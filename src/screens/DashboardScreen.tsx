@@ -24,6 +24,7 @@ export const DashboardScreen = ({ navigation }: any) => {
   const transactions = useStore((state) => state.transactions);
   const accounts = useStore((state) => state.accounts);
   const categories = useStore((state) => state.categories);
+  const formatCurrency = useStore((state) => state.formatCurrency);
 
   const scoreData = useMemo(
     () => calculateFinancialScore(transactions),
@@ -92,20 +93,22 @@ export const DashboardScreen = ({ navigation }: any) => {
         <View style={styles.summaryContainer}>
           <View style={styles.balanceBox}>
             <Text style={styles.balanceLabel}>Total Balance</Text>
-            <Text style={styles.balanceText}>${totalBalance.toFixed(2)}</Text>
+            <Text style={styles.balanceText}>
+              {formatCurrency(totalBalance)}
+            </Text>
           </View>
 
           <View style={styles.monthlyBox}>
             <View style={styles.monthlyItem}>
               <Text style={styles.monthlyLabel}>Monthly Income</Text>
               <Text style={[styles.monthlyValue, { color: '#4caf50' }]}>
-                +${totalIncome.toFixed(2)}
+                +{formatCurrency(totalIncome)}
               </Text>
             </View>
             <View style={styles.monthlyItem}>
               <Text style={styles.monthlyLabel}>Monthly Exp.</Text>
               <Text style={[styles.monthlyValue, { color: '#f44336' }]}>
-                -${totalExpenses.toFixed(2)}
+                -{formatCurrency(totalExpenses)}
               </Text>
             </View>
           </View>

@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Alert,
   FlatList,
   StyleSheet,
   Text,
@@ -12,6 +13,52 @@ import { useStore } from '../store/useStore';
 export const TransactionsScreen = ({ navigation }: any) => {
   const transactions = useStore((state) => state.transactions);
   const categories = useStore((state) => state.categories);
+  const deleteTransaction = useStore((state) => state.deleteTransaction);
+
+  const handleTransactionPress = (transaction: any) => {
+    Alert.alert('Transaction Options', 'What would you like to do?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Edit',
+        onPress: () =>
+          navigation.navigate('AddTransaction', {
+            transaction,
+            isEditing: true,
+          }),
+      },
+      {
+        text: 'Duplicate',
+        onPress: () =>
+          navigation.navigate('AddTransaction', {
+            transaction,
+            isEditing: false,
+          }),
+      },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () =>
+          Alert.alert(
+            'Confirm Delete',
+            'Are you sure you want to delete this transaction?',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Delete',
+                style: 'destructive',
+                onPress: () =>
+                  deleteTransaction(
+                    transaction.id,
+                    transaction.accountId,
+                    transaction.amount,
+                    transaction.type,
+                  ),
+              },
+            ],
+          ),
+      },
+    ]);
+  };
 
   return (
     <View style={styles.container}>
@@ -20,7 +67,14 @@ export const TransactionsScreen = ({ navigation }: any) => {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
           const category = categories.find((c) => c.id === item.categoryId);
-          return <TransactionItem transaction={item} category={category} />;
+          return (
+            <TouchableOpacity
+              onPress={() => handleTransactionPress(item)}
+              activeOpacity={0.7}
+            >
+              <TransactionItem transaction={item} category={category} />
+            </TouchableOpacity>
+          );
         }}
         ListEmptyComponent={
           <View style={styles.empty}>

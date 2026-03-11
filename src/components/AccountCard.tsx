@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Account } from '../store/useStore';
+import { Account, useStore } from '../store/useStore';
 
 interface Props {
   account: Account;
@@ -9,6 +9,8 @@ interface Props {
 }
 
 export const AccountCard: React.FC<Props> = ({ account, onDelete }) => {
+  const formatCurrency = useStore((state) => state.formatCurrency);
+
   const handleDelete = () => {
     if (onDelete) {
       Alert.alert(
@@ -29,7 +31,9 @@ export const AccountCard: React.FC<Props> = ({ account, onDelete }) => {
       <View style={styles.content}>
         <Text style={styles.name}>{account.name}</Text>
         <Text style={styles.type}>{account.type.toUpperCase()}</Text>
-        <Text style={styles.balance}>${account.currentBalance.toFixed(2)}</Text>
+        <Text style={styles.balance}>
+          {formatCurrency(account.currentBalance)}
+        </Text>
       </View>
       {onDelete && (
         <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>

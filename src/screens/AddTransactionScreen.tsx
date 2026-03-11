@@ -10,20 +10,36 @@ import {
 } from 'react-native';
 import { TransactionType, useStore } from '../store/useStore';
 
-export const AddTransactionScreen = ({ navigation }: any) => {
+export const AddTransactionScreen = ({ route, navigation }: any) => {
+  const editingTransaction = route.params?.transaction;
+  const isEditing = !!route.params?.isEditing;
+
   const accounts = useStore((state) => state.accounts);
   const categories = useStore((state) => state.categories);
+  const budgets = useStore((state) => state.budgets);
   const addTransaction = useStore((state) => state.addTransaction);
+  const editTransaction = useStore((state) => state.editTransaction);
 
-  const [type, setType] = useState<TransactionType>('expense');
-  const [amount, setAmount] = useState('');
-  const [note, setNote] = useState('');
-  const [selectedAccount, setSelectedAccount] = useState(accounts[0]?.id || '');
+  const [type, setType] = useState<TransactionType>(
+    editingTransaction?.type || 'expense',
+  );
+  const [amount, setAmount] = useState(
+    editingTransaction ? Math.abs(editingTransaction.amount).toString() : '',
+  );
+  const [note, setNote] = useState(editingTransaction?.note || '');
+  const [selectedAccount, setSelectedAccount] = useState(
+    editingTransaction?.accountId || accounts[0]?.id || '',
+  );
 
   const availableCategories = categories.filter((c) => c.type === type);
   const [selectedCategory, setSelectedCategory] = useState(
-    availableCategories[0]?.id || '',
+    editingTransaction?.categoryId || availableCategories[0]?.id || '',
   );
+  const [selectedBudget, setSelectedBudget] = useState(
+    editingTransaction?.budgetId || '',
+  );
+
+  const currency = useStore((state) => state.currency);
 
   const handleSave = () => {
     if (!amount || isNaN(Number(amount))) {
@@ -35,15 +51,30 @@ export const AddTransactionScreen = ({ navigation }: any) => {
       return;
     }
 
-    addTransaction({
-      id: Date.now().toString(),
-      type,
-      amount: parseFloat(amount),
-      categoryId: selectedCategory || null,
-      accountId: selectedAccount,
-      date: new Date().toISOString(),
-      note,
-    });
+    if (isEditing && editingTransaction) {
+      editTransaction({
+        id: editingTransaction.id,
+        type,
+        amount: parseFloat(amount),
+        categoryId: selectedCategory || null,
+        accountId: selectedAccount,
+        budgetId: selectedBudget || null,
+        date: editingTransaction.date,
+        note,
+      });
+    } else {
+      addTransaction({
+        id: Date.now().toString(),
+        type,
+        amount: parseFloat(amount),
+        categoryId: selectedCategory || null,
+        accountId: selectedAccount,
+        budgetId: selectedBudget || null,
+        // When duplicating, record as a new date
+        date: new Date().toISOString(),
+        note,
+      });
+    }
 
     navigation.goBack();
   };
@@ -74,7 +105,7 @@ export const AddTransactionScreen = ({ navigation }: any) => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Amount</Text>
+        <Text style={styles.label}>Amount ({currency})</Text>
         <TextInput
           style={styles.amountInput}
           placeholder="0.00"
@@ -138,6 +169,36 @@ export const AddTransactionScreen = ({ navigation }: any) => {
       </View>
 
       <View style={styles.inputGroup}>
+        <Text style={styles.label}>Budget (Optional)</Text>
+        <View style={styles.chips}>
+          {budgets.map((bud) => (
+            <TouchableOpacity
+              key={bud.id}
+              style={[
+                styles.chip,
+                selectedBudget === bud.id && styles.activeChip,
+              ]}
+              onPress={() =>
+                setSelectedBudget(selectedBudget === bud.id ? '' : bud.id)
+              }
+            >
+              <Text
+                style={[
+                  styles.chipText,
+                  selectedBudget === bud.id && styles.activeChipText,
+                ]}
+              >
+                {bud.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+          {budgets.length === 0 && (
+            <Text style={{ color: '#888' }}>No budgets created yet.</Text>
+          )}
+        </View>
+      </View>
+
+      <View style={styles.inputGroup}>
         <Text style={styles.label}>Note (Optional)</Text>
         <TextInput
           style={styles.textInput}
@@ -148,7 +209,9 @@ export const AddTransactionScreen = ({ navigation }: any) => {
       </View>
 
       <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-        <Text style={styles.saveBtnText}>Save Transaction</Text>
+        <Text style={styles.saveBtnText}>
+          {isEditing ? 'Update Transaction' : 'Save Transaction'}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );

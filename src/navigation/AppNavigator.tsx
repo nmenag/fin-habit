@@ -4,11 +4,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { AccountsScreen } from '../screens/AccountsScreen';
 import { AddAccountScreen } from '../screens/AddAccountScreen';
+import { AddBudgetScreen } from '../screens/AddBudgetScreen';
 import { AddCategoryScreen } from '../screens/AddCategoryScreen';
 import { AddTransactionScreen } from '../screens/AddTransactionScreen';
+import { BudgetsScreen } from '../screens/BudgetsScreen';
 import { CategoriesScreen } from '../screens/CategoriesScreen';
 import { DashboardScreen } from '../screens/DashboardScreen';
 import { InsightsScreen } from '../screens/InsightsScreen';
+import { SettingsScreen } from '../screens/SettingsScreen';
 import { TransactionsScreen } from '../screens/TransactionsScreen';
 
 const Tab = createBottomTabNavigator();
@@ -24,7 +27,9 @@ const TabNavigator = () => {
           else if (route.name === 'Transactions') iconName = 'list';
           else if (route.name === 'Accounts') iconName = 'wallet';
           else if (route.name === 'Categories') iconName = 'pricetags';
+          else if (route.name === 'Budgets') iconName = 'pie-chart';
           else if (route.name === 'Insights') iconName = 'bulb';
+          else if (route.name === 'Settings') iconName = 'settings';
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
@@ -37,7 +42,9 @@ const TabNavigator = () => {
       <Tab.Screen name="Transactions" component={TransactionsScreen} />
       <Tab.Screen name="Accounts" component={AccountsScreen} />
       <Tab.Screen name="Categories" component={CategoriesScreen} />
+      <Tab.Screen name="Budgets" component={BudgetsScreen} />
       <Tab.Screen name="Insights" component={InsightsScreen} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
 };
@@ -64,6 +71,11 @@ export const AppNavigator = () => {
         name="AddCategory"
         component={AddCategoryScreen}
         options={{ title: 'Add Category', presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="AddBudget"
+        component={AddBudgetScreen}
+        options={{ title: 'Add Budget', presentation: 'modal' }}
       />
     </Stack.Navigator>
   );

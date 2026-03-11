@@ -40,6 +40,8 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
   );
   const [color, setColor] = useState(editingAccount?.color || COLORS[0]);
 
+  const currency = useStore((state) => state.currency);
+
   const handleSave = () => {
     if (!name.trim()) {
       Alert.alert('Error', 'Please enter an account name.');
@@ -154,7 +156,9 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>
-          {isEditing ? 'Current Balance' : 'Initial Balance'}
+          {isEditing
+            ? `Current Balance (${currency})`
+            : `Initial Balance (${currency})`}
         </Text>
         <TextInput
           style={styles.textInput}

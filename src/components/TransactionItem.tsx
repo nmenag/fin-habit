@@ -1,7 +1,7 @@
 import { format, parseISO } from 'date-fns';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Category, Transaction } from '../store/useStore';
+import { Category, Transaction, useStore } from '../store/useStore';
 
 interface Props {
   transaction: Transaction;
@@ -9,6 +9,7 @@ interface Props {
 }
 
 export const TransactionItem: React.FC<Props> = ({ transaction, category }) => {
+  const formatCurrency = useStore((state) => state.formatCurrency);
   const isIncome = transaction.type === 'income';
 
   return (
@@ -37,7 +38,8 @@ export const TransactionItem: React.FC<Props> = ({ transaction, category }) => {
       <Text
         style={[styles.amount, { color: isIncome ? '#4caf50' : '#f44336' }]}
       >
-        {isIncome ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
+        {isIncome ? '+' : '-'}
+        {formatCurrency(transaction.amount)}
       </Text>
     </View>
   );

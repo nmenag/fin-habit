@@ -21,12 +21,20 @@ export interface Category {
   color?: string | null;
 }
 
+export interface Budget {
+  id: string;
+  name: string;
+  amount: number;
+  color?: string | null;
+}
+
 export interface Transaction {
   id: string;
   type: TransactionType;
   amount: number;
   categoryId: string | null;
   accountId: string;
+  budgetId?: string | null;
   date: string;
   note?: string | null;
 }
@@ -35,6 +43,8 @@ interface AppState {
   accounts: Account[];
   transactions: Transaction[];
   categories: Category[];
+  budgets: Budget[];
+  currency: string;
   isLoaded: boolean;
 
   loadData: () => void;
@@ -54,12 +64,21 @@ interface AppState {
   addCategory: (category: Category) => void;
   editCategory: (category: Category) => void;
   deleteCategory: (id: string) => void;
+
+  addBudget: (budget: Budget) => void;
+  editBudget: (budget: Budget) => void;
+  deleteBudget: (id: string) => void;
+
+  setCurrency: (currency: string) => void;
+  formatCurrency: (amount: number) => string;
 }
 
 export const useStore = create<AppState>((set, get) => ({
   accounts: [],
   transactions: [],
   categories: [],
+  budgets: [],
+  currency: 'USD',
   isLoaded: false,
 
   loadData: () => {
@@ -69,8 +88,24 @@ export const useStore = create<AppState>((set, get) => ({
       'SELECT * FROM transactions ORDER BY date DESC',
     );
     const categories = db.getAllSync<Category>('SELECT * FROM categories');
+    const budgets = db.getAllSync<Budget>('SELECT * FROM budgets');
+    let currencySetting;
+    try {
+      currencySetting = db.getFirstSync<{ val: string }>(
+        "SELECT val FROM settings WHERE id = 'currency'",
+      );
+    } catch (e) {
+      console.warn('Could not load currency from DB:', e);
+    }
 
-    set({ accounts, transactions, categories, isLoaded: true });
+    set({
+      accounts,
+      transactions,
+      categories,
+      budgets,
+      currency: currencySetting?.val || 'USD',
+      isLoaded: true,
+    });
   },
 
   addAccount: (account) => {
@@ -124,14 +159,15 @@ export const useStore = create<AppState>((set, get) => ({
     const amountModifier = isIncome ? transaction.amount : -transaction.amount;
 
     db.runSync(
-      'INSERT INTO transactions (id, type, amount, categoryId, accountId, date, note) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO transactions (id, type, amount, categoryId, accountId, budgetId, date, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [
-        transaction.id ?? null,
-        transaction.type ?? null,
+        transaction.id ?? '',
+        transaction.type ?? '',
         transaction.amount ?? 0,
         transaction.categoryId ?? null,
-        transaction.accountId ?? null,
-        transaction.date ?? null,
+        transaction.accountId ?? '',
+        transaction.budgetId ?? null,
+        transaction.date ?? '',
         transaction.note ?? null,
       ],
     );
@@ -168,40 +204,54 @@ export const useStore = create<AppState>((set, get) => ({
     const oldTransaction = get().transactions.find(
       (t) => t.id === transaction.id,
     );
-    if (!oldTransaction) return;
+    if (!oldTransaction) {
+      console.error(
+        'editTransaction: Old transaction not found',
+        transaction.id,
+      );
+      return;
+    }
 
-    // Revert old transaction amount
-    const oldModifier =
-      oldTransaction.type === 'income'
-        ? -oldTransaction.amount
-        : oldTransaction.amount;
-    db.runSync(
-      'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
-      [oldModifier ?? 0, oldTransaction.accountId ?? null],
-    );
+    try {
+      // Revert old transaction amount
+      const oldModifier =
+        oldTransaction.type === 'income'
+          ? -oldTransaction.amount
+          : oldTransaction.amount;
+      db.runSync(
+        'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
+        [oldModifier ?? 0, oldTransaction.accountId ?? ''],
+      );
 
-    // Apply new transaction amount
-    const newModifier =
-      transaction.type === 'income' ? transaction.amount : -transaction.amount;
-    db.runSync(
-      'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
-      [newModifier ?? 0, transaction.accountId ?? null],
-    );
+      // Apply new transaction amount
+      const newModifier =
+        transaction.type === 'income'
+          ? transaction.amount
+          : -transaction.amount;
+      db.runSync(
+        'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
+        [newModifier ?? 0, transaction.accountId ?? ''],
+      );
 
-    db.runSync(
-      'UPDATE transactions SET type = ?, amount = ?, categoryId = ?, accountId = ?, date = ?, note = ? WHERE id = ?',
-      [
-        transaction.type ?? null,
-        transaction.amount ?? 0,
-        transaction.categoryId ?? null,
-        transaction.accountId ?? null,
-        transaction.date ?? null,
-        transaction.note ?? null,
-        transaction.id ?? null,
-      ],
-    );
+      db.runSync(
+        'UPDATE transactions SET type = ?, amount = ?, categoryId = ?, accountId = ?, budgetId = ?, date = ?, note = ? WHERE id = ?',
+        [
+          transaction.type ?? '',
+          transaction.amount ?? 0,
+          transaction.categoryId ?? null,
+          transaction.accountId ?? '',
+          transaction.budgetId ?? null,
+          transaction.date ?? '',
+          transaction.note ?? null,
+          transaction.id ?? '',
+        ],
+      );
 
-    get().loadData(); // Instead of manual state diffing, reload data when editing to ensure balance consistency
+      get().loadData();
+    } catch (error) {
+      console.error('editTransaction Error:', error);
+      throw error;
+    }
   },
 
   deleteTransaction: (id, accountId, amount, type) => {
@@ -272,5 +322,82 @@ export const useStore = create<AppState>((set, get) => ({
     set((state) => ({
       categories: state.categories.filter((c) => c.id !== id),
     }));
+  },
+
+  addBudget: (budget) => {
+    const db = getDb();
+    db.runSync(
+      'INSERT INTO budgets (id, name, amount, color) VALUES (?, ?, ?, ?)',
+      [
+        budget.id ?? null,
+        budget.name ?? null,
+        budget.amount ?? 0,
+        budget.color ?? null,
+      ],
+    );
+    set((state) => ({ budgets: [...state.budgets, budget] }));
+  },
+
+  editBudget: (budget) => {
+    const db = getDb();
+    db.runSync(
+      'UPDATE budgets SET name = ?, amount = ?, color = ? WHERE id = ?',
+      [
+        budget.name ?? null,
+        budget.amount ?? 0,
+        budget.color ?? null,
+        budget.id ?? null,
+      ],
+    );
+    set((state) => ({
+      budgets: state.budgets.map((b) => (b.id === budget.id ? budget : b)),
+    }));
+  },
+
+  deleteBudget: (id) => {
+    const db = getDb();
+    db.runSync('DELETE FROM budgets WHERE id = ?', [id ?? null]);
+    set((state) => ({
+      budgets: state.budgets.filter((b) => b.id !== id),
+    }));
+  },
+
+  setCurrency: (currency) => {
+    const db = getDb();
+    try {
+      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+        'currency',
+        currency ?? 'USD',
+      ]);
+      set({ currency });
+    } catch (error) {
+      console.error('setCurrency Error:', error);
+      // Fallback: update state anyway so the user sees the change
+      set({ currency: currency ?? 'USD' });
+    }
+  },
+
+  formatCurrency: (amount: number) => {
+    const { currency } = get();
+    const symbols: { [key: string]: string } = {
+      USD: '$',
+      COP: '$',
+      MXN: '$',
+      EUR: '€',
+    };
+    const symbol = symbols[currency] || '$';
+
+    // For COP and MXN, sometimes we show the code if it's ambiguous, but usually $ is fine
+    // COP often uses dot as thousands separator: 1.000
+    if (currency === 'COP') {
+      return `${symbol}${Math.round(amount)
+        .toString()
+        .replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+    }
+
+    return `${symbol}${amount.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
   },
 }));
