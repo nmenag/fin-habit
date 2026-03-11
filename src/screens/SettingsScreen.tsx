@@ -16,14 +16,88 @@ const CURRENCIES = [
   { code: 'EUR', name: 'Euro', symbol: '€' },
 ];
 
-export const SettingsScreen = () => {
+export const SettingsScreen = ({ navigation }: any) => {
   const currency = useStore((state) => state.currency);
   const setCurrency = useStore((state) => state.setCurrency);
+  const language = useStore((state) => state.language);
+  const setLanguage = useStore((state) => state.setLanguage);
+  const t = useStore((state) => state.t);
+
+  const SETTINGS_LINKS = [
+    { name: t('manageAccounts'), icon: 'wallet-outline', screen: 'Accounts' },
+    { name: t('manageCategories'), icon: 'pricetags-outline', screen: 'Categories' },
+    { name: t('manageBudgets'), icon: 'pie-chart-outline', screen: 'Budgets' },
+  ];
+
+  const LANGUAGES = [
+    { code: 'en', name: t('english'), label: 'EN' },
+    { code: 'es', name: t('spanish'), label: 'ES' },
+  ];
+
+  const CURRENCIES = [
+    { code: 'USD', name: 'US Dollar', symbol: '$' },
+    { code: 'COP', name: 'Colombian Peso', symbol: '$' },
+    { code: 'MXN', name: 'Mexican Peso', symbol: '$' },
+    { code: 'EUR', name: 'Euro', symbol: '€' },
+  ];
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Currency</Text>
+        <Text style={styles.sectionTitle}>{t('preferences')}</Text>
+        <View style={styles.optionsContainer}>
+          {SETTINGS_LINKS.map((item) => (
+            <TouchableOpacity
+              key={item.screen}
+              style={styles.option}
+              onPress={() => navigation.navigate(item.screen)}
+            >
+              <View style={styles.optionInfo}>
+                <Ionicons
+                  name={item.icon as any}
+                  size={24}
+                  color="#555"
+                  style={styles.menuIcon}
+                />
+                <Text style={styles.currencyCode}>{item.name}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#ccc" />
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('language')}</Text>
+        <View style={styles.optionsContainer}>
+          {LANGUAGES.map((item) => (
+            <TouchableOpacity
+              key={item.code}
+              style={[
+                styles.option,
+                language === item.code && styles.activeOption,
+              ]}
+              onPress={() => setLanguage(item.code as any)}
+            >
+              <View style={styles.optionInfo}>
+                <Text style={styles.currencySymbol}>{item.label}</Text>
+                <View>
+                  <Text style={styles.currencyCode}>{item.name}</Text>
+                </View>
+              </View>
+              {language === item.code && (
+                <Ionicons name="checkmark-circle" size={24} color="#2196f3" />
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+        <View style={styles.sectionInfo}>
+          <Text style={styles.sectionInfoText}>{t('changeLanguageDesc')}</Text>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('currency')}</Text>
         <View style={styles.optionsContainer}>
           {CURRENCIES.map((item) => (
             <TouchableOpacity
@@ -47,14 +121,12 @@ export const SettingsScreen = () => {
             </TouchableOpacity>
           ))}
         </View>
+        <View style={styles.sectionInfo}>
+          <Text style={styles.sectionInfoText}>{t('changeCurrencyDesc')}</Text>
+        </View>
       </View>
 
-      <View style={styles.infoSection}>
-        <Text style={styles.infoText}>
-          Changing the currency will update how all amounts are displayed across
-          the app.
-        </Text>
-      </View>
+      <View style={{ height: 40 }} />
     </ScrollView>
   );
 };
@@ -113,13 +185,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#888',
   },
-  infoSection: {
-    padding: 24,
-  },
-  infoText: {
-    color: '#888',
+  menuIcon: {
+    marginRight: 16,
+    width: 24,
     textAlign: 'center',
-    lineHeight: 20,
-    fontSize: 14,
+  },
+  sectionInfo: {
+    padding: 16,
+    paddingTop: 8,
+  },
+  sectionInfoText: {
+    color: '#888',
+    fontSize: 13,
+    lineHeight: 18,
   },
 });

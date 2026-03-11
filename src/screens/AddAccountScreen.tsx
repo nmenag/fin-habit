@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Account, AccountType, useStore } from '../store/useStore';
 
 const COLORS = [
@@ -97,8 +98,16 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
     navigation.goBack();
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[
+        styles.content,
+        { paddingBottom: Math.max(insets.bottom, 20) },
+      ]}
+    >
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Account Name</Text>
         <TextInput

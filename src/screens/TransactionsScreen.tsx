@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TransactionItem } from '../components/TransactionItem';
 import { useStore } from '../store/useStore';
 
@@ -60,6 +61,8 @@ export const TransactionsScreen = ({ navigation }: any) => {
     ]);
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -83,7 +86,7 @@ export const TransactionsScreen = ({ navigation }: any) => {
         }
       />
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 8 }]}
         onPress={() => navigation.navigate('AddTransaction')}
       >
         <Text style={styles.fabText}>+</Text>

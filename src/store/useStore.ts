@@ -1,5 +1,7 @@
+import * as Localization from 'expo-localization';
 import { create } from 'zustand';
 import { getDb } from '../database/schema';
+import { Language, translations } from '../i18n/translations';
 
 export type AccountType = 'cash' | 'bank' | 'credit';
 export type TransactionType = 'income' | 'expense';
@@ -26,6 +28,7 @@ export interface Budget {
   name: string;
   amount: number;
   color?: string | null;
+  categoryId?: string | null;
 }
 
 export interface Transaction {
@@ -45,9 +48,12 @@ interface AppState {
   categories: Category[];
   budgets: Budget[];
   currency: string;
+  language: Language;
   isLoaded: boolean;
 
   loadData: () => void;
+  setLanguage: (lang: Language) => void;
+  t: (key: keyof typeof translations.en) => string;
   addAccount: (account: Account) => void;
   editAccount: (account: Account) => void;
   deleteAccount: (id: string) => void;
@@ -79,6 +85,7 @@ export const useStore = create<AppState>((set, get) => ({
   categories: [],
   budgets: [],
   currency: 'USD',
+  language: 'en',
   isLoaded: false,
 
   loadData: () => {
@@ -90,12 +97,35 @@ export const useStore = create<AppState>((set, get) => ({
     const categories = db.getAllSync<Category>('SELECT * FROM categories');
     const budgets = db.getAllSync<Budget>('SELECT * FROM budgets');
     let currencySetting;
+    let languageSetting;
     try {
       currencySetting = db.getFirstSync<{ val: string }>(
         "SELECT val FROM settings WHERE id = 'currency'",
       );
+      languageSetting = db.getFirstSync<{ val: string }>(
+        "SELECT val FROM settings WHERE id = 'language'",
+      );
     } catch (e) {
-      console.warn('Could not load currency from DB:', e);
+      console.warn('Could not load settings from DB:', e);
+    }
+
+    // Detect default language
+    let finalLanguage: Language = 'en';
+    if (languageSetting?.val) {
+      finalLanguage = languageSetting.val as Language;
+    } else {
+      try {
+        if (Localization && typeof Localization.getLocales === 'function') {
+          const locales = Localization.getLocales();
+          if (locales && locales.length > 0) {
+            finalLanguage = locales[0].languageCode?.startsWith('es')
+              ? 'es'
+              : 'en';
+          }
+        }
+      } catch (e) {
+        console.warn('Localization native module not found, defaulting to en');
+      }
     }
 
     set({
@@ -104,8 +134,28 @@ export const useStore = create<AppState>((set, get) => ({
       categories,
       budgets,
       currency: currencySetting?.val || 'USD',
+      language: finalLanguage,
       isLoaded: true,
     });
+  },
+
+  setLanguage: (language) => {
+    const db = getDb();
+    try {
+      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+        'language',
+        language,
+      ]);
+      set({ language });
+    } catch (error) {
+      console.error('setLanguage Error:', error);
+      set({ language });
+    }
+  },
+
+  t: (key) => {
+    const { language } = get();
+    return translations[language][key] || translations.en[key] || key;
   },
 
   addAccount: (account) => {
@@ -327,12 +377,13 @@ export const useStore = create<AppState>((set, get) => ({
   addBudget: (budget) => {
     const db = getDb();
     db.runSync(
-      'INSERT INTO budgets (id, name, amount, color) VALUES (?, ?, ?, ?)',
+      'INSERT INTO budgets (id, name, amount, color, categoryId) VALUES (?, ?, ?, ?, ?)',
       [
-        budget.id ?? null,
-        budget.name ?? null,
+        budget.id ?? '',
+        budget.name ?? '',
         budget.amount ?? 0,
         budget.color ?? null,
+        budget.categoryId ?? null,
       ],
     );
     set((state) => ({ budgets: [...state.budgets, budget] }));
@@ -341,12 +392,13 @@ export const useStore = create<AppState>((set, get) => ({
   editBudget: (budget) => {
     const db = getDb();
     db.runSync(
-      'UPDATE budgets SET name = ?, amount = ?, color = ? WHERE id = ?',
+      'UPDATE budgets SET name = ?, amount = ?, color = ?, categoryId = ? WHERE id = ?',
       [
-        budget.name ?? null,
+        budget.name ?? '',
         budget.amount ?? 0,
         budget.color ?? null,
-        budget.id ?? null,
+        budget.categoryId ?? null,
+        budget.id ?? '',
       ],
     );
     set((state) => ({

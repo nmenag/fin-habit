@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Category, useStore } from '../store/useStore';
 
 export const CategoriesScreen = ({ navigation }: any) => {
@@ -72,6 +73,8 @@ export const CategoriesScreen = ({ navigation }: any) => {
     </TouchableOpacity>
   );
 
+  const insets = useSafeAreaInsets();
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -84,7 +87,7 @@ export const CategoriesScreen = ({ navigation }: any) => {
           </View>
         }
       />
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate('AddCategory')}

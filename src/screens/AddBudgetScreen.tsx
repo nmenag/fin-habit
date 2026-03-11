@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Budget, useStore } from '../store/useStore';
 
 const COLORS = [
@@ -37,8 +38,12 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
     editingBudget ? editingBudget.amount.toString() : '',
   );
   const [color, setColor] = useState(editingBudget?.color || COLORS[0]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    editingBudget?.categoryId || null,
+  );
 
   const currency = useStore((state) => state.currency);
+  const categories = useStore((state) => state.categories);
 
   const handleSave = () => {
     if (!name.trim()) {
@@ -52,12 +57,13 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
       return;
     }
 
-    if (isEditing) {
+    if (isEditing && editingBudget) {
       editBudget({
         ...editingBudget,
         name: name.trim(),
         amount: amountNum,
         color: color,
+        categoryId: selectedCategoryId,
       });
     } else {
       addBudget({
@@ -65,14 +71,23 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
         name: name.trim(),
         amount: amountNum,
         color: color,
+        categoryId: selectedCategoryId,
       });
     }
 
     navigation.goBack();
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[
+        styles.content,
+        { paddingBottom: Math.max(insets.bottom, 20) },
+      ]}
+    >
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Budget Name</Text>
         <TextInput
@@ -92,6 +107,50 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
           onChangeText={setAmount}
           keyboardType="numeric"
         />
+      </View>
+
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Associated Category (Optional)</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={styles.categoryContainer}>
+            <TouchableOpacity
+              style={[
+                styles.categoryChip,
+                !selectedCategoryId && styles.activeCategoryChip,
+              ]}
+              onPress={() => setSelectedCategoryId(null)}
+            >
+              <Text
+                style={[
+                  styles.categoryChipText,
+                  !selectedCategoryId && styles.activeCategoryChipText,
+                ]}
+              >
+                None
+              </Text>
+            </TouchableOpacity>
+            {categories.map((cat) => (
+              <TouchableOpacity
+                key={cat.id}
+                style={[
+                  styles.categoryChip,
+                  selectedCategoryId === cat.id && styles.activeCategoryChip,
+                ]}
+                onPress={() => setSelectedCategoryId(cat.id)}
+              >
+                <Text
+                  style={[
+                    styles.categoryChipText,
+                    selectedCategoryId === cat.id &&
+                    styles.activeCategoryChipText,
+                  ]}
+                >
+                  {cat.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
       </View>
 
       <View style={styles.inputGroup}>
@@ -151,6 +210,31 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: '#2196f3',
     paddingVertical: 8,
+  },
+  categoryContainer: {
+    flexDirection: 'row',
+    paddingVertical: 8,
+  },
+  categoryChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  activeCategoryChip: {
+    backgroundColor: '#2196f3',
+    borderColor: '#2196f3',
+  },
+  categoryChipText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  activeCategoryChipText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   colorContainer: {
     flexDirection: 'row',

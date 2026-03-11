@@ -25,6 +25,7 @@ export const DashboardScreen = ({ navigation }: any) => {
   const accounts = useStore((state) => state.accounts);
   const categories = useStore((state) => state.categories);
   const formatCurrency = useStore((state) => state.formatCurrency);
+  const t = useStore((state) => state.t);
 
   const scoreData = useMemo(
     () => calculateFinancialScore(transactions),
@@ -73,7 +74,7 @@ export const DashboardScreen = ({ navigation }: any) => {
       const cat = categories.find((c) => c.id === catId);
       const color = cat?.color || colors[cIdx++ % colors.length];
       return {
-        name: cat?.name || 'Other',
+        name: cat?.name || t('other'),
         population: catExpenses[catId],
         color: color,
         legendFontColor: '#7F7F7F',
@@ -82,9 +83,8 @@ export const DashboardScreen = ({ navigation }: any) => {
     });
 
     return { totalIncome: inc, totalExpenses: exp, pieData: pie };
-  }, [transactions, categories]);
+  }, [transactions, categories, t]);
 
-  const currentMonthlyBalance = totalIncome - totalExpenses;
   const totalBalance = accounts.reduce((acc, a) => acc + a.currentBalance, 0);
 
   return (
@@ -92,7 +92,7 @@ export const DashboardScreen = ({ navigation }: any) => {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.summaryContainer}>
           <View style={styles.balanceBox}>
-            <Text style={styles.balanceLabel}>Total Balance</Text>
+            <Text style={styles.balanceLabel}>{t('totalBalance')}</Text>
             <Text style={styles.balanceText}>
               {formatCurrency(totalBalance)}
             </Text>
@@ -100,13 +100,13 @@ export const DashboardScreen = ({ navigation }: any) => {
 
           <View style={styles.monthlyBox}>
             <View style={styles.monthlyItem}>
-              <Text style={styles.monthlyLabel}>Monthly Income</Text>
+              <Text style={styles.monthlyLabel}>{t('monthlyIncome')}</Text>
               <Text style={[styles.monthlyValue, { color: '#4caf50' }]}>
                 +{formatCurrency(totalIncome)}
               </Text>
             </View>
             <View style={styles.monthlyItem}>
-              <Text style={styles.monthlyLabel}>Monthly Exp.</Text>
+              <Text style={styles.monthlyLabel}>{t('monthlyExpenses')}</Text>
               <Text style={[styles.monthlyValue, { color: '#f44336' }]}>
                 -{formatCurrency(totalExpenses)}
               </Text>
@@ -119,7 +119,7 @@ export const DashboardScreen = ({ navigation }: any) => {
         {pieData.length > 0 && (
           <View style={styles.chartContainer}>
             <Text style={styles.chartTitle}>
-              Expenses by Category (This Month)
+              {t('chartTitle')}
             </Text>
             <PieChart
               data={pieData}
@@ -139,10 +139,9 @@ export const DashboardScreen = ({ navigation }: any) => {
           </View>
         )}
 
-        {/* Basic Google AdMob Banner Integration (Free version) */}
         <View style={styles.adContainer}>
           <BannerAd
-            unitId={TestIds.BANNER} // Use your actual ad unit ID in production
+            unitId={TestIds.BANNER}
             size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
           />
         </View>

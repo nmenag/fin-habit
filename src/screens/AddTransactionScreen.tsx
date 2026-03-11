@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TransactionType, useStore } from '../store/useStore';
 
 export const AddTransactionScreen = ({ route, navigation }: any) => {
@@ -79,8 +80,16 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
     navigation.goBack();
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[
+        styles.content,
+        { paddingBottom: Math.max(insets.bottom, 20) },
+      ]}
+    >
       <View style={styles.typeSelector}>
         <TouchableOpacity
           style={[styles.typeBtn, type === 'expense' && styles.activeExpense]}
@@ -153,7 +162,16 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
                 styles.chip,
                 selectedCategory === cat.id && styles.activeChip,
               ]}
-              onPress={() => setSelectedCategory(cat.id)}
+              onPress={() => {
+                setSelectedCategory(cat.id);
+                // Auto-select budget if category matches
+                const matchingBudget = budgets.find(
+                  (b) => b.categoryId === cat.id,
+                );
+                if (matchingBudget) {
+                  setSelectedBudget(matchingBudget.id);
+                }
+              }}
             >
               <Text
                 style={[

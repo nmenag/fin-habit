@@ -13,11 +13,14 @@ import { DashboardScreen } from '../screens/DashboardScreen';
 import { InsightsScreen } from '../screens/InsightsScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { TransactionsScreen } from '../screens/TransactionsScreen';
+import { useStore } from '../store/useStore';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 const TabNavigator = () => {
+  const t = useStore((state) => state.t);
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -25,9 +28,6 @@ const TabNavigator = () => {
           let iconName: keyof typeof Ionicons.glyphMap = 'help-circle';
           if (route.name === 'Dashboard') iconName = 'home';
           else if (route.name === 'Transactions') iconName = 'list';
-          else if (route.name === 'Accounts') iconName = 'wallet';
-          else if (route.name === 'Categories') iconName = 'pricetags';
-          else if (route.name === 'Budgets') iconName = 'pie-chart';
           else if (route.name === 'Insights') iconName = 'bulb';
           else if (route.name === 'Settings') iconName = 'settings';
 
@@ -38,18 +38,33 @@ const TabNavigator = () => {
         headerShown: true,
       })}
     >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} />
-      <Tab.Screen name="Transactions" component={TransactionsScreen} />
-      <Tab.Screen name="Accounts" component={AccountsScreen} />
-      <Tab.Screen name="Categories" component={CategoriesScreen} />
-      <Tab.Screen name="Budgets" component={BudgetsScreen} />
-      <Tab.Screen name="Insights" component={InsightsScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen
+        name="Dashboard"
+        component={DashboardScreen}
+        options={{ title: t('dashboard') }}
+      />
+      <Tab.Screen
+        name="Transactions"
+        component={TransactionsScreen}
+        options={{ title: t('transactions') }}
+      />
+      <Tab.Screen
+        name="Insights"
+        component={InsightsScreen}
+        options={{ title: t('insights') }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{ title: t('settings') }}
+      />
     </Tab.Navigator>
   );
 };
 
 export const AppNavigator = () => {
+  const t = useStore((state) => state.t);
+
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -60,22 +75,37 @@ export const AppNavigator = () => {
       <Stack.Screen
         name="AddTransaction"
         component={AddTransactionScreen}
-        options={{ title: 'Add Transaction', presentation: 'modal' }}
+        options={{ title: t('addTransaction'), presentation: 'modal' }}
       />
       <Stack.Screen
         name="AddAccount"
         component={AddAccountScreen}
-        options={{ title: 'Add Account', presentation: 'modal' }}
+        options={{ title: t('addAccount'), presentation: 'modal' }}
       />
       <Stack.Screen
         name="AddCategory"
         component={AddCategoryScreen}
-        options={{ title: 'Add Category', presentation: 'modal' }}
+        options={{ title: t('addCategory'), presentation: 'modal' }}
       />
       <Stack.Screen
         name="AddBudget"
         component={AddBudgetScreen}
-        options={{ title: 'Add Budget', presentation: 'modal' }}
+        options={{ title: t('addBudget'), presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="Accounts"
+        component={AccountsScreen}
+        options={{ title: t('manageAccounts') }}
+      />
+      <Stack.Screen
+        name="Categories"
+        component={CategoriesScreen}
+        options={{ title: t('manageCategories') }}
+      />
+      <Stack.Screen
+        name="Budgets"
+        component={BudgetsScreen}
+        options={{ title: t('manageBudgets') }}
       />
     </Stack.Navigator>
   );

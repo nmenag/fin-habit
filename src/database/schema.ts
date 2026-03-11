@@ -49,11 +49,19 @@ export const initDb = () => {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         amount REAL NOT NULL,
-        color TEXT
+        color TEXT,
+        categoryId TEXT,
+        FOREIGN KEY(categoryId) REFERENCES categories(id) ON DELETE SET NULL
       );
     `);
   } catch (e) {
     console.error('Error creating budgets table:', e);
+  }
+
+  try {
+    db.execSync('ALTER TABLE budgets ADD COLUMN categoryId TEXT;');
+  } catch (e) {
+    // Column might already exist
   }
 
   try {

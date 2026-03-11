@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Budget, useStore } from '../store/useStore';
 
 export const BudgetsScreen = ({ navigation }: any) => {
@@ -42,7 +43,11 @@ export const BudgetsScreen = ({ navigation }: any) => {
 
   const renderItem = ({ item }: { item: Budget }) => {
     const spent = transactions
-      .filter((t) => t.budgetId === item.id && t.type === 'expense')
+      .filter((t) => {
+        const matchesBudget = t.budgetId === item.id;
+        const matchesCategory = item.categoryId && t.categoryId === item.categoryId;
+        return (matchesBudget || matchesCategory) && t.type === 'expense';
+      })
       .reduce((sum, t) => sum + t.amount, 0);
     const progress = Math.min((spent / item.amount) * 100, 100);
 
@@ -91,6 +96,8 @@ export const BudgetsScreen = ({ navigation }: any) => {
     );
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -105,7 +112,7 @@ export const BudgetsScreen = ({ navigation }: any) => {
           </View>
         }
       />
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate('AddBudget')}

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AccountCard } from '../components/AccountCard';
 import { useStore } from '../store/useStore';
 
@@ -16,6 +17,8 @@ export const AccountsScreen = ({ navigation }: any) => {
   const handleAddAccount = () => {
     navigation.navigate('AddAccount');
   };
+
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={styles.container}>
@@ -42,7 +45,7 @@ export const AccountsScreen = ({ navigation }: any) => {
         }
       />
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity style={styles.addButton} onPress={handleAddAccount}>
           <Text style={styles.addButtonText}>Add Account</Text>
         </TouchableOpacity>
