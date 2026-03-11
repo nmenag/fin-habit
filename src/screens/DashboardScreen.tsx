@@ -1,0 +1,187 @@
+import { endOfMonth, parseISO, startOfMonth } from 'date-fns';
+import React, { useMemo } from 'react';
+import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { PieChart } from 'react-native-chart-kit';
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+import { ScoreCard } from '../components/ScoreCard';
+import { useStore } from '../store/useStore';
+import { calculateFinancialScore } from '../utils/scoreCalculator';
+
+const screenWidth = Dimensions.get('window').width;
+
+export const DashboardScreen: React.FC = () => {
+  const transactions = useStore((state) => state.transactions);
+  const accounts = useStore((state) => state.accounts);
+  const categories = useStore((state) => state.categories);
+
+  const scoreData = useMemo(() => calculateFinancialScore(transactions), [transactions]);
+
+  const { totalIncome, totalExpenses, pieData } = useMemo(() => {
+    const now = new Date();
+    const start = startOfMonth(now);
+    const end = endOfMonth(now);
+
+    let inc = 0;
+    let exp = 0;
+    const catExpenses: Record<string, number> = {};
+
+    transactions.forEach(t => {
+      const d = parseISO(t.date);
+      if (d >= start && d <= end) {
+        if (t.type === 'income') {
+          inc += t.amount;
+        } else {
+          exp += t.amount;
+          if (t.categoryId) {
+            catExpenses[t.categoryId] = (catExpenses[t.categoryId] || 0) + t.amount;
+          }
+        }
+      }
+    });
+
+    const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#00bcd4', '#009688', '#4caf50', '#ff9800'];
+    let cIdx = 0;
+
+    const pie = Object.keys(catExpenses).map(catId => {
+      const cat = categories.find(c => c.id === catId);
+      const color = cat?.color || colors[cIdx++ % colors.length];
+      return {
+        name: cat?.name || 'Other',
+        population: catExpenses[catId],
+        color: color,
+        legendFontColor: '#7F7F7F',
+        legendFontSize: 12
+      };
+    });
+
+    return { totalIncome: inc, totalExpenses: exp, pieData: pie };
+  }, [transactions, categories]);
+
+  const currentMonthlyBalance = totalIncome - totalExpenses;
+  const totalBalance = accounts.reduce((acc, a) => acc + a.currentBalance, 0);
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.summaryContainer}>
+        <View style={styles.balanceBox}>
+          <Text style={styles.balanceLabel}>Total Balance</Text>
+          <Text style={styles.balanceText}>${totalBalance.toFixed(2)}</Text>
+        </View>
+
+        <View style={styles.monthlyBox}>
+          <View style={styles.monthlyItem}>
+            <Text style={styles.monthlyLabel}>Monthly Income</Text>
+            <Text style={[styles.monthlyValue, { color: '#4caf50' }]}>+${totalIncome.toFixed(2)}</Text>
+          </View>
+          <View style={styles.monthlyItem}>
+            <Text style={styles.monthlyLabel}>Monthly Exp.</Text>
+            <Text style={[styles.monthlyValue, { color: '#f44336' }]}>-${totalExpenses.toFixed(2)}</Text>
+          </View>
+        </View>
+      </View>
+
+      <ScoreCard scoreData={scoreData} />
+
+      {pieData.length > 0 && (
+        <View style={styles.chartContainer}>
+          <Text style={styles.chartTitle}>Expenses by Category (This Month)</Text>
+          <PieChart
+            data={pieData}
+            width={screenWidth - 32}
+            height={200}
+            chartConfig={{
+              backgroundColor: '#fff',
+              backgroundGradientFrom: '#fff',
+              backgroundGradientTo: '#fff',
+              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            }}
+            accessor="population"
+            backgroundColor="transparent"
+            paddingLeft="0"
+            absolute
+          />
+        </View>
+      )}
+
+      {/* Basic Google AdMob Banner Integration (Free version) */}
+      <View style={styles.adContainer}>
+        <BannerAd
+          unitId={TestIds.BANNER} // Use your actual ad unit ID in production
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        />
+      </View>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  content: {
+    paddingBottom: 24,
+  },
+  summaryContainer: {
+    padding: 16,
+  },
+  balanceBox: {
+    backgroundColor: '#2c3e50',
+    padding: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  balanceLabel: {
+    color: '#bdc3c7',
+    fontSize: 14,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  balanceText: {
+    color: '#fff',
+    fontSize: 36,
+    fontWeight: 'bold',
+    marginTop: 8,
+  },
+  monthlyBox: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  monthlyItem: {
+    backgroundColor: '#fff',
+    flex: 1,
+    padding: 16,
+    borderRadius: 12,
+    marginHorizontal: 4,
+    alignItems: 'center',
+  },
+  monthlyLabel: {
+    color: '#7f8c8d',
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  monthlyValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 4,
+  },
+  chartContainer: {
+    backgroundColor: '#fff',
+    margin: 16,
+    padding: 16,
+    borderRadius: 12,
+  },
+  chartTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 16,
+    textAlign: 'center',
+    color: '#34495e',
+  },
+  adContainer: {
+    marginTop: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+});
