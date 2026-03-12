@@ -33,7 +33,7 @@ export const AccountCard: React.FC<Props> = ({ account, onDelete }) => {
         <Text style={styles.name}>{account.name}</Text>
         <Text style={styles.type}>{t(account.type).toUpperCase()}</Text>
         <Text style={styles.balance}>
-          {formatCurrency(account.currentBalance)}
+          {formatCurrency(account.currentBalance, account.currency)}
         </Text>
       </View>
       {onDelete && (

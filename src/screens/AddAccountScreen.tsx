@@ -26,11 +26,18 @@ const COLORS = [
   '#607d8b',
 ];
 
+const CURRENCIES = [
+  { code: 'USD', name: 'US Dollar', symbol: '$' },
+  { code: 'COP', name: 'Colombian Peso', symbol: '$' },
+  { code: 'MXN', name: 'Mexican Peso', symbol: '$' },
+  { code: 'EUR', name: 'Euro', symbol: '€' },
+];
+
 export const AddAccountScreen = ({ route, navigation }: any) => {
   const editingAccount = route.params?.account as Account | undefined;
   const isEditing = !!editingAccount;
 
-  const { addAccount, editAccount, addTransaction, currency } = useStore();
+  const { addAccount, editAccount, addTransaction } = useStore();
   const { t, language } = useTranslation();
 
   const [name, setName] = useState(editingAccount?.name || '');
@@ -39,6 +46,9 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
     editingAccount ? editingAccount.currentBalance.toString() : '',
   );
   const [color, setColor] = useState(editingAccount?.color || COLORS[0]);
+  const [selectedCurrency, setSelectedCurrency] = useState(
+    editingAccount?.currency || 'USD',
+  );
 
   const handleSave = () => {
     if (!name.trim()) {
@@ -60,6 +70,7 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
         name: name.trim(),
         type: type,
         color: color,
+        currency: selectedCurrency,
         currentBalance: editingAccount.currentBalance,
       });
 
@@ -85,6 +96,7 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
         initialBalance: finalBalance,
         currentBalance: finalBalance,
         color: color,
+        currency: selectedCurrency,
       });
     }
 
@@ -131,10 +143,35 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
       </View>
 
       <View style={styles.inputGroup}>
+        <Text style={styles.label}>{t('currency')}</Text>
+        <View style={styles.chips}>
+          {CURRENCIES.map((c) => (
+            <TouchableOpacity
+              key={c.code}
+              style={[
+                styles.chip,
+                selectedCurrency === c.code && styles.activeChip,
+              ]}
+              onPress={() => setSelectedCurrency(c.code)}
+            >
+              <Text
+                style={[
+                  styles.chipText,
+                  selectedCurrency === c.code && styles.activeChipText,
+                ]}
+              >
+                {c.code}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.inputGroup}>
         <Text style={styles.label}>
           {isEditing
-            ? `${t('currentBalanceLabel')} (${currency})`
-            : `${t('initialBalanceLabel')} (${currency})`}
+            ? `${t('currentBalanceLabel')} (${selectedCurrency})`
+            : `${t('initialBalanceLabel')} (${selectedCurrency})`}
         </Text>
         <TextInput
           style={styles.textInput}
@@ -233,6 +270,27 @@ const styles = StyleSheet.create({
   },
   activeColorCircle: {
     borderColor: '#333',
+  },
+  chips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  activeChip: {
+    backgroundColor: '#2196f3',
+  },
+  chipText: {
+    color: '#555',
+  },
+  activeChipText: {
+    color: '#fff',
   },
   saveBtn: {
     backgroundColor: '#2196f3',

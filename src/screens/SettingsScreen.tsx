@@ -9,15 +9,8 @@ import {
 } from 'react-native';
 import { useStore, useTranslation } from '../store/useStore';
 
-const CURRENCIES = [
-  { code: 'USD', name: 'US Dollar', symbol: '$' },
-  { code: 'COP', name: 'Colombian Peso', symbol: '$' },
-  { code: 'MXN', name: 'Mexican Peso', symbol: '$' },
-  { code: 'EUR', name: 'Euro', symbol: '€' },
-];
-
 export const SettingsScreen = ({ navigation }: any) => {
-  const { currency, setCurrency, setLanguage } = useStore();
+  const { setLanguage } = useStore();
   const { t, language } = useTranslation();
 
   const SETTINGS_LINKS = [
@@ -33,13 +26,6 @@ export const SettingsScreen = ({ navigation }: any) => {
   const LANGUAGES = [
     { code: 'en', name: t('english'), label: 'EN' },
     { code: 'es', name: t('spanish'), label: 'ES' },
-  ];
-
-  const CURRENCIES = [
-    { code: 'USD', name: 'US Dollar', symbol: '$' },
-    { code: 'COP', name: 'Colombian Peso', symbol: '$' },
-    { code: 'MXN', name: 'Mexican Peso', symbol: '$' },
-    { code: 'EUR', name: 'Euro', symbol: '€' },
   ];
 
   return (
@@ -60,7 +46,7 @@ export const SettingsScreen = ({ navigation }: any) => {
                   color="#555"
                   style={styles.menuIcon}
                 />
-                <Text style={styles.currencyCode}>{item.name}</Text>
+                <Text style={styles.optionText}>{item.name}</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#ccc" />
             </TouchableOpacity>
@@ -81,9 +67,9 @@ export const SettingsScreen = ({ navigation }: any) => {
               onPress={() => setLanguage(item.code as any)}
             >
               <View style={styles.optionInfo}>
-                <Text style={styles.currencySymbol}>{item.label}</Text>
+                <Text style={styles.languageLabel}>{item.label}</Text>
                 <View>
-                  <Text style={styles.currencyCode}>{item.name}</Text>
+                  <Text style={styles.optionText}>{item.name}</Text>
                 </View>
               </View>
               {language === item.code && (
@@ -94,36 +80,6 @@ export const SettingsScreen = ({ navigation }: any) => {
         </View>
         <View style={styles.sectionInfo}>
           <Text style={styles.sectionInfoText}>{t('changeLanguageDesc')}</Text>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('currency')}</Text>
-        <View style={styles.optionsContainer}>
-          {CURRENCIES.map((item) => (
-            <TouchableOpacity
-              key={item.code}
-              style={[
-                styles.option,
-                currency === item.code && styles.activeOption,
-              ]}
-              onPress={() => setCurrency(item.code)}
-            >
-              <View style={styles.optionInfo}>
-                <Text style={styles.currencySymbol}>{item.symbol}</Text>
-                <View>
-                  <Text style={styles.currencyCode}>{item.code}</Text>
-                  <Text style={styles.currencyName}>{item.name}</Text>
-                </View>
-              </View>
-              {currency === item.code && (
-                <Ionicons name="checkmark-circle" size={24} color="#2196f3" />
-              )}
-            </TouchableOpacity>
-          ))}
-        </View>
-        <View style={styles.sectionInfo}>
-          <Text style={styles.sectionInfoText}>{t('changeCurrencyDesc')}</Text>
         </View>
       </View>
 
@@ -169,22 +125,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  currencySymbol: {
-    fontSize: 24,
+  languageLabel: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
     width: 40,
     textAlign: 'center',
     marginRight: 16,
   },
-  currencyCode: {
+  optionText: {
     fontSize: 16,
     fontWeight: '700',
     color: '#333',
-  },
-  currencyName: {
-    fontSize: 12,
-    color: '#888',
   },
   menuIcon: {
     marginRight: 16,

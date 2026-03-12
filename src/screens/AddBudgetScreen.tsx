@@ -30,7 +30,7 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
   const editingBudget = route.params?.budget as Budget | undefined;
   const isEditing = !!editingBudget;
 
-  const { addBudget, editBudget, currency, categories } = useStore();
+  const { addBudget, editBudget, categories } = useStore();
   const { t, language } = useTranslation();
 
   const [name, setName] = useState(editingBudget?.name || '');
@@ -97,7 +97,7 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>
-          {t('monthlyLimit')} ({currency})
+          {t('monthlyLimit')} (USD)
         </Text>
         <TextInput
           style={styles.amountInput}

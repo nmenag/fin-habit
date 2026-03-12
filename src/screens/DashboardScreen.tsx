@@ -82,19 +82,37 @@ export const DashboardScreen = ({ navigation }: any) => {
     return { totalIncome: inc, totalExpenses: exp, pieData: pie };
   }, [transactions, categories, t, language]);
 
-  const totalBalance = accounts.reduce((acc, a) => acc + a.currentBalance, 0);
-
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.summaryContainer}>
-          <View style={styles.balanceBox}>
-            <Text style={styles.balanceLabel}>{t('totalBalance')}</Text>
-            <Text style={styles.balanceText}>
-              {formatCurrency(totalBalance)}
-            </Text>
-          </View>
+        <View style={styles.accountsSection}>
+          <Text style={styles.sectionHeader}>{t('accounts')}</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.accountsScrollContent}
+          >
+            {accounts.map((acc) => (
+              <View
+                key={acc.id}
+                style={[
+                  styles.accountCard,
+                  { borderLeftColor: acc.color || '#2196f3' },
+                ]}
+              >
+                <Text style={styles.accountCardName}>{acc.name}</Text>
+                <Text style={styles.accountCardBalance}>
+                  {formatCurrency(acc.currentBalance, acc.currency)}
+                </Text>
+                <Text style={styles.accountCardType}>
+                  {t(acc.type).toUpperCase()}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
 
+        <View style={styles.summaryContainer}>
           <View style={styles.monthlyBox}>
             <View style={styles.monthlyItem}>
               <Text style={styles.monthlyLabel}>{t('monthlyIncome')}</Text>
@@ -163,24 +181,49 @@ const styles = StyleSheet.create({
   summaryContainer: {
     padding: 16,
   },
-  balanceBox: {
-    backgroundColor: '#2c3e50',
-    padding: 24,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 16,
+  accountsSection: {
+    marginTop: 16,
+    paddingBottom: 8,
   },
-  balanceLabel: {
-    color: '#bdc3c7',
+  sectionHeader: {
     fontSize: 14,
+    fontWeight: '700',
+    color: '#34495e',
     textTransform: 'uppercase',
     letterSpacing: 1,
+    marginLeft: 16,
+    marginBottom: 12,
   },
-  balanceText: {
-    color: '#fff',
-    fontSize: 36,
+  accountsScrollContent: {
+    paddingHorizontal: 16,
+  },
+  accountCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginRight: 12,
+    width: 160,
+    borderLeftWidth: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  accountCardName: {
+    fontSize: 14,
+    color: '#7f8c8d',
+    fontWeight: '600',
+  },
+  accountCardBalance: {
+    fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 8,
+    color: '#2c3e50',
+    marginVertical: 4,
+  },
+  accountCardType: {
+    fontSize: 10,
+    color: '#bdc3c7',
+    fontWeight: '700',
   },
   monthlyBox: {
     flexDirection: 'row',

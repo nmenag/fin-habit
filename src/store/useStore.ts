@@ -13,6 +13,7 @@ export interface Account {
   initialBalance: number;
   currentBalance: number;
   color?: string | null;
+  currency: string;
 }
 
 export interface Category {
@@ -47,7 +48,6 @@ interface AppState {
   transactions: Transaction[];
   categories: Category[];
   budgets: Budget[];
-  currency: string;
   language: Language;
   isLoaded: boolean;
 
@@ -74,8 +74,7 @@ interface AppState {
   editBudget: (budget: Budget) => void;
   deleteBudget: (id: string) => void;
 
-  setCurrency: (currency: string) => void;
-  formatCurrency: (amount: number) => string;
+  formatCurrency: (amount: number, currencyCode?: string) => string;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -83,7 +82,6 @@ export const useStore = create<AppState>((set, get) => ({
   transactions: [],
   categories: [],
   budgets: [],
-  currency: 'USD',
   language: 'en',
   isLoaded: false,
 
@@ -132,7 +130,6 @@ export const useStore = create<AppState>((set, get) => ({
       transactions,
       categories,
       budgets,
-      currency: currencySetting?.val || 'USD',
       language: finalLanguage,
       isLoaded: true,
     });
@@ -154,7 +151,7 @@ export const useStore = create<AppState>((set, get) => ({
   addAccount: (account) => {
     const db = getDb();
     db.runSync(
-      'INSERT INTO accounts (id, name, type, initialBalance, currentBalance, color) VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT INTO accounts (id, name, type, initialBalance, currentBalance, color, currency) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [
         account.id ?? null,
         account.name ?? null,
@@ -162,6 +159,7 @@ export const useStore = create<AppState>((set, get) => ({
         account.initialBalance ?? 0,
         account.currentBalance ?? 0,
         account.color ?? null,
+        account.currency ?? 'USD',
       ],
     );
     set((state) => ({ accounts: [...state.accounts, account] }));
@@ -170,13 +168,14 @@ export const useStore = create<AppState>((set, get) => ({
   editAccount: (account) => {
     const db = getDb();
     db.runSync(
-      'UPDATE accounts SET name = ?, type = ?, initialBalance = ?, currentBalance = ?, color = ? WHERE id = ?',
+      'UPDATE accounts SET name = ?, type = ?, initialBalance = ?, currentBalance = ?, color = ?, currency = ? WHERE id = ?',
       [
         account.name ?? null,
         account.type ?? null,
         account.initialBalance ?? 0,
         account.currentBalance ?? 0,
         account.color ?? null,
+        account.currency ?? 'USD',
         account.id ?? null,
       ],
     );
@@ -403,22 +402,8 @@ export const useStore = create<AppState>((set, get) => ({
     }));
   },
 
-  setCurrency: (currency) => {
-    const finalCurrency = currency ?? 'USD';
-    set({ currency: finalCurrency });
-    try {
-      const db = getDb();
-      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
-        'currency',
-        finalCurrency,
-      ]);
-    } catch (error) {
-      console.error('setCurrency DB Error:', error);
-    }
-  },
-
-  formatCurrency: (amount: number) => {
-    const { currency } = get();
+  formatCurrency: (amount: number, currencyCode?: string) => {
+    const currency = currencyCode || 'USD';
     const symbols: { [key: string]: string } = {
       USD: '$',
       COP: '$',

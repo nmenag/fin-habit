@@ -22,11 +22,18 @@ export const initDb = () => {
         type TEXT NOT NULL,
         initialBalance REAL NOT NULL,
         currentBalance REAL NOT NULL,
-        color TEXT
+        color TEXT,
+        currency TEXT NOT NULL DEFAULT 'USD'
       );
     `);
   } catch (e) {
     console.error('Error creating accounts table:', e);
+  }
+
+  try {
+    db.execSync("ALTER TABLE accounts ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD';");
+  } catch (e) {
+    // Column might already exist
   }
 
   try {
@@ -149,8 +156,8 @@ export const initDb = () => {
   );
   if (accountCount && accountCount.count === 0) {
     db.runSync(
-      'INSERT INTO accounts (id, name, type, initialBalance, currentBalance, color) VALUES (?, ?, ?, ?, ?, ?)',
-      ['1', 'Main', 'cash', 0, 0, '#2196f3'],
+      'INSERT INTO accounts (id, name, type, initialBalance, currentBalance, color, currency) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      ['1', 'Main', 'cash', 0, 0, '#2196f3', 'USD'],
     );
   }
 

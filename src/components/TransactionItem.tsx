@@ -10,9 +10,12 @@ interface Props {
 }
 
 export const TransactionItem: React.FC<Props> = ({ transaction, category }) => {
-  const { formatCurrency, currency } = useStore();
+  const { accounts, formatCurrency } = useStore();
   const { t, language } = useTranslation();
   const isIncome = transaction.type === 'income';
+
+  const account = accounts.find((a) => a.id === transaction.accountId);
+  const accountCurrency = account?.currency || 'USD';
 
   const dateLocale = language === 'es' ? es : enUS;
 
@@ -45,7 +48,7 @@ export const TransactionItem: React.FC<Props> = ({ transaction, category }) => {
         style={[styles.amount, { color: isIncome ? '#4caf50' : '#f44336' }]}
       >
         {isIncome ? '+' : '-'}
-        {formatCurrency(transaction.amount)}
+        {formatCurrency(transaction.amount, accountCurrency)}
       </Text>
     </View>
   );
