@@ -166,6 +166,7 @@ export const useStore = create<AppState>((set, get) => ({
     } catch (error) {
       console.error('setLanguage DB Error:', error);
     }
+    get().refreshAnalytics();
   },
 
   addAccount: (account) => {
@@ -484,7 +485,8 @@ export const useStore = create<AppState>((set, get) => ({
 
   refreshAnalytics: async () => {
     try {
-      const report = await AnalyticsManager.generateFullReport();
+      const { language } = get();
+      const report = await AnalyticsManager.generateFullReport(language);
       set({ analyticsReport: report });
     } catch (error) {
       console.error('refreshAnalytics Error:', error);

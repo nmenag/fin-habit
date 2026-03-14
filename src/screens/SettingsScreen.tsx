@@ -3,14 +3,13 @@ import React from 'react';
 import {
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 import { useStore, useTranslation } from '../store/useStore';
 import { exportTransactionsToCSV } from '../utils/csvExport';
-import { BannerAdComponent } from '../components/BannerAdComponent';
 
 export const SettingsScreen = ({ navigation }: any) => {
   const {
@@ -18,8 +17,6 @@ export const SettingsScreen = ({ navigation }: any) => {
     transactions,
     accounts,
     categories,
-    isPremiumUser,
-    setPremium,
     incrementActionCounter,
     checkAndShowAd,
   } = useStore();
@@ -39,6 +36,7 @@ export const SettingsScreen = ({ navigation }: any) => {
       screen: 'Categories',
     },
     { name: t('manageBudgets'), icon: 'pie-chart-outline', screen: 'Budgets' },
+    { name: t('calendar'), icon: 'calendar-outline', screen: 'Calendar' },
   ];
 
   const LANGUAGES = [
@@ -72,7 +70,7 @@ export const SettingsScreen = ({ navigation }: any) => {
         </View>
       </View>
 
-      <View style={styles.section}>
+      {/* <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('premium')}</Text>
         <View style={styles.optionsContainer}>
           <View style={styles.option}>
@@ -98,7 +96,7 @@ export const SettingsScreen = ({ navigation }: any) => {
         <View style={styles.sectionInfo}>
           <Text style={styles.sectionInfoText}>{t('premiumDesc')}</Text>
         </View>
-      </View>
+      </View> */}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('settings')}</Text>

@@ -9,6 +9,7 @@ export const translations = {
     budgets: 'Budgets',
     insights: 'Insights',
     settings: 'Settings',
+    calendar: 'Calendar',
     chartTitle: 'Expenses by Category (This Month)',
 
     totalBalance: 'Total Balance',
@@ -136,6 +137,24 @@ export const translations = {
       'Great job! You spent {{percentage}}% less than last month.',
     insightNoSpendChallenge:
       'You spent money on {{days}} days this month. Try a "no-spend" day challenge!',
+    insightOverspendingTitle: 'Overspending Alert',
+    insightOverspendingMessage:
+      'You spent more than you earned this month. Consider reviewing your variable expenses.',
+    insightHighSavingsTitle: 'High Savings Rate',
+    insightHighSavingsMessage:
+      'Great job! You saved {{percentage}}% of your income this month.',
+    insightTopCategoryTitle: 'Top Spending Category',
+    insightTopCategoryMessage:
+      'Your biggest spending category is {{category}}, totaling {{amount}}.',
+    insightNoIncomeTitle: 'No Income Recorded',
+    insightNoIncomeMessage:
+      'You have recorded expenses but no income yet this month.',
+    insightExpenseGrowthTitle: 'Expense Growth',
+    insightExpenseGrowthMessage:
+      'Your total expenses increased by {{percentage}}% compared to last month.',
+    insightExpenseReductionTitle: 'Spending Reduction',
+    insightExpenseReductionMessage:
+      'Excellent! You spent {{percentage}}% less than last month.',
   },
   es: {
     dashboard: 'Inicio',
@@ -145,6 +164,7 @@ export const translations = {
     budgets: 'Presupuestos',
     insights: 'Perspectivas',
     settings: 'Ajustes',
+    calendar: 'Calendario',
     chartTitle: 'Gastos por Categoría (Este Mes)',
 
     totalBalance: 'Balance Total',
@@ -274,5 +294,23 @@ export const translations = {
       '¡Buen trabajo! Gastaste un {{percentage}}% menos que el mes pasado.',
     insightNoSpendChallenge:
       'Gastaste dinero en {{days}} días este mes. ¡Prueba un desafío de "día sin gastos"!',
+    insightOverspendingTitle: 'Alerta de Gastos Excesivos',
+    insightOverspendingMessage:
+      'Gastaste más de lo que ganaste este mes. Considera revisar tus gastos variables.',
+    insightHighSavingsTitle: 'Alta Tasa de Ahorro',
+    insightHighSavingsMessage:
+      '¡Excelente trabajo! Ahorraste el {{percentage}}% de tus ingresos este mes.',
+    insightTopCategoryTitle: 'Categoría de Mayor Gasto',
+    insightTopCategoryMessage:
+      'Tu categoría de mayor gasto es {{category}}, con un total de {{amount}}.',
+    insightNoIncomeTitle: 'Sin Ingresos Registrados',
+    insightNoIncomeMessage:
+      'Has registrado gastos pero aún no tienes ingresos este mes.',
+    insightExpenseGrowthTitle: 'Crecimiento de Gastos',
+    insightExpenseGrowthMessage:
+      'Tus gastos totales aumentaron un {{percentage}}% en comparación con el mes pasado.',
+    insightExpenseReductionTitle: 'Reducción de Gastos',
+    insightExpenseReductionMessage:
+      '¡Excelente! Gastaste un {{percentage}}% menos que el mes pasado.',
   },
 };

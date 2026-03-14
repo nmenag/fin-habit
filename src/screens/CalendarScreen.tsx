@@ -1,5 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -9,22 +8,32 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BannerAdComponent } from '../components/BannerAdComponent';
+import { CalendarView } from '../components/CalendarView';
 import { TransactionItem } from '../components/TransactionItem';
 import { useStore, useTranslation } from '../store/useStore';
+import { format, isSameDay } from 'date-fns';
 
-export const TransactionsScreen = ({ route, navigation }: any) => {
-  const { transactions, accounts, categories, deleteTransaction } = useStore();
+export const CalendarScreen = ({ navigation }: any) => {
+  const { transactions, categories, deleteTransaction } = useStore();
   const { t } = useTranslation();
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const filterAccountId = route.params?.accountId;
-  const filteredTransactions = filterAccountId
-    ? transactions.filter((t) => t.accountId === filterAccountId)
-    : transactions;
+  const insets = useSafeAreaInsets();
 
-  const activeAccount = filterAccountId
-    ? accounts.find((a) => a.id === filterAccountId)
-    : null;
+  const dayTransactions = transactions.filter((t) =>
+    isSameDay(new Date(t.date), selectedDate),
+  );
+
+  const dayTotals = dayTransactions.reduce(
+    (acc, curr) => {
+      if (curr.type === 'income') acc.income += curr.amount;
+      else acc.expense += curr.amount;
+      return acc;
+    },
+    { income: 0, expense: 0 },
+  );
+
+  const dailyNet = dayTotals.income - dayTotals.expense;
 
   const handleTransactionPress = (transaction: any) => {
     Alert.alert(t('transactionOptions'), t('whatToDo'), [
@@ -67,25 +76,49 @@ export const TransactionsScreen = ({ route, navigation }: any) => {
     ]);
   };
 
-  const insets = useSafeAreaInsets();
-
   return (
     <View style={styles.container}>
-      {activeAccount && (
-        <View style={styles.filterHeader}>
-          <Text style={styles.filterText}>
-            {t('accounts')}: {activeAccount.name}
-          </Text>
-          <TouchableOpacity
-            onPress={() => navigation.setParams({ accountId: undefined })}
-          >
-            <Ionicons name="close-circle" size={24} color="#f44336" />
-          </TouchableOpacity>
-        </View>
-      )}
       <FlatList
-        data={filteredTransactions}
+        data={dayTransactions}
         keyExtractor={(item) => item.id}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <CalendarView
+              selectedDate={selectedDate}
+              onDayPress={setSelectedDate}
+            />
+            <View style={styles.listTitleContainer}>
+              <View>
+                <Text style={styles.listTitle}>
+                  {format(selectedDate, 'PP')}
+                </Text>
+                <Text style={styles.transactionCount}>
+                  {dayTransactions.length} {t('transactions')}
+                </Text>
+              </View>
+              <View style={styles.totalsContainer}>
+                {dayTotals.income > 0 && (
+                  <Text style={styles.incomeTotal}>
+                    +{dayTotals.income.toFixed(2)}
+                  </Text>
+                )}
+                {dayTotals.expense > 0 && (
+                  <Text style={styles.expenseTotal}>
+                    -{dayTotals.expense.toFixed(2)}
+                  </Text>
+                )}
+                <Text
+                  style={[
+                    styles.netTotal,
+                    dailyNet < 0 ? styles.expenseTotal : styles.incomeTotal,
+                  ]}
+                >
+                  Sum: {dailyNet.toFixed(2)}
+                </Text>
+              </View>
+            </View>
+          </View>
+        }
         renderItem={({ item }) => {
           const category = categories.find((c) => c.id === item.categoryId);
           return (
@@ -102,13 +135,13 @@ export const TransactionsScreen = ({ route, navigation }: any) => {
             <Text style={styles.emptyText}>{t('noTransactions')}</Text>
           </View>
         }
+        contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
       />
-      <BannerAdComponent />
       <TouchableOpacity
-        style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 8 }]}
+        style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 16 }]}
         onPress={() =>
           navigation.navigate('AddTransaction', {
-            accountId: filterAccountId,
+            date: selectedDate.toISOString(),
           })
         }
       >
@@ -123,19 +156,49 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  filterHeader: {
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+  },
+  listTitleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#fff',
+    paddingVertical: 12,
+    paddingHorizontal: 4,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    marginBottom: 8,
   },
-  filterText: {
+  listTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#2196f3',
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  transactionCount: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 2,
+  },
+  totalsContainer: {
+    alignItems: 'flex-end',
+  },
+  incomeTotal: {
+    fontSize: 14,
+    color: '#4caf50',
+    fontWeight: 'bold',
+  },
+  expenseTotal: {
+    fontSize: 14,
+    color: '#f44336',
+    fontWeight: 'bold',
+  },
+  netTotal: {
+    fontSize: 12,
+    marginTop: 2,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingTop: 2,
   },
   empty: {
     padding: 40,
@@ -148,7 +211,6 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 24,
-    bottom: 24,
     width: 56,
     height: 56,
     borderRadius: 28,
