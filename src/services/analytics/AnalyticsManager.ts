@@ -11,7 +11,10 @@ export class AnalyticsManager {
 
     let expenseGrowth = 0;
     if (previousMonth.expenses > 0) {
-      expenseGrowth = ((currentMonth.expenses - previousMonth.expenses) / previousMonth.expenses) * 100;
+      expenseGrowth =
+        ((currentMonth.expenses - previousMonth.expenses) /
+          previousMonth.expenses) *
+        100;
     }
 
     const report: AnalyticsReport = {
@@ -20,7 +23,7 @@ export class AnalyticsManager {
       categoryExpenses,
       spendingDays,
       expenseGrowth,
-      insights: []
+      insights: [],
     };
 
     report.insights = InsightEngine.generateInsights(report);

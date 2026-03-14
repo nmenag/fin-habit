@@ -1,4 +1,9 @@
-import { AnalyticsReport, Insight, MonthlyMetrics, CategoryExpense } from './types';
+import {
+  AnalyticsReport,
+  Insight,
+  MonthlyMetrics,
+  CategoryExpense,
+} from './types';
 
 export class InsightEngine {
   static generateInsights(report: AnalyticsReport): Insight[] {
@@ -6,19 +11,23 @@ export class InsightEngine {
     const { currentMonth, previousMonth, categoryExpenses } = report;
 
     // Rule 1: Overspending
-    if (currentMonth.expenses > currentMonth.income && currentMonth.income > 0) {
+    if (
+      currentMonth.expenses > currentMonth.income &&
+      currentMonth.income > 0
+    ) {
       insights.push({
         id: 'rule-overspending',
         title: 'Overspending Alert',
-        message: 'You spent more than you earned this month. Consider reviewing your variable expenses.',
+        message:
+          'You spent more than you earned this month. Consider reviewing your variable expenses.',
         level: 'warning',
         category: 'budget',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
 
     // Rule 2: Category Increase > 20%
-    categoryExpenses.forEach(cat => {
+    categoryExpenses.forEach((cat) => {
       // Note: We'd need previous month category data for a full comparison.
       // For simplicity in V1, let's assume we have it or use a simplified check.
     });
@@ -31,7 +40,7 @@ export class InsightEngine {
         message: `Great job! You saved ${(currentMonth.savingsRate * 100).toFixed(0)}% of your income this month.`,
         level: 'positive',
         category: 'savings',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
 
@@ -43,13 +52,16 @@ export class InsightEngine {
         message: `Your biggest spending category is ${currentMonth.topCategory.name}, totaling $${currentMonth.topCategory.amount.toFixed(2)}.`,
         level: 'info',
         category: 'spending',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
 
     // Comparison with Previous Month
     if (previousMonth.expenses > 0) {
-      const growth = ((currentMonth.expenses - previousMonth.expenses) / previousMonth.expenses) * 100;
+      const growth =
+        ((currentMonth.expenses - previousMonth.expenses) /
+          previousMonth.expenses) *
+        100;
       if (growth > 10) {
         insights.push({
           id: 'rule-expense-growth',
@@ -57,7 +69,7 @@ export class InsightEngine {
           message: `Your total expenses increased by ${growth.toFixed(1)}% compared to last month.`,
           level: 'warning',
           category: 'spending',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       } else if (growth < -5) {
         insights.push({
@@ -66,7 +78,7 @@ export class InsightEngine {
           message: `Excellent! You spent ${Math.abs(growth).toFixed(1)}% less than last month.`,
           level: 'positive',
           category: 'spending',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }
@@ -79,7 +91,7 @@ export class InsightEngine {
         message: 'You have recorded expenses but no income yet this month.',
         level: 'info',
         category: 'earnings',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
 
