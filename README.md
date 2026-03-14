@@ -1,50 +1,47 @@
-# Welcome to your Expo app 👋
+# FinHabit 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+FinHabit is a modern, personal finance tracker built with React Native and Expo. It helps you monitor your expenses, manage budgets, and visualize your financial health through insights and interactive calendars.
 
-## Get started
+## ✨ Features
 
-1. Install dependencies
+- **Multi-language Support**: Full support for English and Spanish, including localized financial insights.
+- **Dynamic Dashboard**: Overview of your total balance, monthly income, and expenses with interactive account cards.
+- **Account Management**: Track multiple accounts (Cash, Bank, Credit) and view their specific transaction history.
+- **Calendar View**: A dedicated financial calendar to visualize daily spending patterns with categorized totals.
+- **Smart Insights**: Automatically generated financial tips and alerts based on your spending habits.
+- **Budget Tracking**: Set monthly limits for categories and track your progress in real-time.
+- **Data Export**: Export your transaction history to CSV format for external analysis.
+- **Ad-Supported**: Integrated Google Mobile Ads (Banner and Interstitial).
 
+## 🚀 Tech Stack
+
+- **Framework**: [Expo](https://expo.dev) / React Native
+- **State Management**: [Zustand](https://github.com/pmndrs/zustand)
+- **Database**: [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/)
+- **Styling**: Vanilla React Native StyleSheet
+- **Date Utilities**: [date-fns](https://date-fns.org/)
+- **Localization**: [expo-localization](https://docs.expo.dev/versions/latest/sdk/localization/)
+- **Charts**: [react-native-chart-kit](https://github.com/indiespirit/react-native-chart-kit)
+
+## 🛠️ Get Started
+
+1. **Install dependencies**
    ```bash
    npm install
    ```
 
-2. Start the app
-
+2. **Start the app**
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## 📱 Development
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+You can run the app on:
 - [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- [Expo Go](https://expo.dev/go)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 📄 License
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Private Project. All rights reserved.
