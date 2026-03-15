@@ -47,9 +47,14 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
 
   const [name, setName] = useState(editingAccount?.name || '');
   const [type, setType] = useState<AccountType>(editingAccount?.type || 'cash');
-  const [balance, setBalance] = useState(
-    editingAccount ? editingAccount.currentBalance.toString() : '',
+  const [displayBalance, setDisplayBalance] = useState(
+    editingAccount
+      ? editingAccount.currentBalance.toLocaleString(
+          language === 'es' ? 'es-CO' : 'en-US',
+        )
+      : '',
   );
+  const [balance, setBalance] = useState(editingAccount?.currentBalance || 0);
   const [color, setColor] = useState(editingAccount?.color || COLORS[0]);
   const [selectedCurrency, setSelectedCurrency] = useState(
     editingAccount?.currency || 'COP',
@@ -61,13 +66,7 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
       return;
     }
 
-    const balanceNum = parseFloat(balance);
-    if (balance !== '' && isNaN(balanceNum)) {
-      Alert.alert(t('error'), t('enterValidBalance'));
-      return;
-    }
-
-    const finalBalance = isNaN(balanceNum) ? 0 : balanceNum;
+    const finalBalance = balance;
 
     if (isEditing) {
       editAccount({
@@ -106,6 +105,19 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
     }
 
     navigation.goBack();
+  };
+
+  const handleBalanceChange = (text: string) => {
+    const onlyDigits = text.replace(/\D/g, '');
+    if (onlyDigits === '') {
+      setDisplayBalance('');
+      setBalance(0);
+      return;
+    }
+    const num = parseInt(onlyDigits, 10);
+    setBalance(num);
+    const separator = language === 'es' ? '.' : ',';
+    setDisplayBalance(onlyDigits.replace(/\B(?=(\d{3})+(?!\d))/g, separator));
   };
 
   const insets = useSafeAreaInsets();
@@ -181,8 +193,8 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
         <TextInput
           style={styles.textInput}
           placeholder="0.00"
-          value={balance}
-          onChangeText={setBalance}
+          value={displayBalance}
+          onChangeText={handleBalanceChange}
           keyboardType="numeric"
         />
       </View>
