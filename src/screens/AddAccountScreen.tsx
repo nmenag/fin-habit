@@ -134,7 +134,7 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
         <Text style={styles.label}>{t('accountName')}</Text>
         <TextInput
           style={styles.textInput}
-          placeholder="e.g. Checking Wallet"
+          placeholder={t('accountNamePlaceholder')}
           value={name}
           onChangeText={setName}
         />
