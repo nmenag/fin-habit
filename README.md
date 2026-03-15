@@ -26,6 +26,7 @@ FinHabit is a modern, personal finance tracker built with React Native and Expo.
 ## 🛠️ Get Started
 
 1. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -38,6 +39,7 @@ FinHabit is a modern, personal finance tracker built with React Native and Expo.
 ## 📱 Development
 
 You can run the app on:
+
 - [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
 - [Expo Go](https://expo.dev/go)

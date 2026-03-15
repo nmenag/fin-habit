@@ -1,0 +1,66 @@
+const isPreview = process.env.APP_VARIANT === 'preview';
+
+module.exports = {
+  expo: {
+    name: isPreview ? 'FinHabit (Preview)' : 'FinHabit',
+    slug: 'fin-habit',
+    version: '1.0.0',
+    orientation: 'portrait',
+    icon: isPreview ? './assets/icon-preview.png' : './assets/icon.png',
+    scheme: 'finhabit',
+    userInterfaceStyle: 'automatic',
+    newArchEnabled: true,
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: 'com.nmena.garzon.finhabit',
+    },
+    android: {
+      adaptiveIcon: {
+        backgroundColor: '#E6F4FE',
+        foregroundImage: isPreview
+          ? './assets/icon-preview.png'
+          : './assets/icon.png',
+        backgroundImage: './assets/images/android-icon-background.png',
+        monochromeImage: './assets/images/android-icon-monochrome.png',
+      },
+      edgeToEdgeEnabled: true,
+      predictiveBackGestureEnabled: false,
+      package: 'com.nmena.garzon.finhabit',
+    },
+    web: {
+      output: 'static',
+      favicon: './assets/images/favicon.png',
+    },
+    plugins: [
+      [
+        'expo-splash-screen',
+        {
+          image: './assets/images/splash-icon.png',
+          imageWidth: 200,
+          resizeMode: 'contain',
+          backgroundColor: '#ffffff',
+          dark: {
+            backgroundColor: '#000000',
+          },
+        },
+      ],
+      'expo-sqlite',
+      [
+        'react-native-google-mobile-ads',
+        {
+          androidAppId: 'ca-app-pub-3940256099942544~3347511713',
+        },
+      ],
+      'expo-build-properties',
+      'expo-localization',
+    ],
+    experiments: {
+      reactCompiler: true,
+    },
+    extra: {
+      eas: {
+        projectId: 'bed3f721-6ec2-417a-8e38-4d5f66778b4d',
+      },
+    },
+  },
+};
