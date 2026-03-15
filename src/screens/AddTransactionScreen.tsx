@@ -15,15 +15,28 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
   const editingTransaction = route.params?.transaction;
   const isEditing = !!route.params?.isEditing;
 
-  const { accounts, categories, budgets, addTransaction, editTransaction } =
-    useStore();
+  const {
+    accounts,
+    categories,
+    budgets,
+    addTransaction,
+    editTransaction,
+    deleteTransaction,
+  } = useStore();
   const { t, language } = useTranslation();
 
   const [type, setType] = useState<TransactionType>(
     editingTransaction?.type || 'expense',
   );
+  const [displayAmount, setDisplayAmount] = useState(
+    editingTransaction
+      ? Math.abs(editingTransaction.amount).toLocaleString(
+          language === 'es' ? 'es-CO' : 'en-US',
+        )
+      : '',
+  );
   const [amount, setAmount] = useState(
-    editingTransaction ? Math.abs(editingTransaction.amount).toString() : '',
+    editingTransaction ? Math.abs(editingTransaction.amount) : 0,
   );
   const [note, setNote] = useState(editingTransaction?.note || '');
   const [selectedAccount, setSelectedAccount] = useState(
@@ -42,7 +55,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
   );
 
   const handleSave = () => {
-    if (!amount || isNaN(Number(amount))) {
+    if (!amount || isNaN(amount) || amount <= 0) {
       Alert.alert(t('error'), t('enterValidAmount'));
       return;
     }
@@ -55,7 +68,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
       editTransaction({
         id: editingTransaction.id,
         type,
-        amount: parseFloat(amount),
+        amount,
         categoryId: selectedCategory || null,
         accountId: selectedAccount,
         budgetId: selectedBudget || null,
@@ -66,7 +79,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
       addTransaction({
         id: Date.now().toString(),
         type,
-        amount: parseFloat(amount),
+        amount,
         categoryId: selectedCategory || null,
         accountId: selectedAccount,
         budgetId: selectedBudget || null,
@@ -77,6 +90,70 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
     }
 
     navigation.goBack();
+  };
+
+  const handleDelete = () => {
+    Alert.alert(t('confirmDelete'), t('confirmDeleteTx'), [
+      { text: t('cancel'), style: 'cancel' },
+      {
+        text: t('delete'),
+        style: 'destructive',
+        onPress: () => {
+          deleteTransaction(
+            editingTransaction.id,
+            editingTransaction.accountId,
+            editingTransaction.amount,
+            editingTransaction.type,
+          );
+          navigation.goBack();
+        },
+      },
+    ]);
+  };
+
+  const handleDuplicate = () => {
+    if (!amount || isNaN(amount) || amount <= 0) {
+      Alert.alert(t('error'), t('enterValidAmount'));
+      return;
+    }
+    if (!selectedAccount) {
+      Alert.alert(t('error'), t('selectAccount'));
+      return;
+    }
+
+    addTransaction({
+      id: Date.now().toString(),
+      type,
+      amount,
+      categoryId: selectedCategory || null,
+      accountId: selectedAccount,
+      budgetId: selectedBudget || null,
+      date: new Date().toISOString(),
+      note: note ? `${note} (${t('duplicate')})` : t('duplicate'),
+    });
+
+    navigation.goBack();
+  };
+
+  const handleAmountChange = (text: string) => {
+    // 1. Get only digits from the input
+    const onlyDigits = text.replace(/\D/g, '');
+
+    if (onlyDigits === '') {
+      setDisplayAmount('');
+      setAmount(0);
+      return;
+    }
+
+    // 2. Convert to number for storage
+    const num = parseInt(onlyDigits, 10);
+    setAmount(num);
+
+    // 3. Format integer with thousands separator (Dot for ES, Comma for EN)
+    const separator = language === 'es' ? '.' : ',';
+    const formatted = onlyDigits.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+
+    setDisplayAmount(formatted);
   };
 
   const insets = useSafeAreaInsets();
@@ -122,8 +199,8 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
         <TextInput
           style={styles.amountInput}
           placeholder="0.00"
-          value={amount}
-          onChangeText={setAmount}
+          value={displayAmount}
+          onChangeText={handleAmountChange}
           keyboardType="numeric"
         />
       </View>
@@ -212,7 +289,8 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
                   selectedBudget === bud.id && styles.activeChipText,
                 ]}
               >
-                {bud.name}
+                {categories.find((c) => c.id === bud.categoryId)?.name ||
+                  t('budgets')}
               </Text>
             </TouchableOpacity>
           ))}
@@ -239,6 +317,22 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
           {isEditing ? t('updateTransaction') : t('saveTransaction')}
         </Text>
       </TouchableOpacity>
+
+      {isEditing && (
+        <View style={styles.editActions}>
+          <TouchableOpacity
+            style={styles.duplicateBtn}
+            onPress={handleDuplicate}
+          >
+            <Text style={styles.duplicateBtnText}>{t('duplicate')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
+            <Text style={styles.deleteBtnText}>
+              {t('deleteTransaction') || t('delete')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </ScrollView>
   );
 };
@@ -333,5 +427,38 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  deleteBtnText: {
+    color: '#f44336',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  editActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+  },
+  duplicateBtn: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#2196f3',
+  },
+  duplicateBtnText: {
+    color: '#2196f3',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  deleteBtn: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: '#f44336',
   },
 });

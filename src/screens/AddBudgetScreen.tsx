@@ -33,23 +33,22 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
   const { addBudget, editBudget, categories } = useStore();
   const { t, language } = useTranslation();
 
-  const [name, setName] = useState(editingBudget?.name || '');
-  const [amount, setAmount] = useState(
-    editingBudget ? editingBudget.amount.toString() : '',
+  const [displayAmount, setDisplayAmount] = useState(
+    editingBudget
+      ? editingBudget.amount.toLocaleString(
+          language === 'es' ? 'es-CO' : 'en-US',
+        )
+      : '',
   );
+  const [amount, setAmount] = useState(editingBudget?.amount || 0);
   const [color, setColor] = useState(editingBudget?.color || COLORS[0]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     editingBudget?.categoryId || null,
   );
 
   const handleSave = () => {
-    if (!name.trim()) {
-      Alert.alert(t('error'), t('enterBudgetName'));
-      return;
-    }
-
-    const amountNum = parseFloat(amount);
-    if (!amount || isNaN(amountNum) || amountNum <= 0) {
+    const amountNum = amount;
+    if (amountNum <= 0) {
       Alert.alert(t('error'), t('enterValidAmount'));
       return;
     }
@@ -57,7 +56,6 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
     if (isEditing && editingBudget) {
       editBudget({
         ...editingBudget,
-        name: name.trim(),
         amount: amountNum,
         color: color,
         categoryId: selectedCategoryId,
@@ -65,7 +63,6 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
     } else {
       addBudget({
         id: Date.now().toString(),
-        name: name.trim(),
         amount: amountNum,
         color: color,
         categoryId: selectedCategoryId,
@@ -73,6 +70,19 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
     }
 
     navigation.goBack();
+  };
+
+  const handleAmountChange = (text: string) => {
+    const onlyDigits = text.replace(/\D/g, '');
+    if (onlyDigits === '') {
+      setDisplayAmount('');
+      setAmount(0);
+      return;
+    }
+    const num = parseInt(onlyDigits, 10);
+    setAmount(num);
+    const separator = language === 'es' ? '.' : ',';
+    setDisplayAmount(onlyDigits.replace(/\B(?=(\d{3})+(?!\d))/g, separator));
   };
 
   const insets = useSafeAreaInsets();
@@ -86,22 +96,12 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
       ]}
     >
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>{t('budgetName')}</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder="e.g. Monthly Groceries"
-          value={name}
-          onChangeText={setName}
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>{t('monthlyLimit')} (USD)</Text>
+        <Text style={styles.label}>{t('monthlyLimit')}</Text>
         <TextInput
           style={styles.amountInput}
           placeholder="0.00"
-          value={amount}
-          onChangeText={setAmount}
+          value={displayAmount}
+          onChangeText={handleAmountChange}
           keyboardType="numeric"
         />
       </View>

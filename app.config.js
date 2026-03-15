@@ -1,8 +1,27 @@
-const isPreview = process.env.APP_VARIANT === 'preview';
+const getAppVariant = () => {
+  return process.env.APP_VARIANT || 'production';
+};
+
+const variant = getAppVariant();
+
+const getPackageName = () => {
+  if (variant === 'development') return 'com.finhabit.dev';
+  if (variant === 'preview') return 'com.finhabit.preview';
+  return 'com.finhabit';
+};
+
+const getAppName = () => {
+  const baseName = 'FinHabit';
+  if (variant === 'development') return `${baseName} (Dev)`;
+  if (variant === 'preview') return `${baseName} (Preview)`;
+  return baseName;
+};
+
+const isPreview = variant === 'preview';
 
 module.exports = {
   expo: {
-    name: isPreview ? 'FinHabit (Preview)' : 'FinHabit',
+    name: getAppName(),
     slug: 'fin-habit',
     version: '1.0.0',
     orientation: 'portrait',
@@ -10,9 +29,15 @@ module.exports = {
     scheme: 'finhabit',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
+    runtimeVersion: {
+      policy: 'appVersion',
+    },
+    updates: {
+      url: 'https://u.expo.dev/bed3f721-6ec2-417a-8e38-4d5f66778b4d',
+    },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: 'com.nmena.garzon.finhabit',
+      bundleIdentifier: getPackageName(),
     },
     android: {
       adaptiveIcon: {
@@ -25,7 +50,7 @@ module.exports = {
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
-      package: 'com.nmena.garzon.finhabit',
+      package: getPackageName(),
     },
     web: {
       output: 'static',

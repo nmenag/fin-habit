@@ -105,7 +105,7 @@ export const AddCategoryScreen = ({ route, navigation }: any) => {
         <Text style={styles.label}>{t('categoryName')}</Text>
         <TextInput
           style={styles.textInput}
-          placeholder="e.g. Groceries"
+          placeholder={t('categoryNamePlaceholder')}
           value={name}
           onChangeText={setName}
         />

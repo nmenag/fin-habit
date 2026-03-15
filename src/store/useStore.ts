@@ -29,7 +29,6 @@ export interface Category {
 
 export interface Budget {
   id: string;
-  name: string;
   amount: number;
   color?: string | null;
   categoryId?: string | null;
@@ -413,7 +412,7 @@ export const useStore = create<AppState>((set, get) => ({
       'INSERT INTO budgets (id, name, amount, color, categoryId) VALUES (?, ?, ?, ?, ?)',
       [
         budget.id ?? '',
-        budget.name ?? '',
+        '',
         budget.amount ?? 0,
         budget.color ?? null,
         budget.categoryId ?? null,
@@ -427,7 +426,7 @@ export const useStore = create<AppState>((set, get) => ({
     db.runSync(
       'UPDATE budgets SET name = ?, amount = ?, color = ?, categoryId = ? WHERE id = ?',
       [
-        budget.name ?? '',
+        '',
         budget.amount ?? 0,
         budget.color ?? null,
         budget.categoryId ?? null,

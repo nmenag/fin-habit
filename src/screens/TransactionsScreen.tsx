@@ -27,44 +27,10 @@ export const TransactionsScreen = ({ route, navigation }: any) => {
     : null;
 
   const handleTransactionPress = (transaction: any) => {
-    Alert.alert(t('transactionOptions'), t('whatToDo'), [
-      { text: t('cancel'), style: 'cancel' },
-      {
-        text: t('edit'),
-        onPress: () =>
-          navigation.navigate('AddTransaction', {
-            transaction,
-            isEditing: true,
-          }),
-      },
-      {
-        text: t('duplicate'),
-        onPress: () =>
-          navigation.navigate('AddTransaction', {
-            transaction,
-            isEditing: false,
-          }),
-      },
-      {
-        text: t('delete'),
-        style: 'destructive',
-        onPress: () =>
-          Alert.alert(t('confirmDelete'), t('confirmDeleteTx'), [
-            { text: t('cancel'), style: 'cancel' },
-            {
-              text: t('delete'),
-              style: 'destructive',
-              onPress: () =>
-                deleteTransaction(
-                  transaction.id,
-                  transaction.accountId,
-                  transaction.amount,
-                  transaction.type,
-                ),
-            },
-          ]),
-      },
-    ]);
+    navigation.navigate('AddTransaction', {
+      transaction,
+      isEditing: true,
+    });
   };
 
   const insets = useSafeAreaInsets();

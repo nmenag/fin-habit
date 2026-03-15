@@ -12,7 +12,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Budget, useStore, useTranslation } from '../store/useStore';
 
 export const BudgetsScreen = ({ navigation }: any) => {
-  const { budgets, deleteBudget, transactions, formatCurrency } = useStore();
+  const { budgets, deleteBudget, transactions, formatCurrency, categories } =
+    useStore();
   const { t, language } = useTranslation();
 
   const handleDelete = (budget: Budget) => {
@@ -22,14 +23,21 @@ export const BudgetsScreen = ({ navigation }: any) => {
       return;
     }
 
-    Alert.alert(t('deleteBudget'), `${t('confirmDelete')} ${budget.name}?`, [
-      { text: t('cancel'), style: 'cancel' },
-      {
-        text: t('delete'),
-        style: 'destructive',
-        onPress: () => deleteBudget(budget.id),
-      },
-    ]);
+    const category = categories.find((c) => c.id === budget.categoryId);
+    const budgetDisplayName = category?.name || t('budgets');
+
+    Alert.alert(
+      t('deleteBudget'),
+      `${t('confirmDelete')} ${budgetDisplayName}?`,
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('delete'),
+          style: 'destructive',
+          onPress: () => deleteBudget(budget.id),
+        },
+      ],
+    );
   };
 
   const renderItem = ({ item }: { item: Budget }) => {
@@ -59,9 +67,15 @@ export const BudgetsScreen = ({ navigation }: any) => {
             <Ionicons name="pie-chart" size={24} color="#fff" />
           </View>
           <View style={styles.textContainer}>
-            <Text style={styles.name}>{item.name}</Text>
+            <Text style={styles.name}>
+              {categories.find((c) => c.id === item.categoryId)?.name ||
+                t('budgets')}
+            </Text>
             <Text style={styles.type}>
-              {formatCurrency(spent)} / {formatCurrency(item.amount)}
+              {spent.toLocaleString(language === 'es' ? 'es-CO' : 'en-US')} /{' '}
+              {item.amount.toLocaleString(
+                language === 'es' ? 'es-CO' : 'en-US',
+              )}
             </Text>
           </View>
         </View>
