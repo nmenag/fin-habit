@@ -6,7 +6,7 @@ export interface Insight {
   message: string;
   level: InsightLevel;
   category: string;
-  suggestedAction?: string;
+  recommendation?: string;
   timestamp: string;
 }
 
@@ -35,6 +35,13 @@ export interface AnalyticsReport {
   currentMonth: MonthlyMetrics;
   previousMonth: MonthlyMetrics;
   categoryExpenses: CategoryExpense[];
+  budgets: {
+    categoryId: string;
+    categoryName: string;
+    amount: number;
+    spent: number;
+    exceeded: boolean;
+  }[];
   spendingDays: number;
   expenseGrowth: number;
   insights: Insight[];

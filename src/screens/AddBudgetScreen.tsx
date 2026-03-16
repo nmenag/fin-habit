@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import {
   Button,
-  Card,
   Chip,
   Text,
   TextInput,
@@ -102,20 +101,16 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
           { paddingBottom: Math.max(insets.bottom, 20) + 40 },
         ]}
       >
-        <Card style={styles.mainCard} mode="contained">
-          <Card.Content>
-            <TextInput
-              label={t('monthlyLimit')}
-              value={displayAmount}
-              onChangeText={handleAmountChange}
-              mode="outlined"
-              keyboardType="numeric"
-              style={styles.amountInput}
-              placeholder="0.00"
-              left={<TextInput.Icon icon="cash" />}
-            />
-          </Card.Content>
-        </Card>
+        <TextInput
+            label={t('monthlyLimit')}
+            value={displayAmount}
+            onChangeText={handleAmountChange}
+            mode="outlined"
+            keyboardType="numeric"
+            style={styles.amountInput}
+            placeholder="0.00"
+            left={<TextInput.Icon icon="cash" />}
+          />
 
         <View style={styles.section}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
@@ -196,12 +191,9 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
-  mainCard: {
-    borderRadius: 24,
-    marginBottom: 24,
-  },
   amountInput: {
     backgroundColor: 'transparent',
+    marginBottom: 24,
   },
   section: {
     marginBottom: 24,

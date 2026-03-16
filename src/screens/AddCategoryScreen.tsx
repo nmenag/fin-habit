@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import {
   Button,
-  Card,
   SegmentedButtons,
   Text,
   TextInput,
@@ -111,18 +110,14 @@ export const AddCategoryScreen = ({ route, navigation }: any) => {
           { paddingBottom: Math.max(insets.bottom, 20) + 40 },
         ]}
       >
-        <Card style={styles.inputCard} mode="contained">
-          <Card.Content>
-            <TextInput
-              label={t('categoryName')}
-              placeholder={t('categoryNamePlaceholder')}
-              value={name}
-              onChangeText={setName}
-              mode="outlined"
-              style={styles.textInput}
-            />
-          </Card.Content>
-        </Card>
+        <TextInput
+            label={t('categoryName')}
+            placeholder={t('categoryNamePlaceholder')}
+            value={name}
+            onChangeText={setName}
+            mode="outlined"
+            style={styles.textInput}
+          />
 
         <View style={styles.section}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
@@ -215,12 +210,9 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
-  inputCard: {
-    borderRadius: 24,
-    marginBottom: 24,
-  },
   textInput: {
     backgroundColor: 'transparent',
+    marginBottom: 24,
   },
   section: {
     marginBottom: 24,

@@ -2,8 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import React, { useMemo } from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
-import { Card, Surface, Text, useTheme } from 'react-native-paper';
 import { BarChart, PieChart } from 'react-native-chart-kit';
+import { Card, Surface, Text, useTheme } from 'react-native-paper';
 import { FilterBar } from '../components/FilterBar';
 import { useFilterStore } from '../store/useFilterStore';
 import { useStore, useTranslation } from '../store/useStore';
@@ -37,7 +37,6 @@ export const InsightsScreen = () => {
   const styles = defaultStyles(theme);
   const { selectedRange } = useFilterStore();
 
-  // ── Filtered analytics computed from raw transactions ────────────────────
   const filtered = useMemo(() => {
     const inRange = transactions.filter((tx) =>
       isInRange(tx.date, selectedRange),
@@ -97,20 +96,19 @@ export const InsightsScreen = () => {
     };
   }, [transactions, categories, selectedRange, t]);
 
-  // ── Month-over-month data (from existing analyticsReport) ────────────────
   const barData = analyticsReport
     ? {
-        labels: [t('previousMonth'), t('currentMonth')],
-        datasets: [
-          {
-            data: [
-              analyticsReport.previousMonth.expenses,
-              analyticsReport.currentMonth.expenses,
-            ],
-            colors: [(_opacity = 1) => '#90caf9', (_opacity = 1) => '#2196f3'],
-          },
-        ],
-      }
+      labels: [t('previousMonth'), t('currentMonth')],
+      datasets: [
+        {
+          data: [
+            analyticsReport.previousMonth.expenses,
+            analyticsReport.currentMonth.expenses,
+          ],
+          colors: [(_opacity = 1) => '#90caf9', (_opacity = 1) => '#2196f3'],
+        },
+      ],
+    }
     : null;
 
   const expenseGrowth = analyticsReport?.expenseGrowth ?? 0;
@@ -123,7 +121,6 @@ export const InsightsScreen = () => {
     legendFontSize: 11,
   }));
 
-  // ── Range label ──────────────────────────────────────────────────────────
   const rangeLabel = useMemo(() => {
     const { type, startDate, endDate } = selectedRange;
     if (type === 'today') return t('filterToday');
@@ -131,6 +128,7 @@ export const InsightsScreen = () => {
     if (type === 'month') return t('filterMonth');
     if (type === 'lastMonth') return t('filterLastMonth');
     if (type === 'year') return t('filterYear');
+    if (type === 'allTime') return t('filterAllTime');
     return `${format(startDate, 'MMM d')} – ${format(endDate, 'MMM d, yyyy')}`;
   }, [selectedRange, t]);
 
@@ -148,37 +146,45 @@ export const InsightsScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      {/* Filter Bar */}
       <FilterBar />
 
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Range Indicator */}
         <View
           style={[
             styles.rangeBadge,
             { backgroundColor: theme.colors.primaryContainer },
           ]}
         >
-          <Ionicons
-            name="calendar"
-            size={14}
-            color={theme.colors.onPrimaryContainer}
-          />
+          {selectedRange.type !== 'allTime' && (
+            <>
+              <Ionicons
+                name="calendar"
+                size={14}
+                color={theme.colors.onPrimaryContainer}
+              />
+              <Text
+                variant="labelSmall"
+                style={{
+                  color: theme.colors.onPrimaryContainer,
+                  marginLeft: 6,
+                  fontWeight: '700',
+                }}
+              >
+                {rangeLabel}
+              </Text>
+              <Text
+                variant="labelSmall"
+                style={{ color: theme.colors.onPrimaryContainer, marginLeft: 4 }}
+              >
+                ·{' '}
+              </Text>
+            </>
+          )}
           <Text
             variant="labelSmall"
-            style={{
-              color: theme.colors.onPrimaryContainer,
-              marginLeft: 6,
-              fontWeight: '700',
-            }}
+            style={{ color: theme.colors.onPrimaryContainer }}
           >
-            {rangeLabel}
-          </Text>
-          <Text
-            variant="labelSmall"
-            style={{ color: theme.colors.onPrimaryContainer, marginLeft: 4 }}
-          >
-            · {filtered.txCount}{' '}
+            {filtered.txCount}{' '}
             {filtered.txCount === 1 ? 'transaction' : 'transactions'}
           </Text>
         </View>
@@ -395,33 +401,75 @@ export const InsightsScreen = () => {
 
         {/* Insights */}
         {analyticsReport && analyticsReport.insights.length > 0 && (
-          <>
-            <Text
-              variant="titleLarge"
-              style={[styles.sectionTitle, { marginTop: 8 }]}
-            >
+          <View style={{ marginTop: 8 }}>
+            <Text variant="titleLarge" style={styles.sectionTitle}>
               {t('insights')}
             </Text>
-            {analyticsReport.insights.map((insight) => (
-              <Surface
-                key={insight.id}
-                style={[
-                  styles.insightBox,
-                  insight.level === 'positive' && styles.positiveBox,
-                  insight.level === 'warning' && styles.warningBox,
-                  insight.level === 'critical' && styles.criticalBox,
-                ]}
-                elevation={1}
-              >
-                <Text variant="titleSmall" style={styles.insightTitle}>
-                  {insight.title}
-                </Text>
-                <Text variant="bodyMedium" style={styles.insightText}>
-                  {insight.message}
-                </Text>
-              </Surface>
-            ))}
-          </>
+            {analyticsReport.insights.map((insight) => {
+              let iconName: any = 'information-circle-outline';
+              let iconColor = '#2196f3';
+              let backgroundColor = '#e3f2fd';
+
+              if (insight.level === 'critical') {
+                iconName = 'alert-circle-outline';
+                iconColor = theme.colors.error;
+                backgroundColor = '#ffebee';
+              } else if (insight.level === 'warning') {
+                iconName = 'warning-outline';
+                iconColor = '#ff9800';
+                backgroundColor = '#fff3e0';
+              } else if (insight.level === 'positive') {
+                iconName = 'checkmark-circle-outline';
+                iconColor = '#4caf50';
+                backgroundColor = '#e8f5e9';
+              } else {
+                // info
+                iconName = 'bulb-outline';
+                iconColor = '#2196f3';
+                backgroundColor = '#e3f2fd';
+              }
+
+              return (
+                <Card
+                  key={insight.id}
+                  style={[styles.insightCard, { borderLeftColor: iconColor }]}
+                  mode="elevated"
+                >
+                  <Card.Content style={styles.insightContent}>
+                    <View
+                      style={[
+                        styles.insightIconContainer,
+                        { backgroundColor: backgroundColor },
+                      ]}
+                    >
+                      <Ionicons name={iconName} size={24} color={iconColor} />
+                    </View>
+                    <View style={styles.insightTextContainer}>
+                      <Text variant="titleSmall" style={styles.insightTitle}>
+                        {insight.title}
+                      </Text>
+                      <Text variant="bodyMedium" style={styles.insightText}>
+                        {insight.message}
+                      </Text>
+                      {insight.recommendation && (
+                        <View style={styles.recommendationContainer}>
+                          <Text
+                            variant="labelSmall"
+                            style={{
+                              color: theme.colors.primary,
+                              fontWeight: '700',
+                            }}
+                          >
+                            {insight.recommendation}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  </Card.Content>
+                </Card>
+              );
+            })}
+          </View>
         )}
 
         {/* Empty state */}
@@ -554,18 +602,42 @@ const defaultStyles = (theme: any) =>
     subtext: {
       color: theme.colors.onSurfaceVariant,
     },
-    insightBox: {
-      padding: 16,
-      borderRadius: 16,
+    insightCard: {
       marginBottom: 12,
-      borderLeftWidth: 6,
+      borderRadius: 16,
       backgroundColor: theme.colors.surface,
+      borderLeftWidth: 6,
     },
-    positiveBox: { borderLeftColor: '#4caf50' },
-    warningBox: { borderLeftColor: '#ff9800' },
-    criticalBox: { borderLeftColor: '#f44336' },
-    insightTitle: { fontWeight: '700', marginBottom: 4 },
-    insightText: { color: theme.colors.onSurface, lineHeight: 20 },
+    insightContent: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      padding: 12,
+      gap: 12,
+    },
+    insightIconContainer: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    insightTextContainer: {
+      flex: 1,
+      gap: 2,
+    },
+    insightTitle: {
+      fontWeight: '700',
+    },
+    insightText: {
+      color: theme.colors.onSurfaceVariant,
+      lineHeight: 18,
+    },
+    recommendationContainer: {
+      marginTop: 8,
+      paddingTop: 8,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.outlineVariant,
+    },
     emptyContainer: {
       alignItems: 'center',
       paddingVertical: 40,

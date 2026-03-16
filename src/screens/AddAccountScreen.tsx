@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import {
   Button,
-  Card,
   Chip,
   SegmentedButtons,
   Text,
@@ -138,8 +137,7 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
           { paddingBottom: Math.max(insets.bottom, 20) + 40 },
         ]}
       >
-        <Card style={styles.mainCard} mode="contained">
-          <Card.Content>
+        <View style={styles.inputGroup}>
             <TextInput
               label={t('accountName')}
               value={name}
@@ -172,8 +170,7 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
               style={styles.input}
               left={<TextInput.Affix text={selectedCurrency + ' '} />}
             />
-          </Card.Content>
-        </Card>
+          </View>
 
         <View style={styles.section}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
@@ -244,8 +241,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
-  mainCard: {
-    borderRadius: 24,
+  inputGroup: {
     marginBottom: 24,
   },
   input: {

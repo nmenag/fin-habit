@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Alert, SectionList, StyleSheet, View } from 'react-native';
 import {
-  Avatar,
   Card,
   FAB,
   IconButton,
@@ -49,16 +48,19 @@ export const CategoriesScreen = ({ navigation }: any) => {
       <List.Item
         title={item.name}
         titleStyle={styles.categoryName}
-        left={(props) => (
-          <Avatar.Icon
-            {...props}
-            icon={(item.icon as any) || 'folder'}
-            size={44}
-            style={{
-              backgroundColor: item.color || theme.colors.surfaceVariant,
-            }}
-            color="#fff"
-          />
+        left={() => (
+          <View
+            style={[
+              styles.iconCircle,
+              { backgroundColor: item.color || theme.colors.surfaceVariant },
+            ]}
+          >
+            <Ionicons
+              name={(item.icon as any) || 'pricetag'}
+              size={22}
+              color="#fff"
+            />
+          </View>
         )}
         right={(props) => (
           <IconButton
@@ -140,6 +142,15 @@ const defaultStyles = (theme: any) =>
       marginHorizontal: 16,
       borderRadius: 16,
       backgroundColor: theme.colors.surface,
+    },
+    iconCircle: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginLeft: 8,
+      alignSelf: 'center',
     },
     categoryName: {
       fontWeight: '700',

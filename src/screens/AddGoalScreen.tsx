@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
   Button,
-  Card,
   HelperText,
   Text,
   TextInput,
@@ -106,8 +105,7 @@ export const AddGoalScreen = ({ route, navigation }: any) => {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Card style={styles.mainCard} mode="contained">
-          <Card.Content>
+        <View style={styles.inputGroup}>
             <TextInput
               label={t('goalName')}
               value={name}
@@ -143,8 +141,7 @@ export const AddGoalScreen = ({ route, navigation }: any) => {
               outlineStyle={styles.inputOutline}
               right={<TextInput.Icon icon="calendar" />}
             />
-          </Card.Content>
-        </Card>
+          </View>
 
         <Text variant="titleMedium" style={styles.sectionTitle}>
           {t('selectIcon')}
@@ -225,9 +222,8 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
-  mainCard: {
-    borderRadius: 24,
-    marginBottom: 24,
+  inputGroup: {
+    marginBottom: 8,
   },
   input: {
     marginBottom: 16,

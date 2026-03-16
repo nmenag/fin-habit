@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import {
   Button,
-  Card,
   Chip,
   IconButton,
   SegmentedButtons,
@@ -195,8 +194,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
           />
         </View>
 
-        <Card style={styles.mainCard} mode="contained">
-          <Card.Content>
+        <View style={styles.inputGroup}>
             <TextInput
               label={t('amount')}
               value={displayAmount}
@@ -215,8 +213,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
               style={styles.input}
               placeholder={t('notePlaceholder')}
             />
-          </Card.Content>
-        </Card>
+          </View>
 
         <View style={styles.section}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
@@ -333,8 +330,7 @@ const styles = StyleSheet.create({
   segmentedContainer: {
     marginBottom: 24,
   },
-  mainCard: {
-    borderRadius: 24,
+  inputGroup: {
     marginBottom: 24,
   },
   amountInput: {
