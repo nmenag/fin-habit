@@ -126,27 +126,76 @@ export const initDb = () => {
   );
   if (count && count.count === 0) {
     const defaultCategories = [
-      { id: '1', name: 'Food', type: 'expense', icon: 'fast-food' },
-      { id: '2', name: 'Transport', type: 'expense', icon: 'car' },
-      { id: '3', name: 'Housing', type: 'expense', icon: 'home' },
+      {
+        id: '1',
+        name: 'Food',
+        type: 'expense',
+        icon: 'fast-food',
+        color: '#f44336',
+      },
+      {
+        id: '2',
+        name: 'Transport',
+        type: 'expense',
+        icon: 'car',
+        color: '#2196f3',
+      },
+      {
+        id: '3',
+        name: 'Housing',
+        type: 'expense',
+        icon: 'home',
+        color: '#9c27b0',
+      },
       {
         id: '4',
         name: 'Entertainment',
         type: 'expense',
         icon: 'game-controller',
+        color: '#ff9800',
       },
-      { id: '5', name: 'Health', type: 'expense', icon: 'medkit' },
-      { id: '6', name: 'Other', type: 'expense', icon: 'list' },
-      { id: '7', name: 'Salary', type: 'income', icon: 'cash' },
-      { id: '8', name: 'Other Income', type: 'income', icon: 'wallet' },
+      {
+        id: '5',
+        name: 'Health',
+        type: 'expense',
+        icon: 'medkit',
+        color: '#e91e63',
+      },
+      {
+        id: '6',
+        name: 'Other',
+        type: 'expense',
+        icon: 'list',
+        color: '#607d8b',
+      },
+      {
+        id: '7',
+        name: 'Salary',
+        type: 'income',
+        icon: 'cash',
+        color: '#4caf50',
+      },
+      {
+        id: '8',
+        name: 'Other Income',
+        type: 'income',
+        icon: 'wallet',
+        color: '#009688',
+      },
     ];
 
     const statement = db.prepareSync(
-      'INSERT INTO categories (id, name, type, icon) VALUES (?, ?, ?, ?)',
+      'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
     );
     try {
       defaultCategories.forEach((cat) => {
-        statement.executeSync([cat.id, cat.name, cat.type, cat.icon]);
+        statement.executeSync([
+          cat.id,
+          cat.name,
+          cat.type,
+          cat.icon,
+          cat.color,
+        ]);
       });
     } finally {
       statement.finalizeSync();

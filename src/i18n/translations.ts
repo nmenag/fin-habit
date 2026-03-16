@@ -15,6 +15,8 @@ export const translations = {
     totalBalance: 'Total Balance',
     monthlyIncome: 'Monthly Income',
     monthlyExpenses: 'Monthly Expenses',
+    previousMonth: 'Prev Month',
+    currentMonth: 'This Month',
     recentTransactions: 'Recent Transactions',
     noRecentTransactions: 'No recent transactions',
 
@@ -113,6 +115,7 @@ export const translations = {
     categoryType: 'Category Type',
     income: 'Income',
     expense: 'Expense',
+    expenses: 'Expenses',
     noCategories: 'No categories found.',
     categoryUsedError: 'This category is used in one or more transactions.',
 
@@ -171,6 +174,8 @@ export const translations = {
     totalBalance: 'Balance Total',
     monthlyIncome: 'Ingresos Mensuales',
     monthlyExpenses: 'Gastos Mensuales',
+    previousMonth: 'Mes Ant.',
+    currentMonth: 'Este Mes',
     recentTransactions: 'Transacciones Recientes',
     noRecentTransactions: 'Sin transacciones recientes',
 
@@ -270,6 +275,7 @@ export const translations = {
     categoryType: 'Tipo de Categoría',
     income: 'Ingreso',
     expense: 'Gasto',
+    expenses: 'Gastos',
     noCategories: 'No se encontraron categorías.',
     categoryUsedError:
       'Esta categoría se está utilizando en una o más transacciones.',

@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   Alert,
-  FlatList,
+  SectionList,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -13,7 +13,7 @@ import { Category, useStore, useTranslation } from '../store/useStore';
 
 export const CategoriesScreen = ({ navigation }: any) => {
   const { categories, deleteCategory, transactions } = useStore();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
 
   const handleDelete = (category: Category) => {
     const isUsed = transactions.some((t) => t.categoryId === category.id);
@@ -57,11 +57,6 @@ export const CategoriesScreen = ({ navigation }: any) => {
         </View>
         <View style={styles.textContainer}>
           <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.type}>
-            {item.type === 'income'
-              ? t('income').toUpperCase()
-              : t('expense').toUpperCase()}
-          </Text>
         </View>
       </View>
       <TouchableOpacity
@@ -75,12 +70,28 @@ export const CategoriesScreen = ({ navigation }: any) => {
 
   const insets = useSafeAreaInsets();
 
+  const expenseCategories = categories.filter((c) => c.type === 'expense');
+  const incomeCategories = categories.filter((c) => c.type === 'income');
+
+  const sections = [
+    { title: t('expenses'), data: expenseCategories },
+    { title: t('income'), data: incomeCategories },
+  ];
+
   return (
     <View style={styles.container}>
-      <FlatList
-        data={categories}
+      <SectionList
+        sections={sections}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
+        renderSectionHeader={({ section: { title, data } }) =>
+          data.length > 0 ? (
+            <View style={styles.header}>
+              <Text style={styles.headerTitle}>{title}</Text>
+            </View>
+          ) : null
+        }
+        contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyText}>{t('noCategories')}</Text>
@@ -106,19 +117,34 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
+  listContent: {
+    paddingBottom: 20,
+  },
+  header: {
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#666',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
   card: {
     backgroundColor: '#fff',
     padding: 16,
-    borderRadius: 8,
-    marginVertical: 8,
+    borderRadius: 12,
+    marginBottom: 8,
     marginHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
   cardContent: {
     flexDirection: 'row',
@@ -126,9 +152,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -137,14 +163,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   name: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
     color: '#333',
-  },
-  type: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 4,
   },
   deleteButton: {
     padding: 8,
@@ -163,9 +184,9 @@ const styles = StyleSheet.create({
     borderColor: '#eee',
   },
   addButton: {
-    backgroundColor: '#4caf50',
+    backgroundColor: '#2196f3',
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: 'center',
   },
   addButtonText: {

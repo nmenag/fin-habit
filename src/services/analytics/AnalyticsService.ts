@@ -74,12 +74,14 @@ export class AnalyticsService {
       categoryId: string;
       categoryName: string;
       amount: number;
+      color: string;
     }>(
       `
       SELECT 
         c.id as categoryId, 
         c.name as categoryName, 
-        SUM(t.amount) as amount
+        SUM(t.amount) as amount,
+        MAX(c.color) as color
       FROM transactions t
       JOIN categories c ON t.categoryId = c.id
       WHERE t.type = 'expense' AND t.date >= ? AND t.date <= ?

@@ -28,6 +28,7 @@ export interface CategoryExpense {
   categoryName: string;
   amount: number;
   percentage: number;
+  color: string;
 }
 
 export interface AnalyticsReport {
