@@ -15,10 +15,10 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useStore } from '../store/useStore';
 
-const formatAmount = (amount: number) => {
+const formatAmount = (amount: number, formatCurrency: any) => {
   if (amount >= 1000000) return (amount / 1000000).toFixed(1) + 'M';
   if (amount >= 1000) return (amount / 1000).toFixed(1) + 'k';
-  return Math.round(amount).toString();
+  return formatCurrency(amount);
 };
 
 interface CalendarViewProps {
@@ -30,7 +30,7 @@ export const CalendarView = ({
   selectedDate,
   onDayPress,
 }: CalendarViewProps) => {
-  const { transactions } = useStore();
+  const { transactions, formatCurrency } = useStore();
   const [currentDate, setCurrentDate] = useState(selectedDate || new Date());
 
   const monthStart = startOfMonth(currentDate);
@@ -113,12 +113,12 @@ export const CalendarView = ({
               <View style={styles.amountsContainer}>
                 {(dayData?.income || 0) > 0 && (
                   <Text style={styles.incomeAmount} numberOfLines={1}>
-                    +{formatAmount(dayData!.income)}
+                    +{formatAmount(dayData!.income, formatCurrency)}
                   </Text>
                 )}
                 {(dayData?.expense || 0) > 0 && (
                   <Text style={styles.expenseAmount} numberOfLines={1}>
-                    -{formatAmount(dayData!.expense)}
+                    -{formatAmount(dayData!.expense, formatCurrency)}
                   </Text>
                 )}
               </View>

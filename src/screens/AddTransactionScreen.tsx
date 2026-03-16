@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TransactionType, useStore, useTranslation } from '../store/useStore';
+import { formatNumber } from '../utils/formatters';
 
 export const AddTransactionScreen = ({ route, navigation }: any) => {
   const editingTransaction = route.params?.transaction;
@@ -30,9 +31,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
   );
   const [displayAmount, setDisplayAmount] = useState(
     editingTransaction
-      ? Math.abs(editingTransaction.amount).toLocaleString(
-          language === 'es' ? 'es-CO' : 'en-US',
-        )
+      ? formatNumber(Math.abs(editingTransaction.amount), language)
       : '',
   );
   const [amount, setAmount] = useState(

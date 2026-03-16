@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Budget, useStore, useTranslation } from '../store/useStore';
+import { formatNumber } from '../utils/formatters';
 
 const COLORS = [
   '#f44336',
@@ -34,11 +35,7 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
   const { t, language } = useTranslation();
 
   const [displayAmount, setDisplayAmount] = useState(
-    editingBudget
-      ? editingBudget.amount.toLocaleString(
-          language === 'es' ? 'es-CO' : 'en-US',
-        )
-      : '',
+    editingBudget ? formatNumber(editingBudget.amount, language) : '',
   );
   const [amount, setAmount] = useState(editingBudget?.amount || 0);
   const [color, setColor] = useState(editingBudget?.color || COLORS[0]);

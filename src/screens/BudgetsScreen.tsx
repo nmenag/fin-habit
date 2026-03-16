@@ -72,10 +72,7 @@ export const BudgetsScreen = ({ navigation }: any) => {
                 t('budgets')}
             </Text>
             <Text style={styles.type}>
-              {spent.toLocaleString(language === 'es' ? 'es-CO' : 'en-US')} /{' '}
-              {item.amount.toLocaleString(
-                language === 'es' ? 'es-CO' : 'en-US',
-              )}
+              {formatCurrency(spent)} / {formatCurrency(item.amount)}
             </Text>
           </View>
         </View>

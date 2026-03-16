@@ -1,5 +1,6 @@
 import { Language, translations } from '../../i18n/translations';
 import { AnalyticsReport, Insight } from './types';
+import { formatCurrency } from '../../utils/formatters';
 
 export class InsightEngine {
   static generateInsights(
@@ -52,7 +53,7 @@ export class InsightEngine {
           .replace('{{category}}', currentMonth.topCategory.name)
           .replace(
             '{{amount}}',
-            currentMonth.topCategory.amount.toFixed(2).toString(),
+            formatCurrency(currentMonth.topCategory.amount),
           ),
         level: 'info',
         category: 'spending',

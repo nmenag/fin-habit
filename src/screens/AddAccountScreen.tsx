@@ -15,6 +15,7 @@ import {
   useStore,
   useTranslation,
 } from '../store/useStore';
+import { formatNumber } from '../utils/formatters';
 
 const COLORS = [
   '#f44336',
@@ -48,11 +49,7 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
   const [name, setName] = useState(editingAccount?.name || '');
   const [type, setType] = useState<AccountType>(editingAccount?.type || 'cash');
   const [displayBalance, setDisplayBalance] = useState(
-    editingAccount
-      ? editingAccount.currentBalance.toLocaleString(
-          language === 'es' ? 'es-CO' : 'en-US',
-        )
-      : '',
+    editingAccount ? formatNumber(editingAccount.currentBalance, language) : '',
   );
   const [balance, setBalance] = useState(editingAccount?.currentBalance || 0);
   const [color, setColor] = useState(editingAccount?.color || COLORS[0]);

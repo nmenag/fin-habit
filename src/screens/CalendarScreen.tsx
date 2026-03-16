@@ -13,8 +13,16 @@ import { TransactionItem } from '../components/TransactionItem';
 import { useStore, useTranslation } from '../store/useStore';
 import { format, isSameDay } from 'date-fns';
 
+// Helper function for formatting amounts
+const formatAmount = (amount: number, formatCurrency: any) => {
+  if (amount >= 1000000) return (amount / 1000000).toFixed(1) + 'M';
+  if (amount >= 1000) return (amount / 1000).toFixed(1) + 'k';
+  return formatCurrency(amount);
+};
+
 export const CalendarScreen = ({ navigation }: any) => {
-  const { transactions, categories, deleteTransaction } = useStore();
+  const { transactions, categories, deleteTransaction, formatCurrency } =
+    useStore();
   const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -65,12 +73,12 @@ export const CalendarScreen = ({ navigation }: any) => {
               <View style={styles.totalsContainer}>
                 {dayTotals.income > 0 && (
                   <Text style={styles.incomeTotal}>
-                    +{dayTotals.income.toFixed(2)}
+                    +{formatAmount(dayTotals.income, formatCurrency)}
                   </Text>
                 )}
                 {dayTotals.expense > 0 && (
                   <Text style={styles.expenseTotal}>
-                    -{dayTotals.expense.toFixed(2)}
+                    -{formatAmount(dayTotals.expense, formatCurrency)}
                   </Text>
                 )}
                 <Text
@@ -79,7 +87,7 @@ export const CalendarScreen = ({ navigation }: any) => {
                     dailyNet < 0 ? styles.expenseTotal : styles.incomeTotal,
                   ]}
                 >
-                  Sum: {dailyNet.toFixed(2)}
+                  Sum: {formatCurrency(dailyNet)}
                 </Text>
               </View>
             </View>

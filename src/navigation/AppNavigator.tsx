@@ -14,6 +14,8 @@ import { InsightsScreen } from '../screens/InsightsScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { TransactionsScreen } from '../screens/TransactionsScreen';
 import { CalendarScreen } from '../screens/CalendarScreen';
+import { GoalsScreen } from '../screens/GoalsScreen';
+import { AddGoalScreen } from '../screens/AddGoalScreen';
 import { useStore, useTranslation } from '../store/useStore';
 
 const Tab = createBottomTabNavigator();
@@ -112,6 +114,16 @@ export const AppNavigator = () => {
         name="Calendar"
         component={CalendarScreen}
         options={{ title: t('calendar') }}
+      />
+      <Stack.Screen
+        name="Goals"
+        component={GoalsScreen}
+        options={{ title: t('goals') }}
+      />
+      <Stack.Screen
+        name="AddGoal"
+        component={AddGoalScreen}
+        options={{ title: t('addGoal'), presentation: 'modal' }}
       />
     </Stack.Navigator>
   );

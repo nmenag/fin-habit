@@ -6,7 +6,7 @@ import { useStore, useTranslation } from '../store/useStore';
 const screenWidth = Dimensions.get('window').width;
 
 export const InsightsScreen = () => {
-  const { analyticsReport, formatCurrency } = useStore();
+  const { analyticsReport, formatCurrency, currencySymbol } = useStore();
   const { t } = useTranslation();
 
   if (!analyticsReport) {
@@ -47,7 +47,7 @@ export const InsightsScreen = () => {
   };
 
   const pieData = categoryExpenses.map((ce) => ({
-    name: ce.categoryName,
+    name: `${ce.categoryName}: ${formatCurrency(ce.amount)}`,
     population: ce.amount,
     color: ce.color || '#ccc',
     legendFontColor: '#7F7F7F',
@@ -81,7 +81,7 @@ export const InsightsScreen = () => {
           data={barData}
           width={screenWidth - 64}
           height={220}
-          yAxisLabel="$"
+          yAxisLabel={currencySymbol}
           yAxisSuffix=""
           chartConfig={chartConfig}
           verticalLabelRotation={0}
@@ -116,7 +116,6 @@ export const InsightsScreen = () => {
             accessor="population"
             backgroundColor="transparent"
             paddingLeft="15"
-            absolute
           />
         </View>
       )}

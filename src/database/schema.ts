@@ -115,10 +115,26 @@ export const initDb = () => {
   }
 
   try {
-    // Standard ALTER TABLE ADD COLUMN in SQLite is simple
     db.execSync('ALTER TABLE transactions ADD COLUMN budgetId TEXT;');
   } catch (e) {
     // Column might already exist
+  }
+
+  try {
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS goals (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        targetAmount REAL NOT NULL,
+        currentAmount REAL NOT NULL DEFAULT 0,
+        color TEXT,
+        icon TEXT,
+        deadline TEXT,
+        status TEXT DEFAULT 'active'
+      );
+    `);
+  } catch (e) {
+    console.error('Error creating goals table:', e);
   }
 
   const count = db.getFirstSync<{ count: number }>(

@@ -1,5 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import { endOfMonth, parseISO, startOfMonth } from 'date-fns';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Dimensions,
   ScrollView,
@@ -19,6 +20,7 @@ const screenWidth = Dimensions.get('window').width;
 export const DashboardScreen = ({ navigation }: any) => {
   const { transactions, accounts, categories, formatCurrency } = useStore();
   const { t, language } = useTranslation();
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   const scoreData = useMemo(
     () => calculateFinancialScore(transactions),
@@ -63,17 +65,22 @@ export const DashboardScreen = ({ navigation }: any) => {
     ];
     let cIdx = 0;
 
-    const pie = Object.keys(catExpenses).map((catId) => {
-      const cat = categories.find((c) => c.id === catId);
-      const color = cat?.color || colors[cIdx++ % colors.length];
-      return {
-        name: cat?.name || t('other'),
-        population: catExpenses[catId],
-        color: color,
-        legendFontColor: '#7F7F7F',
-        legendFontSize: 12,
-      };
-    });
+    const pie = Object.keys(catExpenses)
+      .map((catId) => {
+        const cat = categories.find((c) => c.id === catId);
+        const color = cat?.color || colors[cIdx++ % colors.length];
+        const amount = catExpenses[catId];
+        const percentage = exp > 0 ? (amount / exp) * 100 : 0;
+        return {
+          name: cat?.name || t('other'),
+          population: amount,
+          color: color,
+          percentage: percentage.toFixed(1),
+          legendFontColor: '#7F7F7F',
+          legendFontSize: 12,
+        };
+      })
+      .sort((a, b) => b.population - a.population);
 
     return { totalIncome: inc, totalExpenses: exp, pieData: pie };
   }, [transactions, categories, t, language]);
@@ -133,21 +140,74 @@ export const DashboardScreen = ({ navigation }: any) => {
         {pieData.length > 0 && (
           <View style={styles.chartContainer}>
             <Text style={styles.chartTitle}>{t('chartTitle')}</Text>
-            <PieChart
-              data={pieData}
-              width={screenWidth - 32}
-              height={200}
-              chartConfig={{
-                backgroundColor: '#fff',
-                backgroundGradientFrom: '#fff',
-                backgroundGradientTo: '#fff',
-                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              }}
-              accessor="population"
-              backgroundColor="transparent"
-              paddingLeft="0"
-              absolute
-            />
+            <View style={styles.pieRow}>
+              <PieChart
+                data={pieData.map((d) => ({
+                  ...d,
+                  name: '', // Hide names to keep only percentages on graph
+                  population: parseFloat(d.percentage),
+                }))}
+                width={screenWidth}
+                height={220}
+                chartConfig={{
+                  backgroundColor: '#fff',
+                  backgroundGradientFrom: '#fff',
+                  backgroundGradientTo: '#fff',
+                  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                }}
+                accessor="population"
+                backgroundColor="transparent"
+                paddingLeft="50"
+                absolute
+                hasLegend={false}
+              />
+            </View>
+
+            <View style={styles.categoryList}>
+              {(showAllCategories ? pieData : pieData.slice(0, 5)).map(
+                (item, idx) => (
+                  <View key={idx} style={styles.categoryInfoRow}>
+                    <View style={styles.categoryLabelGroup}>
+                      <View
+                        style={[
+                          styles.colorDot,
+                          { backgroundColor: item.color },
+                        ]}
+                      />
+                      <Text style={styles.categoryName} numberOfLines={1}>
+                        {item.name}
+                      </Text>
+                    </View>
+                    <View style={styles.categoryValueGroup}>
+                      <Text style={styles.categoryAmount}>
+                        {formatCurrency(item.population)}
+                      </Text>
+                      <Text style={styles.categoryPercent}>
+                        {item.percentage}%
+                      </Text>
+                    </View>
+                  </View>
+                ),
+              )}
+
+              {pieData.length > 5 && (
+                <TouchableOpacity
+                  onPress={() => setShowAllCategories(!showAllCategories)}
+                  style={styles.showMoreBtn}
+                >
+                  <Text style={styles.showMoreText}>
+                    {showAllCategories
+                      ? t('showLess') || 'Show Less'
+                      : t('showMore') || 'Show More'}
+                  </Text>
+                  <Ionicons
+                    name={showAllCategories ? 'chevron-up' : 'chevron-down'}
+                    size={16}
+                    color="#2196f3"
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         )}
 
@@ -274,5 +334,66 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  pieRow: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 200,
+  },
+  categoryList: {
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    paddingTop: 10,
+  },
+  categoryInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f9f9f9',
+  },
+  categoryLabelGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  colorDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 10,
+  },
+  categoryName: {
+    fontSize: 14,
+    color: '#2c3e50',
+    fontWeight: '500',
+  },
+  categoryValueGroup: {
+    alignItems: 'flex-end',
+  },
+  categoryAmount: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2c3e50',
+  },
+  categoryPercent: {
+    fontSize: 12,
+    color: '#7f8c8d',
+    marginTop: 2,
+  },
+  showMoreBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    marginTop: 5,
+  },
+  showMoreText: {
+    fontSize: 14,
+    color: '#2196f3',
+    fontWeight: '600',
+    marginRight: 4,
   },
 });
