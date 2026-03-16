@@ -14,7 +14,7 @@ import { Category, useStore, useTranslation } from '../store/useStore';
 
 export const CategoriesScreen = ({ navigation }: any) => {
   const { categories, deleteCategory, transactions } = useStore();
-  const { t } = useTranslation();
+  const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
 
@@ -27,7 +27,7 @@ export const CategoriesScreen = ({ navigation }: any) => {
 
     Alert.alert(
       t('deleteCategory'),
-      `${t('confirmDelete')} ${category.name}?`,
+      `${t('confirmDelete')} ${translateName(category.name)}?`,
       [
         { text: t('cancel'), style: 'cancel' },
         {
@@ -46,7 +46,7 @@ export const CategoriesScreen = ({ navigation }: any) => {
       mode="elevated"
     >
       <List.Item
-        title={item.name}
+        title={translateName(item.name)}
         titleStyle={styles.categoryName}
         left={() => (
           <View

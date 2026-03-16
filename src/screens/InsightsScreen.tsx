@@ -32,7 +32,7 @@ export const InsightsScreen = () => {
     formatCurrency,
     currencySymbol,
   } = useStore();
-  const { t } = useTranslation();
+  const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
   const { selectedRange } = useFilterStore();
@@ -70,7 +70,7 @@ export const InsightsScreen = () => {
         const pct = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0;
         return {
           id: catId,
-          name: cat?.name || t('other'),
+          name: cat?.name ? translateName(cat.name) : t('other'),
           amount,
           color,
           percentage: pct.toFixed(1),
@@ -114,7 +114,7 @@ export const InsightsScreen = () => {
   const expenseGrowth = analyticsReport?.expenseGrowth ?? 0;
 
   const pieData = filtered.categoryBreakdown.map((ce) => ({
-    name: ce.name,
+    name: translateName(ce.name),
     population: ce.amount,
     color: ce.color,
     legendFontColor: theme.colors.onSurfaceVariant,

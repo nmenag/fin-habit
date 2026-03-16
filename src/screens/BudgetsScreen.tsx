@@ -20,7 +20,7 @@ import { Budget, useStore, useTranslation } from '../store/useStore';
 export const BudgetsScreen = ({ navigation }: any) => {
   const { budgets, deleteBudget, transactions, formatCurrency, categories } =
     useStore();
-  const { t } = useTranslation();
+  const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
 
@@ -32,7 +32,9 @@ export const BudgetsScreen = ({ navigation }: any) => {
     }
 
     const category = categories.find((c) => c.id === budget.categoryId);
-    const budgetDisplayName = category?.name || t('budgets');
+    const budgetDisplayName = category?.name
+      ? translateName(category.name)
+      : t('budgets');
 
     Alert.alert(
       t('deleteBudget'),
@@ -70,7 +72,7 @@ export const BudgetsScreen = ({ navigation }: any) => {
           <View style={styles.cardHeader}>
             <View style={styles.textContainer}>
               <Text variant="titleLarge" style={styles.name}>
-                {category?.name || t('budgets')}
+                {category?.name ? translateName(category.name) : t('budgets')}
               </Text>
               <Text variant="bodyMedium" style={styles.limitText}>
                 {formatCurrency(spent)} / {formatCurrency(item.amount)}

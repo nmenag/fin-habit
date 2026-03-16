@@ -27,7 +27,7 @@ const screenWidth = Dimensions.get('window').width;
 
 export const DashboardScreen = ({ navigation }: any) => {
   const { transactions, accounts, categories, formatCurrency } = useStore();
-  const { t, language } = useTranslation();
+  const { t, language, translateName } = useTranslation();
   const [showAllCategories, setShowAllCategories] = useState(false);
   const theme = useTheme();
   const styles = defaultStyles(theme);
@@ -83,7 +83,7 @@ export const DashboardScreen = ({ navigation }: any) => {
         const amount = catExpenses[catId];
         const percentage = exp > 0 ? (amount / exp) * 100 : 0;
         return {
-          name: cat?.name || t('other'),
+          name: cat?.name ? translateName(cat.name) : t('other'),
           population: amount,
           color: color,
           percentage: percentage.toFixed(1),
@@ -127,7 +127,7 @@ export const DashboardScreen = ({ navigation }: any) => {
               >
                 <Card.Content>
                   <Text variant="labelMedium" style={styles.accountCardName}>
-                    {acc.name}
+                    {translateName(acc.name)}
                   </Text>
                   <Text variant="titleMedium" style={styles.accountCardBalance}>
                     {formatCurrency(acc.currentBalance, acc.currency)}
@@ -214,7 +214,7 @@ export const DashboardScreen = ({ navigation }: any) => {
                           ]}
                         />
                         <Text variant="bodyMedium" numberOfLines={1}>
-                          {item.name}
+                          {translateName(item.name)}
                         </Text>
                       </View>
                       <View style={styles.categoryValueGroup}>

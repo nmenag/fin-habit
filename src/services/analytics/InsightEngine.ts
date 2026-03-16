@@ -1,4 +1,8 @@
-import { Language, translations } from '../../i18n/translations';
+import {
+  getTranslatedName,
+  Language,
+  translations,
+} from '../../i18n/translations';
 import { AnalyticsReport, Insight } from './types';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -13,15 +17,16 @@ export class InsightEngine {
 
     // Rule 1: High spending category (> 30% of total)
     categoryExpenses.forEach((cat) => {
+      const translatedCatName = getTranslatedName(cat.categoryName, language);
       if (cat.percentage > 30) {
         insights.push({
           id: `high-spending-${cat.categoryId}`,
           title: t.insightHighSpendingCategoryTitle.replace(
             '{{category}}',
-            cat.categoryName,
+            translatedCatName,
           ),
           message: t.insightHighSpendingCategoryMessage
-            .replace('{{category}}', cat.categoryName)
+            .replace('{{category}}', translatedCatName)
             .replace('{{percentage}}', cat.percentage.toFixed(0)),
           recommendation: t.insightHighSpendingCategoryRec,
           level: 'warning',
@@ -67,13 +72,14 @@ export class InsightEngine {
 
     // Rule 3: Budget Exceeded
     report.budgets.forEach((budget) => {
+      const translatedCatName = getTranslatedName(budget.categoryName, language);
       if (budget.exceeded) {
         insights.push({
           id: `budget-exceeded-${budget.categoryId}`,
           title: t.insightBudgetExceededTitle,
           message: t.insightBudgetExceededMessage.replace(
             '{{category}}',
-            budget.categoryName,
+            translatedCatName,
           ),
           recommendation: t.insightBudgetExceededRec,
           level: 'warning',

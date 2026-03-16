@@ -10,7 +10,7 @@ interface Props {
 
 export const AccountCard: React.FC<Props> = ({ account, onDelete }) => {
   const { formatCurrency } = useStore();
-  const { t } = useTranslation();
+  const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
 
@@ -18,7 +18,7 @@ export const AccountCard: React.FC<Props> = ({ account, onDelete }) => {
     if (onDelete) {
       Alert.alert(
         t('deleteAccount'),
-        t('deleteAccountConfirm', { name: account.name }),
+        t('deleteAccountConfirm', { name: translateName(account.name) }),
         [
           { text: t('cancel'), style: 'cancel' },
           { text: t('delete'), style: 'destructive', onPress: onDelete },
@@ -41,7 +41,7 @@ export const AccountCard: React.FC<Props> = ({ account, onDelete }) => {
             {t(account.type).toUpperCase()}
           </Text>
           <Text variant="titleLarge" style={styles.name}>
-            {account.name}
+            {translateName(account.name)}
           </Text>
           <Text variant="headlineSmall" style={styles.balance}>
             {formatCurrency(account.currentBalance, account.currency)}

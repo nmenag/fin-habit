@@ -32,7 +32,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
     editTransaction,
     deleteTransaction,
   } = useStore();
-  const { t, language } = useTranslation();
+  const { t, language, translateName } = useTranslation();
   const theme = useTheme();
 
   const [type, setType] = useState<TransactionType>(
@@ -231,7 +231,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
                 mode="flat"
                 selectedColor={theme.colors.primary}
               >
-                {acc.name}
+                {translateName(acc.name)}
               </Chip>
             ))}
           </View>
@@ -257,7 +257,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
                 mode="flat"
                 selectedColor={cat.color || undefined}
               >
-                {cat.name}
+                {translateName(cat.name)}
               </Chip>
             ))}
           </View>
@@ -279,8 +279,10 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
                   style={styles.chip}
                   mode="flat"
                 >
-                  {categories.find((c) => c.id === bud.categoryId)?.name ||
-                    t('budgets')}
+                  {translateName(
+                    categories.find((c) => c.id === bud.categoryId)?.name ||
+                      t('budgets'),
+                  )}
                 </Chip>
               ))}
             </View>

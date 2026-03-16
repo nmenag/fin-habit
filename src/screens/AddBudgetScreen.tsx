@@ -38,7 +38,7 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
   const isEditing = !!editingBudget;
 
   const { addBudget, editBudget, categories } = useStore();
-  const { t, language } = useTranslation();
+  const { t, language, translateName } = useTranslation();
   const theme = useTheme();
 
   const [displayAmount, setDisplayAmount] = useState(
@@ -137,7 +137,7 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
                 selectedColor={cat.color || theme.colors.primary}
                 showSelectedOverlay
               >
-                {cat.name}
+                {translateName(cat.name)}
               </Chip>
             ))}
           </View>

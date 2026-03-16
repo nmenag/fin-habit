@@ -17,7 +17,7 @@ interface Props {
 
 export const TransactionItem: React.FC<Props> = ({ transaction, category }) => {
   const { accounts, formatCurrency } = useStore();
-  const { t, language } = useTranslation();
+  const { t, language, translateName } = useTranslation();
   const theme = useTheme();
   const isIncome = transaction.type === 'income';
 
@@ -26,18 +26,21 @@ export const TransactionItem: React.FC<Props> = ({ transaction, category }) => {
 
   const dateLocale = language === 'es' ? es : enUS;
 
-  const LeftContent = (props: any) => (
-    <Avatar.Text
-      {...props}
-      size={40}
-      label={category?.name ? category.name[0].toUpperCase() : '?'}
-      style={[
-        styles.avatar,
-        { backgroundColor: category?.color || theme.colors.surfaceVariant },
-      ]}
-      labelStyle={{ color: '#fff' }}
-    />
-  );
+  const LeftContent = (props: any) => {
+    const displayName = category?.name ? translateName(category.name) : '?';
+    return (
+      <Avatar.Text
+        {...props}
+        size={40}
+        label={displayName[0].toUpperCase()}
+        style={[
+          styles.avatar,
+          { backgroundColor: category?.color || theme.colors.surfaceVariant },
+        ]}
+        labelStyle={{ color: '#fff' }}
+      />
+    );
+  };
 
   const RightContent = () => (
     <Text
@@ -54,7 +57,7 @@ export const TransactionItem: React.FC<Props> = ({ transaction, category }) => {
 
   return (
     <List.Item
-      title={category?.name || t('uncategorized')}
+      title={category?.name ? translateName(category.name) : t('uncategorized')}
       description={`${format(parseISO(transaction.date), 'MMM d, yyyy', {
         locale: dateLocale,
       })}${transaction.note ? ` • ${transaction.note}` : ''}`}

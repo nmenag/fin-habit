@@ -1,4 +1,6 @@
+import * as Localization from 'expo-localization';
 import * as SQLite from 'expo-sqlite';
+import { translations } from '../i18n/translations';
 
 let cachedDb: SQLite.SQLiteDatabase | null = null;
 
@@ -35,7 +37,6 @@ export const initDb = () => {
       "ALTER TABLE accounts ADD COLUMN currency TEXT NOT NULL DEFAULT 'COP';",
     );
   } catch (e) {
-    // Column might already exist
   }
 
   try {
@@ -70,7 +71,6 @@ export const initDb = () => {
   try {
     db.execSync('ALTER TABLE budgets ADD COLUMN categoryId TEXT;');
   } catch (e) {
-    // Column might already exist
   }
 
   try {
@@ -137,6 +137,10 @@ export const initDb = () => {
     console.error('Error creating goals table:', e);
   }
 
+  const locales = Localization.getLocales();
+  const langCode = locales[0]?.languageCode === 'es' ? 'es' : 'en';
+  const t = (translations as any)[langCode];
+
   const count = db.getFirstSync<{ count: number }>(
     'SELECT COUNT(*) as count FROM categories',
   );
@@ -144,56 +148,56 @@ export const initDb = () => {
     const defaultCategories = [
       {
         id: '1',
-        name: 'Food',
+        name: t.catFood,
         type: 'expense',
         icon: 'fast-food',
         color: '#f44336',
       },
       {
         id: '2',
-        name: 'Transport',
+        name: t.catTransport,
         type: 'expense',
         icon: 'car',
         color: '#2196f3',
       },
       {
         id: '3',
-        name: 'Housing',
+        name: t.catHousing,
         type: 'expense',
         icon: 'home',
         color: '#9c27b0',
       },
       {
         id: '4',
-        name: 'Entertainment',
+        name: t.catEntertainment,
         type: 'expense',
         icon: 'game-controller',
         color: '#ff9800',
       },
       {
         id: '5',
-        name: 'Health',
+        name: t.catHealth,
         type: 'expense',
         icon: 'medkit',
         color: '#e91e63',
       },
       {
         id: '6',
-        name: 'Other',
+        name: t.catOther,
         type: 'expense',
         icon: 'list',
         color: '#607d8b',
       },
       {
         id: '7',
-        name: 'Salary',
+        name: t.catSalary,
         type: 'income',
         icon: 'cash',
         color: '#4caf50',
       },
       {
         id: '8',
-        name: 'Other Income',
+        name: t.catOtherIncome,
         type: 'income',
         icon: 'wallet',
         color: '#009688',
@@ -224,7 +228,7 @@ export const initDb = () => {
   if (accountCount && accountCount.count === 0) {
     db.runSync(
       'INSERT INTO accounts (id, name, type, initialBalance, currentBalance, color, currency) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      ['1', 'Bank', 'bank', 0, 0, '#2196f3', 'COP'],
+      ['1', t.defaultAccountName, 'bank', 0, 0, '#2196f3', 'COP'],
     );
   }
 

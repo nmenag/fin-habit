@@ -19,7 +19,7 @@ import { isInRange } from '../utils/dateFilters';
 
 export const TransactionsScreen = ({ route, navigation }: any) => {
   const { transactions, accounts, categories } = useStore();
-  const { t } = useTranslation();
+  const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
   const { selectedRange } = useFilterStore();
@@ -155,7 +155,7 @@ export const TransactionsScreen = ({ route, navigation }: any) => {
                 compact
               >
                 {activeAccount
-                  ? activeAccount.name
+                  ? translateName(activeAccount.name)
                   : t('filterByAccount' as any)}
               </Chip>
             }
@@ -171,7 +171,7 @@ export const TransactionsScreen = ({ route, navigation }: any) => {
             {accounts.map((acc) => (
               <Menu.Item
                 key={acc.id}
-                title={acc.name}
+                title={translateName(acc.name)}
                 leadingIcon={
                   selectedAccountId === acc.id ? 'check-circle' : 'bank-outline'
                 }
@@ -195,7 +195,7 @@ export const TransactionsScreen = ({ route, navigation }: any) => {
                 compact
               >
                 {activeCategory
-                  ? activeCategory.name
+                  ? translateName(activeCategory.name)
                   : t('filterByCategory' as any)}
               </Chip>
             }
@@ -211,7 +211,7 @@ export const TransactionsScreen = ({ route, navigation }: any) => {
             {categories.map((cat) => (
               <Menu.Item
                 key={cat.id}
-                title={cat.name}
+                title={translateName(cat.name)}
                 leadingIcon={
                   selectedCategoryId === cat.id ? 'check-circle' : 'tag-outline'
                 }

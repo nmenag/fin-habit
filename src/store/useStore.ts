@@ -2,7 +2,11 @@ import * as Localization from 'expo-localization';
 import { create } from 'zustand';
 import { interstitialManager } from '../ads/InterstitialManager';
 import { getDb } from '../database/schema';
-import { Language, translations } from '../i18n/translations';
+import {
+  getTranslatedName,
+  Language,
+  translations,
+} from '../i18n/translations';
 import { AnalyticsManager } from '../services/analytics/AnalyticsManager';
 import { AnalyticsReport } from '../services/analytics/types';
 import { formatCurrency as formatCurrencyUtil } from '../utils/formatters';
@@ -594,5 +598,10 @@ export const useTranslation = () => {
 
     return text;
   };
-  return { t, language };
+
+  const translateName = (name: string) => {
+    return getTranslatedName(name, language);
+  };
+
+  return { t, language, translateName };
 };

@@ -1,5 +1,36 @@
 export type Language = 'en' | 'es';
 
+export const nameToKeyMapping: Record<string, string> = {
+  Food: 'catFood',
+  Alimentación: 'catFood',
+  Transport: 'catTransport',
+  Transporte: 'catTransport',
+  Housing: 'catHousing',
+  Vivienda: 'catHousing',
+  Entertainment: 'catEntertainment',
+  Entretenimiento: 'catEntertainment',
+  Health: 'catHealth',
+  Salud: 'catHealth',
+  Other: 'catOther',
+  Otros: 'catOther',
+  Salary: 'catSalary',
+  Salario: 'catSalary',
+  'Other Income': 'catOtherIncome',
+  'Otros Ingresos': 'catOtherIncome',
+  Bank: 'defaultAccountName',
+  Banco: 'defaultAccountName',
+  Main: 'defaultAccountName',
+};
+
+export const getTranslatedName = (name: string, lang: Language) => {
+  const key = nameToKeyMapping[name];
+  if (key) {
+    const langSet = (translations as any)[lang] || translations.en;
+    return langSet[key] || name;
+  }
+  return name;
+};
+
 export const translations = {
   en: {
     dashboard: 'Dashboard',
@@ -60,6 +91,15 @@ export const translations = {
     none: 'None',
     other: 'Other',
     uncategorized: 'Uncategorized',
+    defaultAccountName: 'Bank',
+    catFood: 'Food',
+    catTransport: 'Transport',
+    catHousing: 'Housing',
+    catEntertainment: 'Entertainment',
+    catHealth: 'Health',
+    catOther: 'Other',
+    catSalary: 'Salary',
+    catOtherIncome: 'Other Income',
     error: 'Error',
     enterValidAmount: 'Please enter a valid amount.',
     selectAccount: 'Please select an account.',
@@ -292,6 +332,15 @@ export const translations = {
     none: 'Ninguno',
     other: 'Otro',
     uncategorized: 'Sin categoría',
+    defaultAccountName: 'Banco',
+    catFood: 'Alimentación',
+    catTransport: 'Transporte',
+    catHousing: 'Vivienda',
+    catEntertainment: 'Entretenimiento',
+    catHealth: 'Salud',
+    catOther: 'Otros',
+    catSalary: 'Salario',
+    catOtherIncome: 'Otros Ingresos',
     error: 'Error',
     enterValidAmount: 'Por favor ingresa un monto válido.',
     selectAccount: 'Por favor selecciona una cuenta.',
