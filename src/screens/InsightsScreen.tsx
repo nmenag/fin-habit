@@ -366,7 +366,7 @@ export const InsightsScreen = () => {
                   marginBottom: 8,
                 }}
               >
-                (Based on last 2 full months)
+                {t('basedOnLastMonths')}
               </Text>
               <BarChart
                 data={barData}
@@ -490,7 +490,7 @@ export const InsightsScreen = () => {
                 { color: theme.colors.onSurfaceVariant },
               ]}
             >
-              No data for this period
+              {t('noDataForPeriod')}
             </Text>
           </View>
         )}

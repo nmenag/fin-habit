@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useMemo, useState } from 'react';
 import {
   Alert,
   ScrollView,
@@ -20,9 +21,25 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TransactionType, useStore, useTranslation } from '../store/useStore';
 import { formatNumber } from '../utils/formatters';
 
-export const AddTransactionScreen = ({ route, navigation }: any) => {
-  const editingTransaction = route.params?.transaction;
-  const isEditing = !!route.params?.isEditing;
+export const AddTransactionScreen = () => {
+  const params = useLocalSearchParams<{
+    transaction?: string;
+    isEditing?: string;
+    accountId?: string;
+  }>();
+
+  const editingTransaction = useMemo(() => {
+    if (params.transaction) {
+      try {
+        return JSON.parse(params.transaction);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }, [params.transaction]);
+
+  const isEditing = params.isEditing === 'true';
 
   const {
     accounts,
@@ -48,10 +65,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
   );
   const [note, setNote] = useState(editingTransaction?.note || '');
   const [selectedAccount, setSelectedAccount] = useState(
-    editingTransaction?.accountId ||
-      route.params?.accountId ||
-      accounts[0]?.id ||
-      '',
+    editingTransaction?.accountId || params.accountId || accounts[0]?.id || '',
   );
 
   const availableCategories = categories.filter((c) => c.type === type);
@@ -96,7 +110,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
       });
     }
 
-    navigation.goBack();
+    router.back();
   };
 
   const handleDelete = () => {
@@ -112,7 +126,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
             editingTransaction.amount,
             editingTransaction.type,
           );
-          navigation.goBack();
+          router.back();
         },
       },
     ]);
@@ -139,7 +153,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
       note: note ? `${note} (${t('duplicate')})` : t('duplicate'),
     });
 
-    navigation.goBack();
+    router.back();
   };
 
   const handleAmountChange = (text: string) => {

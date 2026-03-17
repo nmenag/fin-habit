@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
   Button,
@@ -38,8 +39,20 @@ const ICONS = [
   'umbrella',
 ];
 
-export const AddGoalScreen = ({ route, navigation }: any) => {
-  const editingGoal = route.params?.goal;
+export const AddGoalScreen = () => {
+  const params = useLocalSearchParams<{ goal?: string }>();
+
+  const editingGoal = useMemo(() => {
+    if (params.goal) {
+      try {
+        return JSON.parse(params.goal);
+      } catch (e) {
+        return undefined;
+      }
+    }
+    return undefined;
+  }, [params.goal]);
+
   const isEditing = !!editingGoal;
 
   const { addGoal, editGoal, formatCurrency } = useStore();
@@ -79,7 +92,7 @@ export const AddGoalScreen = ({ route, navigation }: any) => {
     } else {
       addGoal(goalData);
     }
-    navigation.goBack();
+    router.back();
   };
 
   const handleAmountChange = (text: string) => {
@@ -203,7 +216,7 @@ export const AddGoalScreen = ({ route, navigation }: any) => {
 
         <Button
           mode="text"
-          onPress={() => navigation.goBack()}
+          onPress={() => router.back()}
           style={styles.cancelBtn}
           labelStyle={styles.cancelBtnLabel}
         >

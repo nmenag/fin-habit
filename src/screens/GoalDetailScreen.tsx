@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { differenceInMonths, parseISO } from 'date-fns';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View, Alert } from 'react-native';
 import {
@@ -16,8 +17,9 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Goal, useStore, useTranslation } from '../store/useStore';
 
-export const GoalDetailScreen = ({ route, navigation }: any) => {
-  const { goalId } = route.params;
+export const GoalDetailScreen = () => {
+  const params = useLocalSearchParams<{ goalId?: string }>();
+  const goalId = params.goalId;
   const { goals, formatCurrency, deleteGoal, contributeToGoal } = useStore();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -65,7 +67,7 @@ export const GoalDetailScreen = ({ route, navigation }: any) => {
           style: 'destructive',
           onPress: () => {
             deleteGoal(goal.id);
-            navigation.goBack();
+            router.back();
           },
         },
       ],
@@ -247,7 +249,12 @@ export const GoalDetailScreen = ({ route, navigation }: any) => {
           <View style={styles.secondaryActions}>
             <Button
               mode="outlined"
-              onPress={() => navigation.navigate('AddGoal', { goal })}
+              onPress={() =>
+                router.push({
+                  pathname: '/add-goal',
+                  params: { goal: JSON.stringify(goal) },
+                })
+              }
               style={styles.secondaryButton}
               icon="pencil"
               labelStyle={styles.secondaryActionLabel}

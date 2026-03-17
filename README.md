@@ -1,48 +1,58 @@
-# FinHabit 👋
+# FinHabit 💰👋
 
-FinHabit is a modern, personal finance tracker built with React Native and Expo. It helps you monitor your expenses, manage budgets, and visualize your financial health through insights and interactive calendars.
+FinHabit is a modern, high-performance personal finance tracker built with **React Native** and **Expo**. It empowers users to take control of their financial life through a seamless, localized, and highly organized interface.
 
-## ✨ Features
+## 🌟 Key Features
 
-- **Multi-language Support**: Full support for English and Spanish, including localized financial insights.
-- **Dynamic Dashboard**: Overview of your total balance, monthly income, and expenses with interactive account cards.
-- **Account Management**: Track multiple accounts (Cash, Bank, Credit) and view their specific transaction history.
-- **Calendar View**: A dedicated financial calendar to visualize daily spending patterns with categorized totals.
-- **Smart Insights**: Automatically generated financial tips and alerts based on your spending habits.
-- **Budget Tracking**: Set monthly limits for categories and track your progress in real-time.
-- **Data Export**: Export your transaction history to CSV format for external analysis.
-- **Ad-Supported**: Integrated Google Mobile Ads (Banner and Interstitial).
+- **Expo Router Navigation**: Modern, file-based routing architecture for robust deep linking and smooth transitions.
+- **Dedicated Settings Tab**: A centralized hub for managing Accounts, Categories, Budgets, and Goals, keeping the main dashboard clean and focused.
+- **Full Localization (i18n)**: Comprehensive support for English and Spanish, including localized default categories and financial insights.
+- **Visual Financial Health**:
+  - **Dynamic Dashboard**: Real-time overview of net balance and monthly cash flow.
+  - **Interactive Insights**: Smart analysis of spending growth, savings rates, and frequency alerts.
+  - **Expense Charts**: Beautiful pie and bar charts visualizing category-wise spending and month-over-month growth.
+- **Smart Management**:
+  - **Account Tracking**: Manage multiple financial sources (Cash, Bank, Credit).
+  - **Financial Goals**: Set targets (e.g., "New Car") and track progress with estimated monthly savings.
+  - **Budgeting**: Define monthly spending limits per category with real-time percentage tracking.
+- **Accessibility & UX**:
+  - **Safe Area Aware**: Optimized for all device sizes (notches, dynamic islands, etc.).
+  - **Dark Mode Ready**: Premium look and feel in any lighting.
+- **Data Mobility**: Export full transaction history to **CSV** for external spreadsheet analysis.
+- **Monetization**: Seamlessly integrated Google Mobile Ads (Banner and Interstitial) with test mode for development.
 
-## 🚀 Tech Stack
+## 🛠️ Tech Stack
 
-- **Framework**: [Expo](https://expo.dev) / React Native
-- **State Management**: [Zustand](https://github.com/pmndrs/zustand)
-- **Database**: [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/)
-- **Styling**: Vanilla React Native StyleSheet
-- **Date Utilities**: [date-fns](https://date-fns.org/)
-- **Localization**: [expo-localization](https://docs.expo.dev/versions/latest/sdk/localization/)
-- **Charts**: [react-native-chart-kit](https://github.com/indiespirit/react-native-chart-kit)
+- **Core**: [Expo SDK](https://expo.dev) & React Native
+- **Routing**: [Expo Router](https://docs.expo.dev/router/introduction/) (File-based navigation)
+- **State**: [Zustand](https://github.com/pmndrs/zustand) (Atomic & Persisted state)
+- **Database**: [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) (High-performance local storage)
+- **UI Components**: [React Native Paper](https://reactnativepaper.com/) (Material Design)
+- **Visualization**: [react-native-chart-kit](https://github.com/indiespirit/react-native-chart-kit)
+- **Utilities**: `date-fns`, `expo-localization`
 
-## 🛠️ Get Started
+## 🚀 Getting Started
 
-1. **Install dependencies**
-
+1. **Clone & Install**
    ```bash
+   git clone <repo-url>
+   cd fin-habit
    npm install
    ```
 
-2. **Start the app**
+2. **Environment Setup**
+   Ensure you have your AdMob IDs configured in `.env` (refer to `app.config.js` for required variables).
+
+3. **Launch Development Server**
    ```bash
    npx expo start
    ```
 
-## 📱 Development
+## 📦 Deployment & Updates
 
-You can run the app on:
-
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go)
+- **Verified OTA**: Supporting `expo-updates` for seamless Over-The-Air bug fixes and route updates.
+- **Build**: Optimized for Android APK/AAB builds using EAS Build.
+- **Route Validation**: Run `npm run routes` (aliased to `expo export`) to verify all route files are bundled correctly for OTA updates.
 
 ## 📄 License
 

@@ -70,6 +70,7 @@ module.exports = {
         },
       ],
       'expo-sqlite',
+      'expo-router',
       [
         'react-native-google-mobile-ads',
         {

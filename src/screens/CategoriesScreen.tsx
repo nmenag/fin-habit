@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React from 'react';
 import { Alert, SectionList, StyleSheet, View } from 'react-native';
 import {
@@ -12,7 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Category, useStore, useTranslation } from '../store/useStore';
 
-export const CategoriesScreen = ({ navigation }: any) => {
+export const CategoriesScreen = () => {
   const { categories, deleteCategory, transactions } = useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme();
@@ -42,7 +43,12 @@ export const CategoriesScreen = ({ navigation }: any) => {
   const renderItem = ({ item }: { item: Category }) => (
     <Card
       style={styles.card}
-      onPress={() => navigation.navigate('AddCategory', { category: item })}
+      onPress={() =>
+        router.push({
+          pathname: '/add-category',
+          params: { category: JSON.stringify(item) },
+        })
+      }
       mode="elevated"
     >
       <List.Item
@@ -116,7 +122,7 @@ export const CategoriesScreen = ({ navigation }: any) => {
       <FAB
         icon="plus"
         style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
-        onPress={() => navigation.navigate('AddCategory')}
+        onPress={() => router.push('/add-category')}
       />
     </View>
   );

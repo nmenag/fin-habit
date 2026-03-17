@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useMemo, useState } from 'react';
 import {
   Alert,
   ScrollView,
@@ -27,8 +28,20 @@ const COLORS = [
   '#607d8b',
 ];
 
-export const AddBudgetScreen = ({ route, navigation }: any) => {
-  const editingBudget = route.params?.budget as Budget | undefined;
+export const AddBudgetScreen = () => {
+  const params = useLocalSearchParams<{ budget?: string }>();
+
+  const editingBudget = useMemo(() => {
+    if (params.budget) {
+      try {
+        return JSON.parse(params.budget) as Budget;
+      } catch (e) {
+        return undefined;
+      }
+    }
+    return undefined;
+  }, [params.budget]);
+
   const isEditing = !!editingBudget;
 
   const { addBudget, editBudget, categories } = useStore();
@@ -67,7 +80,7 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
       });
     }
 
-    navigation.goBack();
+    router.back();
   };
 
   const handleAmountChange = (text: string) => {

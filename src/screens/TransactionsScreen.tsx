@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { format, parseISO } from 'date-fns';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
   FlatList,
@@ -17,7 +18,8 @@ import { useFilterStore } from '../store/useFilterStore';
 import { useStore, useTranslation } from '../store/useStore';
 import { isInRange } from '../utils/dateFilters';
 
-export const TransactionsScreen = ({ route, navigation }: any) => {
+export const TransactionsScreen = () => {
+  const params = useLocalSearchParams<{ accountId?: string }>();
   const { transactions, accounts, categories } = useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme();
@@ -27,7 +29,7 @@ export const TransactionsScreen = ({ route, navigation }: any) => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(
-    route.params?.accountId ?? null,
+    params.accountId ?? null,
   );
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null,
@@ -104,7 +106,10 @@ export const TransactionsScreen = ({ route, navigation }: any) => {
   }, [filteredTransactions]);
 
   const handleTransactionPress = (transaction: any) => {
-    navigation.navigate('AddTransaction', { transaction, isEditing: true });
+    router.push({
+      pathname: '/add-transaction',
+      params: { transaction: JSON.stringify(transaction), isEditing: 'true' },
+    });
   };
 
   return (
@@ -316,16 +321,15 @@ export const TransactionsScreen = ({ route, navigation }: any) => {
         icon="plus"
         style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
         onPress={() =>
-          navigation.navigate('AddTransaction', {
-            accountId: selectedAccountId,
+          router.push({
+            pathname: '/add-transaction',
+            params: { accountId: selectedAccountId || '' },
           })
         }
       />
     </View>
   );
 };
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const defaultStyles = (theme: any) =>
   StyleSheet.create({

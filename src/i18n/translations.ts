@@ -277,6 +277,8 @@ export const translations = {
     allCategories: 'All Categories',
     filters: 'Filters',
     clearFilters: 'Clear',
+    noDataForPeriod: 'No data for this period',
+    basedOnLastMonths: '(Based on last 2 full months)',
   },
   es: {
     dashboard: 'Inicio',
@@ -525,5 +527,7 @@ export const translations = {
     allCategories: 'Todas las Categorías',
     filters: 'Filtros',
     clearFilters: 'Limpiar',
+    noDataForPeriod: 'Sin datos para este periodo',
+    basedOnLastMonths: '(Basado en los últimos 2 meses completos)',
   },
 };

@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useMemo, useState } from 'react';
 import {
   Alert,
   ScrollView,
@@ -56,8 +57,20 @@ const ICONS = [
   'musical-notes',
 ];
 
-export const AddCategoryScreen = ({ route, navigation }: any) => {
-  const editingCategory = route.params?.category as Category | undefined;
+export const AddCategoryScreen = () => {
+  const params = useLocalSearchParams<{ category?: string }>();
+
+  const editingCategory = useMemo(() => {
+    if (params.category) {
+      try {
+        return JSON.parse(params.category) as Category;
+      } catch (e) {
+        return undefined;
+      }
+    }
+    return undefined;
+  }, [params.category]);
+
   const isEditing = !!editingCategory;
 
   const { addCategory, editCategory } = useStore();
@@ -95,7 +108,7 @@ export const AddCategoryScreen = ({ route, navigation }: any) => {
       });
     }
 
-    navigation.goBack();
+    router.back();
   };
 
   const insets = useSafeAreaInsets();

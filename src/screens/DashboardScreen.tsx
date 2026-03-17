@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { endOfMonth, parseISO, startOfMonth } from 'date-fns';
+import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
   Dimensions,
@@ -25,7 +26,7 @@ import { calculateFinancialScore } from '../utils/scoreCalculator';
 
 const screenWidth = Dimensions.get('window').width;
 
-export const DashboardScreen = ({ navigation }: any) => {
+export const DashboardScreen = () => {
   const { transactions, accounts, categories, formatCurrency } = useStore();
   const { t, language, translateName } = useTranslation();
   const [showAllCategories, setShowAllCategories] = useState(false);
@@ -121,7 +122,10 @@ export const DashboardScreen = ({ navigation }: any) => {
                   { borderLeftColor: acc.color || theme.colors.primary },
                 ]}
                 onPress={() =>
-                  navigation.navigate('Transactions', { accountId: acc.id })
+                  router.push({
+                    pathname: '/transactions',
+                    params: { accountId: acc.id },
+                  })
                 }
                 mode="elevated"
               >
@@ -264,7 +268,7 @@ export const DashboardScreen = ({ navigation }: any) => {
       <FAB
         icon="plus"
         style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
-        onPress={() => navigation.navigate('AddTransaction')}
+        onPress={() => router.push('/add-transaction')}
       />
     </View>
   );
