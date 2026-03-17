@@ -331,8 +331,6 @@ export const TransactionsScreen = () => {
   );
 };
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const defaultStyles = (theme: any) =>
   StyleSheet.create({
     container: { flex: 1 },

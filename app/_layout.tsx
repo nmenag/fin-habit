@@ -11,7 +11,7 @@ import { StatusBar } from 'expo-status-bar';
 import { registerTranslation, en, es } from 'react-native-paper-dates';
 
 import { initDb } from '../src/db/schema';
-import { useStore } from '../src/store/useStore';
+import { useStore, useTranslation } from '../src/store/useStore';
 import { darkTheme, lightTheme } from '../src/theme/theme';
 import { interstitialManager } from '../src/ads/InterstitialManager';
 
@@ -47,6 +47,7 @@ const CombinedDarkTheme = {
 export default function RootLayout() {
   const [dbInitialized, setDbInitialized] = useState(false);
   const { loadData, isLoaded } = useStore();
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
 
   const isDarkTheme = colorScheme === 'dark';
@@ -97,7 +98,7 @@ export default function RootLayout() {
           options={{
             presentation: 'modal',
             headerShown: true,
-            title: 'Add Transaction',
+            title: t('addTransaction'),
           }}
         />
         <Stack.Screen
@@ -105,7 +106,7 @@ export default function RootLayout() {
           options={{
             presentation: 'modal',
             headerShown: true,
-            title: 'Add Account',
+            title: t('addAccount'),
           }}
         />
         <Stack.Screen
@@ -113,7 +114,7 @@ export default function RootLayout() {
           options={{
             presentation: 'modal',
             headerShown: true,
-            title: 'Add Category',
+            title: t('addCategory'),
           }}
         />
         <Stack.Screen
@@ -121,7 +122,7 @@ export default function RootLayout() {
           options={{
             presentation: 'modal',
             headerShown: true,
-            title: 'Add Budget',
+            title: t('addBudget'),
           }}
         />
         <Stack.Screen
@@ -129,49 +130,49 @@ export default function RootLayout() {
           options={{
             presentation: 'modal',
             headerShown: true,
-            title: 'Add Goal',
+            title: t('addGoal'),
           }}
         />
         <Stack.Screen
           name="accounts"
           options={{
             headerShown: true,
-            title: 'Accounts',
+            title: t('accounts'),
           }}
         />
         <Stack.Screen
           name="categories"
           options={{
             headerShown: true,
-            title: 'Categories',
+            title: t('categories'),
           }}
         />
         <Stack.Screen
           name="budgets"
           options={{
             headerShown: true,
-            title: 'Budgets',
+            title: t('budgets'),
           }}
         />
         <Stack.Screen
           name="goals"
           options={{
             headerShown: true,
-            title: 'Goals',
+            title: t('goals'),
           }}
         />
         <Stack.Screen
           name="calendar"
           options={{
             headerShown: true,
-            title: 'Calendar',
+            title: t('calendar'),
           }}
         />
         <Stack.Screen
           name="goal-detail"
           options={{
             headerShown: true,
-            title: 'Goal Details',
+            title: t('goalDetail'),
           }}
         />
       </Stack>
