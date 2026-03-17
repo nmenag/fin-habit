@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import React from 'react';
 import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { FAB, IconButton, Text, useTheme } from 'react-native-paper';
@@ -5,14 +6,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AccountCard } from '../components/AccountCard';
 import { useStore, useTranslation } from '../store/useStore';
 
-export const AccountsScreen = ({ navigation }: any) => {
+export const AccountsScreen = () => {
   const { accounts, deleteAccount } = useStore();
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
 
   const handleAddAccount = () => {
-    navigation.navigate('AddAccount');
+    router.push('/add-account');
   };
 
   const insets = useSafeAreaInsets();
@@ -28,7 +29,12 @@ export const AccountsScreen = ({ navigation }: any) => {
         renderItem={({ item }) => (
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => navigation.navigate('AddAccount', { account: item })}
+            onPress={() =>
+              router.push({
+                pathname: '/add-account',
+                params: { account: JSON.stringify(item) },
+              })
+            }
           >
             <AccountCard
               account={item}

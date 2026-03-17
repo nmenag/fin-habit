@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { Card, FAB, ProgressBar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Goal, useStore, useTranslation } from '../store/useStore';
 
-export const GoalsScreen = ({ navigation }: any) => {
+export const GoalsScreen = () => {
   const { goals, formatCurrency } = useStore();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -22,7 +23,9 @@ export const GoalsScreen = ({ navigation }: any) => {
     return (
       <Card
         style={styles.card}
-        onPress={() => navigation.navigate('GoalDetail', { goalId: item.id })}
+        onPress={() =>
+          router.push({ pathname: '/goal-detail', params: { goalId: item.id } })
+        }
         mode="elevated"
       >
         <Card.Content style={styles.cardContent}>
@@ -118,7 +121,7 @@ export const GoalsScreen = ({ navigation }: any) => {
       <FAB
         icon="plus"
         style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
-        onPress={() => navigation.navigate('AddGoal')}
+        onPress={() => router.push('/add-goal')}
       />
     </View>
   );

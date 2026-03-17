@@ -1,7 +1,7 @@
 import * as Localization from 'expo-localization';
 import { create } from 'zustand';
 import { interstitialManager } from '../ads/InterstitialManager';
-import { getDb } from '../database/schema';
+import { getDb } from '../db/schema';
 import {
   getTranslatedName,
   Language,

@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useMemo, useState } from 'react';
 import {
   Alert,
   ScrollView,
@@ -46,8 +47,20 @@ const CURRENCIES = [
   { code: 'EUR', name: 'Euro', symbol: '€' },
 ];
 
-export const AddAccountScreen = ({ route, navigation }: any) => {
-  const editingAccount = route.params?.account as Account | undefined;
+export const AddAccountScreen = () => {
+  const params = useLocalSearchParams<{ account?: string }>();
+
+  const editingAccount = useMemo(() => {
+    if (params.account) {
+      try {
+        return JSON.parse(params.account) as Account;
+      } catch (e) {
+        return undefined;
+      }
+    }
+    return undefined;
+  }, [params.account]);
+
   const isEditing = !!editingAccount;
 
   const { addAccount, editAccount, addTransaction } = useStore();
@@ -109,7 +122,7 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
       });
     }
 
-    navigation.goBack();
+    router.back();
   };
 
   const handleBalanceChange = (text: string) => {

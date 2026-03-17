@@ -1,11 +1,13 @@
+import { router } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Card, Divider, List, Text, useTheme } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { useStore, useTranslation } from '../store/useStore';
 import { exportTransactionsToCSV } from '../utils/csvExport';
 
-export const SettingsScreen = ({ navigation }: any) => {
+export const SettingsScreen = () => {
   const {
     setLanguage,
     transactions,
@@ -17,6 +19,7 @@ export const SettingsScreen = ({ navigation }: any) => {
   const { t, language } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
+  const insets = useSafeAreaInsets();
 
   const handleExport = async () => {
     await exportTransactionsToCSV(transactions, accounts, categories);
@@ -25,15 +28,19 @@ export const SettingsScreen = ({ navigation }: any) => {
   };
 
   const SETTINGS_LINKS = [
-    { name: t('manageAccounts'), icon: 'wallet-outline', screen: 'Accounts' },
+    { name: t('manageAccounts'), icon: 'wallet-outline', screen: '/accounts' },
     {
       name: t('manageCategories'),
       icon: 'tag-multiple-outline',
-      screen: 'Categories',
+      screen: '/categories',
     },
-    { name: t('manageBudgets'), icon: 'chart-pie', screen: 'Budgets' },
-    { name: t('manageGoals'), icon: 'flag-outline', screen: 'Goals' },
-    { name: t('calendar'), icon: 'calendar-blank-outline', screen: 'Calendar' },
+    { name: t('manageBudgets'), icon: 'chart-pie', screen: '/budgets' },
+    { name: t('manageGoals'), icon: 'flag-outline', screen: '/goals' },
+    {
+      name: t('calendar'),
+      icon: 'calendar-blank-outline',
+      screen: '/calendar',
+    },
   ];
 
   const LANGUAGES = [
@@ -44,6 +51,10 @@ export const SettingsScreen = ({ navigation }: any) => {
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
+      contentContainerStyle={{
+        paddingTop: insets.top > 0 ? 0 : 16,
+        paddingBottom: (insets.bottom || 0) + 40,
+      }}
     >
       <View style={styles.section}>
         <Text variant="labelLarge" style={styles.sectionTitle}>
@@ -56,7 +67,7 @@ export const SettingsScreen = ({ navigation }: any) => {
                 title={item.name}
                 left={(props) => <List.Icon {...props} icon={item.icon} />}
                 right={(props) => <List.Icon {...props} icon="chevron-right" />}
-                onPress={() => navigation.navigate(item.screen)}
+                onPress={() => router.push(item.screen as any)}
               />
               {index < SETTINGS_LINKS.length - 1 && <Divider />}
             </View>

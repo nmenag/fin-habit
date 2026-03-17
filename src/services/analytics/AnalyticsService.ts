@@ -1,4 +1,4 @@
-import { getDb } from '../../database/schema';
+import { getDb } from '../../db/schema';
 import { MonthlyMetrics, CategoryExpense } from './types';
 
 export class AnalyticsService {

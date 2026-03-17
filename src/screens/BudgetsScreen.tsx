@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import React from 'react';
 import {
   Alert,
@@ -17,7 +18,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Budget, useStore, useTranslation } from '../store/useStore';
 
-export const BudgetsScreen = ({ navigation }: any) => {
+export const BudgetsScreen = () => {
   const { budgets, deleteBudget, transactions, formatCurrency, categories } =
     useStore();
   const { t, translateName } = useTranslation();
@@ -65,7 +66,12 @@ export const BudgetsScreen = ({ navigation }: any) => {
     return (
       <Card
         style={styles.card}
-        onPress={() => navigation.navigate('AddBudget', { budget: item })}
+        onPress={() =>
+          router.push({
+            pathname: '/add-budget',
+            params: { budget: JSON.stringify(item) },
+          })
+        }
         mode="elevated"
       >
         <Card.Content>
@@ -126,7 +132,7 @@ export const BudgetsScreen = ({ navigation }: any) => {
       <FAB
         icon="plus"
         style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
-        onPress={() => navigation.navigate('AddBudget')}
+        onPress={() => router.push('/add-budget')}
       />
     </View>
   );

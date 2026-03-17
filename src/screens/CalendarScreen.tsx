@@ -1,4 +1,5 @@
 import { format, isSameDay } from 'date-fns';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { FAB, Text, useTheme } from 'react-native-paper';
@@ -14,7 +15,7 @@ const formatAmount = (amount: number, formatCurrency: any) => {
   return formatCurrency(amount);
 };
 
-export const CalendarScreen = ({ navigation }: any) => {
+export const CalendarScreen = () => {
   const { transactions, categories, formatCurrency } = useStore();
   const { t } = useTranslation();
   const theme = useTheme();
@@ -39,9 +40,12 @@ export const CalendarScreen = ({ navigation }: any) => {
   const dailyNet = dayTotals.income - dayTotals.expense;
 
   const handleTransactionPress = (transaction: any) => {
-    navigation.navigate('AddTransaction', {
-      transaction,
-      isEditing: true,
+    router.push({
+      pathname: '/add-transaction',
+      params: {
+        transaction: JSON.stringify(transaction),
+        isEditing: 'true',
+      },
     });
   };
 
@@ -115,8 +119,9 @@ export const CalendarScreen = ({ navigation }: any) => {
         icon="plus"
         style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
         onPress={() =>
-          navigation.navigate('AddTransaction', {
-            date: selectedDate.toISOString(),
+          router.push({
+            pathname: '/add-transaction',
+            params: { date: selectedDate.toISOString() },
           })
         }
       />
