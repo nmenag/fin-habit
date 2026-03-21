@@ -18,21 +18,36 @@ export const exportTransactionsToCSV = async (
   const rows = transactions
     .map((tX) => {
       const account = accounts.find((a) => a.id === tX.accountId);
+      const toAccount = tX.toAccountId
+        ? accounts.find((a) => a.id === tX.toAccountId)
+        : null;
       const category = categories.find((c) => c.id === tX.categoryId);
 
       const date = tX.date.split('T')[0];
-      const type = tX.type === 'income' ? t('income') : t('expense');
+      let type = '';
+      if (tX.type === 'income') type = t('income');
+      else if (tX.type === 'expense') type = t('expense');
+      else if (tX.type === 'transfer') type = t('transfer');
+
       const amount = tX.amount;
       const currency = account?.currency || 'COP';
+
       const accountName = account?.name
         ? translateName(account.name)
         : t('unknown') || 'Unknown';
-      const categoryName = category?.name
-        ? translateName(category.name)
-        : t('uncategorized');
+
+      let destinationName = '';
+      if (tX.type === 'transfer' && toAccount) {
+        destinationName = translateName(toAccount.name);
+      } else if (category) {
+        destinationName = translateName(category.name);
+      } else {
+        destinationName = t('uncategorized');
+      }
+
       const note = tX.note ? `"${tX.note.replace(/"/g, '""')}"` : '';
 
-      return `${date},${type},${amount},${currency},"${accountName}","${categoryName}",${note}`;
+      return `${date},${type},${amount},${currency},"${accountName}","${destinationName}",${note}`;
     })
     .join('\n');
 

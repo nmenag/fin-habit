@@ -193,6 +193,13 @@ export default function RootLayout() {
             title: t('privacyPolicy'),
           }}
         />
+        <Stack.Screen
+          name="export-data"
+          options={{
+            headerShown: true,
+            title: t('exportData'),
+          }}
+        />
       </Stack>
     </PaperProvider>
   );

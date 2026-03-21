@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { useStore, useTranslation } from '../store/useStore';
 import { backupToJSON, restoreFromJSON } from '../utils/dataBackup';
-import { exportTransactionsToCSV } from '../utils/csvExport';
 
 export const SettingsScreen = () => {
   const {
@@ -30,18 +29,6 @@ export const SettingsScreen = () => {
 
   const handleDonate = () => {
     Linking.openURL('https://ko-fi.com/nmenag');
-  };
-
-  const handleExportCSV = async () => {
-    await exportTransactionsToCSV(
-      transactions,
-      accounts,
-      categories,
-      t,
-      translateName,
-    );
-    incrementActionCounter();
-    checkAndShowAd();
   };
 
   const handleBackupJSON = async () => {
@@ -123,7 +110,7 @@ export const SettingsScreen = () => {
               <List.Icon {...props} icon="file-delimited-outline" />
             )}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={handleExportCSV}
+            onPress={() => router.push('/export-data' as any)}
           />
           <Divider />
           <List.Item
