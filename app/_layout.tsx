@@ -179,6 +179,20 @@ export default function RootLayout() {
             title: t('goalDetail'),
           }}
         />
+        <Stack.Screen
+          name="about"
+          options={{
+            headerShown: true,
+            title: t('aboutApp'),
+          }}
+        />
+        <Stack.Screen
+          name="privacy-policy"
+          options={{
+            headerShown: true,
+            title: t('privacyPolicy'),
+          }}
+        />
       </Stack>
     </PaperProvider>
   );

@@ -174,6 +174,31 @@ export const SettingsScreen = () => {
         </Text>
       </View>
 
+      <View style={styles.section}>
+        <Text variant="labelLarge" style={styles.sectionTitle}>
+          {t('app') || 'App'}
+        </Text>
+        <Card style={styles.card} mode="contained">
+          <List.Item
+            title={t('aboutApp')}
+            left={(props) => (
+              <List.Icon {...props} icon="information-outline" />
+            )}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('/about')}
+          />
+          <Divider />
+          <List.Item
+            title={t('privacyPolicy')}
+            left={(props) => (
+              <List.Icon {...props} icon="shield-check-outline" />
+            )}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('/privacy-policy')}
+          />
+        </Card>
+      </View>
+
       <View style={{ height: 40 }} />
       <BannerAdComponent />
     </ScrollView>
