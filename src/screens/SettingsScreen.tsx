@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { Card, Divider, List, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { useStore, useTranslation } from '../store/useStore';
+import { backupToJSON, restoreFromJSON } from '../utils/dataBackup';
 import { exportTransactionsToCSV } from '../utils/csvExport';
 
 export const SettingsScreen = () => {
@@ -13,6 +14,7 @@ export const SettingsScreen = () => {
     transactions,
     accounts,
     categories,
+    loadData,
     incrementActionCounter,
     checkAndShowAd,
   } = useStore();
@@ -21,10 +23,29 @@ export const SettingsScreen = () => {
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
 
-  const handleExport = async () => {
+  const handleExportCSV = async () => {
     await exportTransactionsToCSV(transactions, accounts, categories);
     incrementActionCounter();
     checkAndShowAd();
+  };
+
+  const handleBackupJSON = async () => {
+    await backupToJSON();
+    incrementActionCounter();
+    checkAndShowAd();
+  };
+
+  const handleRestoreJSON = () => {
+    Alert.alert(t('restoreData'), t('restoreConfirm'), [
+      { text: t('cancel'), style: 'cancel' },
+      {
+        text: t('restoreData'),
+        style: 'destructive',
+        onPress: async () => {
+          await restoreFromJSON(loadData, t);
+        },
+      },
+    ]);
   };
 
   const SETTINGS_LINKS = [
@@ -83,9 +104,31 @@ export const SettingsScreen = () => {
           <List.Item
             title={t('exportData')}
             description={t('exportDataDesc')}
-            left={(props) => <List.Icon {...props} icon="download-outline" />}
+            left={(props) => (
+              <List.Icon {...props} icon="file-delimited-outline" />
+            )}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={handleExport}
+            onPress={handleExportCSV}
+          />
+          <Divider />
+          <List.Item
+            title={t('backupData')}
+            description={t('backupDataDesc')}
+            left={(props) => (
+              <List.Icon {...props} icon="database-export-outline" />
+            )}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={handleBackupJSON}
+          />
+          <Divider />
+          <List.Item
+            title={t('restoreData')}
+            description={t('restoreDataDesc')}
+            left={(props) => (
+              <List.Icon {...props} icon="database-import-outline" />
+            )}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={handleRestoreJSON}
           />
         </Card>
       </View>

@@ -69,6 +69,19 @@ export const translations = {
       'Changing the currency will update how all amounts are displayed across the app.',
     english: 'English',
     spanish: 'Spanish',
+    backupData: 'Backup Data (JSON)',
+    backupDataDesc: 'Export all app data to a JSON file for backup.',
+    restoreData: 'Restore Data (JSON)',
+    restoreDataDesc: 'Import data from a backup JSON file.',
+    restoreConfirm:
+      'Are you sure you want to restore data? This will overwrite your current data and cannot be undone.',
+    restoreSuccess: 'Data restored successfully!',
+    restoreError: 'Error restoring data. Please check the file format.',
+    backupReminder: 'Backup Reminder',
+    backupReminderDesc:
+      "It's been a while since your last backup. Would you like to create one now to keep your data safe?",
+    backupLater: 'Later',
+    backupNow: 'Backup Now',
     premium: 'Premium Status',
     premiumDesc: 'Remove all ads and unlock advanced features.',
     freeVersion: 'Free Version (Ad-supported)',
@@ -317,6 +330,21 @@ export const translations = {
       'Cambiar la moneda actualizará cómo se muestran todos los montos en la aplicación.',
     english: 'Inglés',
     spanish: 'Español',
+    backupData: 'Copia de Seguridad (JSON)',
+    backupDataDesc:
+      'Exporta todos los datos de la app a un archivo JSON para respaldo.',
+    restoreData: 'Restaurar Datos (JSON)',
+    restoreDataDesc: 'Importa datos desde un archivo JSON de respaldo.',
+    restoreConfirm:
+      '¿Estás seguro de que deseas restaurar los datos? Esto sobrescribirá tus datos actuales y no se puede deshacer.',
+    restoreSuccess: '¡Datos restaurados con éxito!',
+    restoreError:
+      'Error al restaurar los datos. Por favor revisa el formato del archivo.',
+    backupReminder: 'Recordatorio de Respaldo',
+    backupReminderDesc:
+      'Ha pasado un tiempo desde tu última copia de seguridad. ¿Te gustaría crear una ahora para mantener tus datos seguros?',
+    backupLater: 'Más tarde',
+    backupNow: 'Respaldar ahora',
     premium: 'Estado Premium',
     premiumDesc: 'Elimina todos los anuncios y desbloquea funciones avanzadas.',
     freeVersion: 'Versión Gratuita (Con anuncios)',
