@@ -28,6 +28,10 @@ export const SettingsScreen = () => {
     Linking.openURL(`mailto:nmena.garzon@gmail.com?subject=${subject}`);
   };
 
+  const handleDonate = () => {
+    Linking.openURL('https://ko-fi.com/nmenag');
+  };
+
   const handleExportCSV = async () => {
     await exportTransactionsToCSV(transactions, accounts, categories);
     incrementActionCounter();
@@ -190,6 +194,23 @@ export const SettingsScreen = () => {
             left={(props) => <List.Icon {...props} icon="message-outline" />}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
             onPress={handleOpenEmail}
+          />
+        </Card>
+      </View>
+
+      <View style={styles.section}>
+        <Text variant="labelLarge" style={styles.sectionTitle}>
+          {t('donate')}
+        </Text>
+        <Card style={styles.card} mode="contained">
+          <List.Item
+            title={t('buyMeACoffee')}
+            description={t('donateDesc')}
+            left={(props) => (
+              <List.Icon {...props} icon="coffee" color="#FF5E5B" />
+            )}
+            right={(props) => <List.Icon {...props} icon="open-in-new" />}
+            onPress={handleDonate}
           />
         </Card>
       </View>

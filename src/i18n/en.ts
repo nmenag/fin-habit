@@ -287,4 +287,7 @@ export const en = {
   feedbackDesc: 'Help us improve FinHabit with your suggestions',
   feedbackPlaceholder: 'Tell us what you think or report a bug...',
   sendFeedback: 'Send Feedback',
+  donate: 'Donate',
+  donateDesc: 'Support the development of FinHabit',
+  buyMeACoffee: 'Buy me a coffee',
 };

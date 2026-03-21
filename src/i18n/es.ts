@@ -293,4 +293,7 @@ export const es = {
   feedbackDesc: 'Ayúdanos a mejorar FinHabit con tus sugerencias',
   feedbackPlaceholder: 'Cuéntanos qué piensas o reporta un error...',
   sendFeedback: 'Enviar Feedback',
+  donate: 'Donar',
+  donateDesc: 'Apoya el desarrollo de FinHabit',
+  buyMeACoffee: 'Cómprame un café',
 };
