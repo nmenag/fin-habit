@@ -14,6 +14,7 @@ import { initDb } from '../src/db/schema';
 import { useStore, useTranslation } from '../src/store/useStore';
 import { darkTheme, lightTheme } from '../src/theme/theme';
 import { interstitialManager } from '../src/ads/InterstitialManager';
+import { checkBackupReminder } from '../src/utils/dataBackup';
 
 // Register locales for the date picker
 registerTranslation('en', en);
@@ -71,7 +72,10 @@ export default function RootLayout() {
     if (dbInitialized && !isLoaded) {
       loadData();
     }
-  }, [dbInitialized, isLoaded, loadData]);
+    if (dbInitialized && isLoaded) {
+      checkBackupReminder(t);
+    }
+  }, [dbInitialized, isLoaded, loadData, t]);
 
   if (!dbInitialized || !isLoaded) {
     return (
@@ -173,6 +177,27 @@ export default function RootLayout() {
           options={{
             headerShown: true,
             title: t('goalDetail'),
+          }}
+        />
+        <Stack.Screen
+          name="about"
+          options={{
+            headerShown: true,
+            title: t('aboutApp'),
+          }}
+        />
+        <Stack.Screen
+          name="privacy-policy"
+          options={{
+            headerShown: true,
+            title: t('privacyPolicy'),
+          }}
+        />
+        <Stack.Screen
+          name="export-data"
+          options={{
+            headerShown: true,
+            title: t('exportData'),
           }}
         />
       </Stack>
