@@ -674,7 +674,11 @@ export const DashboardScreen = React.memo(() => {
             <TouchableOpacity
               onPress={() => router.push('/budgets')}
               style={{
-                backgroundColor: addAlpha(theme.colors.primary, 0.08, '#22C55E'),
+                backgroundColor: addAlpha(
+                  theme.colors.primary,
+                  0.08,
+                  '#22C55E',
+                ),
                 borderColor: addAlpha(theme.colors.primary, 0.17, '#22C55E'),
                 borderWidth: 1,
                 borderRadius: 12,
