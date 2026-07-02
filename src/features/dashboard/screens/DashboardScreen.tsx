@@ -2,6 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { format, parseISO } from 'date-fns';
 import { enUS, es as esLocale } from 'date-fns/locale';
 import { router } from 'expo-router';
+import {
+  getLast30DaysRange,
+  getRangeForType,
+  isInRange,
+} from '../../../utils/dateFilters';
 import React, { useMemo } from 'react';
 import {
   ScrollView,
@@ -105,9 +110,39 @@ export const DashboardScreen = React.memo(() => {
     const activeGoals = goals.filter((g) => g.status === 'active').slice(0, 2);
     const recentTransactions = transactions.slice(0, 5);
 
+    const activeRange = hasCurrentMonthData
+      ? getRangeForType('month')
+      : getLast30DaysRange();
+
+    const activeExpenses = transactions.filter((t) => {
+      if (t.type !== 'expense') return false;
+      const isAdjustment =
+        t.note &&
+        (t.note === 'Balance Adjustment' || t.note === 'Ajuste de Saldo');
+      if (isAdjustment) return false;
+      return isInRange(t.date, activeRange);
+    });
+
+    const budgetedCategoryIds = new Set(
+      budgets
+        .map((b) => b.categoryId)
+        .filter((catId): catId is string => !!catId),
+    );
+
+    let budgetedExpensesSum = 0;
+    let unbudgetedExpensesSum = 0;
+
+    activeExpenses.forEach((t) => {
+      if (t.categoryId && budgetedCategoryIds.has(t.categoryId)) {
+        budgetedExpensesSum += t.amount;
+      } else {
+        unbudgetedExpensesSum += t.amount;
+      }
+    });
+
     const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
     const limit = totalBudget > 0 ? totalBudget : calendarIncome;
-    const ratio = limit > 0 ? calendarExpenses / limit : 0;
+    const ratio = totalBudget > 0 ? budgetedExpensesSum / totalBudget : 0;
     const progress = Math.min(ratio, 1);
 
     const topCatId = activeMetrics.topCategory?.id;
@@ -136,21 +171,22 @@ export const DashboardScreen = React.memo(() => {
       ratio,
       hasCurrentMonthData,
       insightMessage: dashboardReport.insights[0]?.message,
+      budgetedExpensesSum,
+      unbudgetedExpensesSum,
     };
   }, [dashboardReport, accounts, goals, transactions, budgets, categories]);
 
   const data = useMemo(() => {
     if (!financialData) return null;
 
-    const { ratio, insightMessage, monthlyExpenses, monthlyIncome } =
-      financialData;
+    const { ratio, insightMessage, totalBudget } = financialData;
 
     let progressColor = theme.colors.primary;
     if (ratio > 0.9) progressColor = theme.colors.error;
     else if (ratio >= 0.7) progressColor = theme.colors.warning;
 
     let progressMessage = '';
-    if (monthlyExpenses > 0 || monthlyIncome > 0) {
+    if (totalBudget > 0) {
       progressMessage = t('doingWell');
       if (ratio > 1.0) progressMessage = t('exceededLimit');
       else if (ratio > 0.9) progressMessage = t('aboutToExceed');
@@ -531,78 +567,168 @@ export const DashboardScreen = React.memo(() => {
   const progressCard = (
     <Card style={styles.card} mode="contained">
       <Card.Content>
-        <View style={styles.cardHeader}>
-          <Text
-            style={{
-              fontFamily: 'Inter-Medium',
-              fontWeight: '500',
-              fontSize: fontScale(15),
-              color: theme.colors.onSurface,
-              flex: 1,
-            }}
-          >
-            {t('spendingProgress')}
-          </Text>
-          <Text
-            style={{
-              fontFamily: 'Inter-SemiBold',
-              fontWeight: '600',
-              fontSize: fontScale(15),
-              color: theme.colors.onSurface,
-              flexShrink: 1,
-              textAlign: 'right',
-              marginLeft: 8,
-            }}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-          >
-            {formatCurrency(data.calendarExpenses)}
-          </Text>
-        </View>
-        <ProgressBar
-          progress={data.progress}
-          color={data.progressColor}
-          style={styles.progressBar}
-          accessibilityLabel={t('spendingProgress')}
-          accessibilityValue={{
-            now: Math.round(data.progress * 100),
-            min: 0,
-            max: 100,
-            text: `${Math.round(data.progress * 100)}%`,
-          }}
-        />
-        <View
-          style={[
-            styles.row,
-            { justifyContent: 'space-between', marginTop: 6 },
-          ]}
-        >
-          {data.progressMessage ? (
-            <Text
-              variant="labelSmall"
-              style={{ color: data.progressColor, fontWeight: 'bold' }}
-            >
-              {data.progressMessage}
-            </Text>
-          ) : null}
-          {data.limit > 0 && (
-            <Text
-              variant="labelSmall"
-              style={{
-                color: theme.colors.outline,
-                flex: 1,
-                textAlign: 'right',
-                marginLeft: 8,
+        {data.totalBudget > 0 ? (
+          <>
+            <View style={styles.cardHeader}>
+              <Text
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: fontScale(15),
+                  color: theme.colors.onSurface,
+                  flex: 1,
+                }}
+              >
+                {t('spendingProgress')}
+              </Text>
+              <Text
+                style={{
+                  fontFamily: 'Inter-SemiBold',
+                  fontWeight: '600',
+                  fontSize: fontScale(15),
+                  color: theme.colors.onSurface,
+                  flexShrink: 1,
+                  textAlign: 'right',
+                  marginLeft: 8,
+                }}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {`${formatCurrency(data.budgetedExpensesSum)} / ${formatCurrency(data.totalBudget)}`}
+              </Text>
+            </View>
+            <ProgressBar
+              progress={data.progress}
+              color={data.progressColor}
+              style={styles.progressBar}
+              accessibilityLabel={t('spendingProgress')}
+              accessibilityValue={{
+                now: Math.round(data.progress * 100),
+                min: 0,
+                max: 100,
+                text: `${Math.round(data.progress * 100)}%`,
               }}
-              numberOfLines={1}
-              adjustsFontSizeToFit
+            />
+            <View
+              style={[
+                styles.row,
+                { justifyContent: 'space-between', marginTop: 6 },
+              ]}
             >
-              {t('totalBudgetLimit', {
-                amount: formatCurrency(data.limit),
-              })}
+              {data.progressMessage ? (
+                <Text
+                  variant="labelSmall"
+                  style={{ color: data.progressColor, fontWeight: 'bold' }}
+                >
+                  {data.progressMessage}
+                </Text>
+              ) : null}
+              <Text
+                variant="labelSmall"
+                style={{
+                  color: theme.colors.outline,
+                  flex: 1,
+                  textAlign: 'right',
+                  marginLeft: 8,
+                }}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {`${Math.round(data.progress * 100)}%`}
+              </Text>
+            </View>
+          </>
+        ) : (
+          <View style={{ alignItems: 'center', paddingVertical: 16 }}>
+            <Ionicons
+              name="pie-chart-outline"
+              size={36}
+              color={theme.colors.onSurfaceVariant}
+              style={{ marginBottom: 8, opacity: 0.7 }}
+            />
+            <Text
+              style={{
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
+                fontSize: fontScale(15),
+                color: theme.colors.onSurface,
+                textAlign: 'center',
+                marginBottom: 6,
+              }}
+            >
+              {t('spendingProgress')}
             </Text>
-          )}
-        </View>
+            <Text
+              style={{
+                fontFamily: 'Inter-Regular',
+                fontSize: fontScale(13),
+                color: theme.colors.onSurfaceVariant,
+                textAlign: 'center',
+                marginBottom: 16,
+                paddingHorizontal: 16,
+                lineHeight: 18,
+              }}
+            >
+              {t('noBudgets')}
+            </Text>
+            <TouchableOpacity
+              onPress={() => router.push('/budgets')}
+              style={{
+                backgroundColor: addAlpha(theme.colors.primary, 0.08, '#22C55E'),
+                borderColor: addAlpha(theme.colors.primary, 0.17, '#22C55E'),
+                borderWidth: 1,
+                borderRadius: 12,
+                paddingVertical: 8,
+                paddingHorizontal: 16,
+              }}
+            >
+              <Text
+                style={{
+                  color: theme.colors.primary,
+                  fontFamily: 'Inter-SemiBold',
+                  fontWeight: '600',
+                  fontSize: fontScale(13),
+                }}
+              >
+                {t('manageBudgets')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {data.totalBudget > 0 && data.unbudgetedExpensesSum > 0 && (
+          <>
+            <Divider style={{ marginVertical: 12 }} />
+            <View style={styles.row}>
+              <Text
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: fontScale(14),
+                  color: theme.colors.onSurfaceVariant,
+                  flex: 1,
+                }}
+              >
+                {t('unbudgetedSpending')}
+              </Text>
+              <Text
+                style={{
+                  fontFamily: 'Inter-SemiBold',
+                  fontWeight: '600',
+                  fontSize: fontScale(14),
+                  color: theme.colors.onSurfaceVariant,
+                  flexShrink: 1,
+                  textAlign: 'right',
+                  marginLeft: 8,
+                }}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {formatCurrency(data.unbudgetedExpensesSum)}
+              </Text>
+            </View>
+          </>
+        )}
       </Card.Content>
     </Card>
   );
