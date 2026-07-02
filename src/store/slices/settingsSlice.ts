@@ -324,7 +324,6 @@ export const createSettingsSlice: StateCreator<
       try {
         const { language } = get();
 
-        // Dynamically adjust selectedRange if it is 'month' or 'last30Days'
         const now = new Date();
         const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
           .toISOString()
