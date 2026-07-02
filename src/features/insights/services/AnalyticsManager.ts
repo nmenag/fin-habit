@@ -183,8 +183,7 @@ export class AnalyticsManager {
     }
 
     const hasComparisonData =
-      (currentCalendarMonth.expenses > 0 || currentCalendarMonth.income > 0) &&
-      (previousCalendarMonth.expenses > 0 || previousCalendarMonth.income > 0);
+      previousCalendarMonth.expenses > 0 || previousCalendarMonth.income > 0;
 
     const report: AnalyticsReport = {
       currentMonth,

@@ -3,7 +3,7 @@ import {
   DateRange,
   FilterType,
   getAllTimeRange,
-  getLast30DaysRange,
+  getMonthRange,
   getRangeForType,
 } from '../utils/dateFilters';
 
@@ -15,7 +15,7 @@ interface FilterState {
 }
 
 export const useFilterStore = create<FilterState>((set) => ({
-  selectedRange: getLast30DaysRange(),
+  selectedRange: getMonthRange(),
 
   setFilter: (type, customStart, customEnd) => {
     set({ selectedRange: getRangeForType(type, customStart, customEnd) });
