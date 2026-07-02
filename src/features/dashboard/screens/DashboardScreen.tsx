@@ -83,32 +83,45 @@ export const DashboardScreen = React.memo(() => {
   const financialData = useMemo(() => {
     if (!dashboardReport) return null;
 
-    const { currentMonth } = dashboardReport;
-    const monthlyIncome = currentMonth.income;
-    const monthlyExpenses = currentMonth.expenses;
-    const monthlyAdjustments = currentMonth.adjustments;
-    const remainingBalance = currentMonth.savings;
+    const { currentMonth, currentCalendarMonth } = dashboardReport;
+
+    const hasCurrentMonthData =
+      currentCalendarMonth &&
+      (currentCalendarMonth.expenses > 0 || currentCalendarMonth.income > 0);
+
+    const activeMetrics = hasCurrentMonthData
+      ? currentCalendarMonth
+      : currentMonth;
+
+    const monthlyIncome = activeMetrics.income;
+    const monthlyExpenses = activeMetrics.expenses;
+    const monthlyAdjustments = activeMetrics.adjustments;
+    const remainingBalance = activeMetrics.savings;
+
+    const calendarExpenses = monthlyExpenses;
+    const calendarIncome = monthlyIncome;
 
     const totalBalance = accounts.reduce((sum, a) => sum + a.currentBalance, 0);
     const activeGoals = goals.filter((g) => g.status === 'active').slice(0, 2);
     const recentTransactions = transactions.slice(0, 5);
 
     const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
-    const limit = totalBudget > 0 ? totalBudget : monthlyIncome;
-    const ratio = limit > 0 ? monthlyExpenses / limit : 0;
+    const limit = totalBudget > 0 ? totalBudget : calendarIncome;
+    const ratio = limit > 0 ? calendarExpenses / limit : 0;
     const progress = Math.min(ratio, 1);
 
-    const topCatId = currentMonth.topCategory?.id;
+    const topCatId = activeMetrics.topCategory?.id;
     const topCategory = topCatId
       ? categories.find((c) => c.id === topCatId)
       : undefined;
-    const topCatAmount = currentMonth.topCategory?.amount || 0;
+    const topCatAmount = activeMetrics.topCategory?.amount || 0;
     const topCatPercent =
       monthlyExpenses > 0 ? (topCatAmount / monthlyExpenses) * 100 : 0;
 
     return {
       monthlyIncome,
       monthlyExpenses,
+      calendarExpenses,
       monthlyAdjustments,
       remainingBalance,
       topCategory,
@@ -121,6 +134,7 @@ export const DashboardScreen = React.memo(() => {
       progress,
       totalBalance,
       ratio,
+      hasCurrentMonthData,
       insightMessage: dashboardReport.insights[0]?.message,
     };
   }, [dashboardReport, accounts, goals, transactions, budgets, categories]);
@@ -167,7 +181,15 @@ export const DashboardScreen = React.memo(() => {
 
   const monthHeader = (
     <View style={styles.monthHeader}>
-      <Text style={styles.monthText}>{t('filterLast30Days' as any)}</Text>
+      <Text style={styles.monthText}>
+        {data.hasCurrentMonthData
+          ? (() => {
+              const locale = language === 'es' ? esLocale : enUS;
+              const name = format(new Date(), 'MMMM yyyy', { locale });
+              return name.charAt(0).toUpperCase() + name.slice(1);
+            })()
+          : t('filterLast30Days' as any)}
+      </Text>
     </View>
   );
 
@@ -534,7 +556,7 @@ export const DashboardScreen = React.memo(() => {
             numberOfLines={1}
             adjustsFontSizeToFit
           >
-            {formatCurrency(data.monthlyExpenses)}
+            {formatCurrency(data.calendarExpenses)}
           </Text>
         </View>
         <ProgressBar

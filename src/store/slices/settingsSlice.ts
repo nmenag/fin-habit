@@ -323,10 +323,28 @@ export const createSettingsSlice: StateCreator<
     analyticsDebounceTimer = setTimeout(async () => {
       try {
         const { language } = get();
-        const { selectedRange } = useFilterStore.getState();
+
+        // Dynamically adjust selectedRange if it is 'month' or 'last30Days'
+        const now = new Date();
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+          .toISOString()
+          .split('T')[0];
+        const hasCurrentMonthData = get().transactions.some(
+          (t) => t.date >= currentMonthStart && t.type !== 'transfer',
+        );
+
+        let activeRange = useFilterStore.getState().selectedRange;
+        if (activeRange.type === 'month' || activeRange.type === 'last30Days') {
+          const targetType = hasCurrentMonthData ? 'month' : 'last30Days';
+          if (activeRange.type !== targetType) {
+            useFilterStore.getState().setFilter(targetType);
+            activeRange = useFilterStore.getState().selectedRange;
+          }
+        }
+
         const report = await AnalyticsManager.generateFullReport(
           language,
-          selectedRange,
+          activeRange,
         );
         const dReport = await AnalyticsManager.generateFullReport(
           language,
