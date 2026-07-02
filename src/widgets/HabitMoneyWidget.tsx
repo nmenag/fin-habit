@@ -11,6 +11,7 @@ interface HabitMoneyWidgetProps {
   currency: string;
   language: 'en' | 'es';
   theme: 'light' | 'dark';
+  subtitle: string;
 }
 
 export function HabitMoneyWidget({
@@ -19,6 +20,7 @@ export function HabitMoneyWidget({
   currency,
   language,
   theme,
+  subtitle,
 }: HabitMoneyWidgetProps) {
   const isDark = theme === 'dark';
 
@@ -38,7 +40,7 @@ export function HabitMoneyWidget({
 
   const t = {
     title: 'Habit Money',
-    subtitle: langSet.filterLast30Days,
+    subtitle: subtitle,
     incomeLabel: langSet.income,
     expenseLabel: langSet.expenses,
     addButton: `+ ${langSet.addTransaction}`,
