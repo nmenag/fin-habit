@@ -333,10 +333,14 @@ export const createSettingsSlice: StateCreator<
         );
 
         let activeRange = useFilterStore.getState().selectedRange;
-        if (activeRange.type === 'month' || activeRange.type === 'last30Days') {
+        const isDefault = useFilterStore.getState().isDefaultFilter;
+        if (
+          isDefault &&
+          (activeRange.type === 'month' || activeRange.type === 'last30Days')
+        ) {
           const targetType = hasCurrentMonthData ? 'month' : 'last30Days';
           if (activeRange.type !== targetType) {
-            useFilterStore.getState().setFilter(targetType);
+            useFilterStore.getState().setDefaultFilter(targetType);
             activeRange = useFilterStore.getState().selectedRange;
           }
         }
