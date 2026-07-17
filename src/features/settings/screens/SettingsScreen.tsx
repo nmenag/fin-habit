@@ -28,7 +28,7 @@ import { ReviewManager } from '../../../services/ReviewManager';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { backupToJSON, restoreFromJSON } from '../../../utils/dataBackup';
 import { CURRENCIES } from '../../../constants';
-import { AppTheme } from '../../../theme/theme';
+import { AppTheme, spacing, radius, featureColors } from '../../../theme/theme';
 import { fontScale } from '../../../utils/responsive';
 
 const addAlpha = (color: string, opacity: number) => {
@@ -234,31 +234,31 @@ export const SettingsScreen = () => {
       name: t('manageAccounts'),
       icon: 'wallet-outline',
       screen: '/accounts',
-      color: '#10B981',
+      color: featureColors.accounts,
     },
     {
       name: t('manageCategories'),
       icon: 'pricetags-outline',
       screen: '/categories',
-      color: '#8B5CF6',
+      color: featureColors.categories,
     },
     {
       name: t('manageBudgets'),
       icon: 'pie-chart-outline',
       screen: '/budgets',
-      color: '#3B82F6',
+      color: featureColors.budgets,
     },
     {
       name: t('manageGoals'),
       icon: 'flag-outline',
       screen: '/goals',
-      color: '#F59E0B',
+      color: featureColors.goals,
     },
     {
       name: t('calendar'),
       icon: 'calendar-outline',
       screen: '/calendar',
-      color: '#EC4899',
+      color: featureColors.calendar,
     },
   ];
 
@@ -276,9 +276,9 @@ export const SettingsScreen = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingTop: insets.top > 0 ? insets.top + 8 : 24,
+          paddingTop: insets.top > 0 ? insets.top + spacing.sm : spacing.lg,
           paddingBottom: (insets.bottom || 0) + 120,
-          paddingHorizontal: 16,
+          paddingHorizontal: spacing.md,
         }}
       >
         <View style={styles.header}>
@@ -312,8 +312,8 @@ export const SettingsScreen = () => {
                       style={[
                         styles.iconBox,
                         {
-                          backgroundColor: `${itemColor}12`,
-                          borderColor: `${itemColor}2B`,
+                          backgroundColor: addAlpha(itemColor, 0.07),
+                          borderColor: addAlpha(itemColor, 0.17),
                         },
                       ]}
                     >
@@ -369,12 +369,16 @@ export const SettingsScreen = () => {
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: '#3B82F612',
-                    borderColor: '#3B82F62B',
+                    backgroundColor: addAlpha(featureColors.budgets, 0.07),
+                    borderColor: addAlpha(featureColors.budgets, 0.17),
                   },
                 ]}
               >
-                <Ionicons name="earth-outline" size={20} color="#3B82F6" />
+                <Ionicons
+                  name="earth-outline"
+                  size={20}
+                  color={featureColors.budgets}
+                />
               </View>
               <View style={styles.rowText}>
                 <Text
@@ -428,12 +432,16 @@ export const SettingsScreen = () => {
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: '#10B98112',
-                    borderColor: '#10B9812B',
+                    backgroundColor: addAlpha(featureColors.accounts, 0.07),
+                    borderColor: addAlpha(featureColors.accounts, 0.17),
                   },
                 ]}
               >
-                <Ionicons name="cash-outline" size={20} color="#10B981" />
+                <Ionicons
+                  name="cash-outline"
+                  size={20}
+                  color={featureColors.accounts}
+                />
               </View>
               <View style={styles.rowText}>
                 <Text
@@ -482,8 +490,8 @@ export const SettingsScreen = () => {
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: `${theme.colors.primary}12`,
-                    borderColor: `${theme.colors.primary}2B`,
+                    backgroundColor: addAlpha(theme.colors.primary, 0.07),
+                    borderColor: addAlpha(theme.colors.primary, 0.17),
                   },
                 ]}
               >
@@ -524,15 +532,15 @@ export const SettingsScreen = () => {
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: '#F59E0B12',
-                    borderColor: '#F59E0B2B',
+                    backgroundColor: addAlpha(featureColors.goals, 0.07),
+                    borderColor: addAlpha(featureColors.goals, 0.17),
                   },
                 ]}
               >
                 <Ionicons
                   name="notifications-outline"
                   size={20}
-                  color="#F59E0B"
+                  color={featureColors.goals}
                 />
               </View>
               <View style={styles.rowText}>
@@ -569,8 +577,8 @@ export const SettingsScreen = () => {
                   style={[
                     styles.iconBox,
                     {
-                      backgroundColor: `${theme.colors.primary}12`,
-                      borderColor: `${theme.colors.primary}2B`,
+                      backgroundColor: addAlpha(theme.colors.primary, 0.07),
+                      borderColor: addAlpha(theme.colors.primary, 0.17),
                     },
                   ]}
                 >
@@ -626,15 +634,15 @@ export const SettingsScreen = () => {
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: '#6366F112',
-                    borderColor: '#6366F12B',
+                    backgroundColor: addAlpha(featureColors.export, 0.07),
+                    borderColor: addAlpha(featureColors.export, 0.17),
                   },
                 ]}
               >
                 <Ionicons
                   name="cloud-download-outline"
                   size={20}
-                  color="#6366F1"
+                  color={featureColors.export}
                 />
               </View>
               <View style={styles.rowText}>
@@ -670,12 +678,16 @@ export const SettingsScreen = () => {
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: '#4F46E512',
-                    borderColor: '#4F46E52B',
+                    backgroundColor: addAlpha(featureColors.backup, 0.07),
+                    borderColor: addAlpha(featureColors.backup, 0.17),
                   },
                 ]}
               >
-                <Ionicons name="save-outline" size={20} color="#4F46E5" />
+                <Ionicons
+                  name="save-outline"
+                  size={20}
+                  color={featureColors.backup}
+                />
               </View>
               <View style={styles.rowText}>
                 <Text
@@ -710,15 +722,15 @@ export const SettingsScreen = () => {
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: '#A855F712',
-                    borderColor: '#A855F72B',
+                    backgroundColor: addAlpha(featureColors.restore, 0.07),
+                    borderColor: addAlpha(featureColors.restore, 0.17),
                   },
                 ]}
               >
                 <Ionicons
                   name="refresh-circle-outline"
                   size={20}
-                  color="#A855F7"
+                  color={featureColors.restore}
                 />
               </View>
               <View style={styles.rowText}>
@@ -789,8 +801,8 @@ export const SettingsScreen = () => {
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: '#EF444412',
-                    borderColor: '#EF44442B',
+                    backgroundColor: addAlpha(featureColors.feedback, 0.07),
+                    borderColor: addAlpha(featureColors.feedback, 0.17),
                   },
                 ]}
               >
@@ -841,12 +853,16 @@ export const SettingsScreen = () => {
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: '#64748B12',
-                    borderColor: '#64748B2B',
+                    backgroundColor: addAlpha(featureColors.feedback, 0.07),
+                    borderColor: addAlpha(featureColors.feedback, 0.17),
                   },
                 ]}
               >
-                <Ionicons name="mail-outline" size={20} color="#64748B" />
+                <Ionicons
+                  name="mail-outline"
+                  size={20}
+                  color={featureColors.feedback}
+                />
               </View>
               <View style={styles.rowText}>
                 <Text
@@ -884,12 +900,16 @@ export const SettingsScreen = () => {
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: '#F59E0B12',
-                    borderColor: '#F59E0B2B',
+                    backgroundColor: addAlpha(featureColors.rateApp, 0.07),
+                    borderColor: addAlpha(featureColors.rateApp, 0.17),
                   },
                 ]}
               >
-                <Ionicons name="star-outline" size={20} color="#F59E0B" />
+                <Ionicons
+                  name="star-outline"
+                  size={20}
+                  color={featureColors.rateApp}
+                />
               </View>
               <View style={styles.rowText}>
                 <Text
@@ -924,12 +944,16 @@ export const SettingsScreen = () => {
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: '#F59E0B12',
-                    borderColor: '#F59E0B2B',
+                    backgroundColor: addAlpha(featureColors.donate, 0.07),
+                    borderColor: addAlpha(featureColors.donate, 0.17),
                   },
                 ]}
               >
-                <Ionicons name="heart-outline" size={20} color="#F59E0B" />
+                <Ionicons
+                  name="heart-outline"
+                  size={20}
+                  color={featureColors.donate}
+                />
               </View>
               <View style={styles.rowText}>
                 <Text
@@ -976,8 +1000,8 @@ export const SettingsScreen = () => {
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: `${theme.colors.primary}12`,
-                    borderColor: `${theme.colors.primary}2B`,
+                    backgroundColor: addAlpha(theme.colors.primary, 0.07),
+                    borderColor: addAlpha(theme.colors.primary, 0.17),
                   },
                 ]}
               >
@@ -1014,8 +1038,8 @@ export const SettingsScreen = () => {
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: `${theme.colors.primary}12`,
-                    borderColor: `${theme.colors.primary}2B`,
+                    backgroundColor: addAlpha(theme.colors.primary, 0.07),
+                    borderColor: addAlpha(theme.colors.primary, 0.17),
                   },
                 ]}
               >
@@ -1073,8 +1097,8 @@ export const SettingsScreen = () => {
               flexDirection: 'row',
               width: '100%',
               justifyContent: 'space-between',
-              marginTop: 24,
-              gap: 12,
+              marginTop: spacing.lg,
+              gap: spacing.sm,
             }}
           >
             <TouchableOpacity
@@ -1090,7 +1114,7 @@ export const SettingsScreen = () => {
             >
               <Text
                 style={{
-                  fontFamily: 'Inter-Medium',
+                  ...theme.fonts.labelLarge,
                   color: theme.colors.onSurfaceVariant,
                 }}
               >
@@ -1115,7 +1139,7 @@ export const SettingsScreen = () => {
             >
               <Text
                 style={{
-                  fontFamily: 'Inter-Medium',
+                  ...theme.fonts.labelLarge,
                   color: theme.colors.onPrimary,
                 }}
               >
@@ -1154,8 +1178,7 @@ export const SettingsScreen = () => {
             >
               <Text
                 style={{
-                  fontFamily: 'Inter-Medium',
-                  fontWeight: '500',
+                  ...theme.fonts.titleMedium,
                   color: theme.colors.onSurface,
                 }}
               >
@@ -1256,10 +1279,10 @@ export const SettingsScreen = () => {
       >
         <Text
           style={{
-            fontFamily: 'Inter-Regular',
+            ...theme.fonts.bodySmall,
             fontSize: fontScale(13),
             color: theme.colors.onSurfaceVariant,
-            marginBottom: 20,
+            marginBottom: spacing.md,
             lineHeight: 18,
           }}
         >
@@ -1270,7 +1293,10 @@ export const SettingsScreen = () => {
           activeOpacity={0.7}
           style={[
             styles.modalListItem,
-            { borderColor: theme.colors.outlineVariant, marginBottom: 12 },
+            {
+              borderColor: theme.colors.outlineVariant,
+              marginBottom: spacing.sm,
+            },
           ]}
           onPress={async () => {
             setRestoreMenuVisible(false);
@@ -1291,18 +1317,17 @@ export const SettingsScreen = () => {
           <View style={{ flex: 1, paddingRight: 8 }}>
             <Text
               style={{
-                fontFamily: 'Inter-SemiBold',
-                fontWeight: '600',
+                ...theme.fonts.titleMedium,
                 fontSize: fontScale(14),
-                color: '#10B981',
-                marginBottom: 2,
+                color: featureColors.accounts,
+                marginBottom: spacing.xs,
               }}
             >
               {t('backupAndRestore')}
             </Text>
             <Text
               style={{
-                fontFamily: 'Inter-Regular',
+                ...theme.fonts.bodySmall,
                 fontSize: fontScale(11),
                 color: theme.colors.onSurfaceVariant,
                 lineHeight: 14,
@@ -1311,14 +1336,21 @@ export const SettingsScreen = () => {
               {t('backupAndRestoreDesc')}
             </Text>
           </View>
-          <Ionicons name="shield-checkmark-outline" size={24} color="#10B981" />
+          <Ionicons
+            name="shield-checkmark-outline"
+            size={24}
+            color={featureColors.accounts}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity
           activeOpacity={0.7}
           style={[
             styles.modalListItem,
-            { borderColor: theme.colors.outlineVariant, marginBottom: 20 },
+            {
+              borderColor: theme.colors.outlineVariant,
+              marginBottom: spacing.md,
+            },
           ]}
           onPress={async () => {
             setRestoreMenuVisible(false);
@@ -1347,18 +1379,17 @@ export const SettingsScreen = () => {
           <View style={{ flex: 1, paddingRight: 8 }}>
             <Text
               style={{
-                fontFamily: 'Inter-SemiBold',
-                fontWeight: '600',
+                ...theme.fonts.titleMedium,
                 fontSize: fontScale(14),
                 color: theme.colors.error,
-                marginBottom: 2,
+                marginBottom: spacing.xs,
               }}
             >
               {t('restoreDirectly')}
             </Text>
             <Text
               style={{
-                fontFamily: 'Inter-Regular',
+                ...theme.fonts.bodySmall,
                 fontSize: fontScale(11),
                 color: theme.colors.onSurfaceVariant,
                 lineHeight: 14,
@@ -1384,29 +1415,27 @@ const defaultStyles = (theme: AppTheme) =>
       flex: 1,
     },
     header: {
-      marginBottom: 20,
-      paddingHorizontal: 8,
+      marginBottom: spacing.md,
+      paddingHorizontal: spacing.sm,
     },
     headerTitle: {
+      ...theme.fonts.titleLarge,
       fontSize: fontScale(24),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
       letterSpacing: -0.5,
     },
     section: {
-      marginBottom: 20,
+      marginBottom: spacing.md,
     },
     sectionTitle: {
+      ...theme.fonts.labelSmall,
       fontSize: fontScale(10),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
       textTransform: 'uppercase',
-      marginBottom: 10,
-      marginLeft: 8,
+      marginBottom: spacing.sm,
+      marginLeft: spacing.sm,
       letterSpacing: 1,
     },
     card: {
-      borderRadius: theme.roundness || 12,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: theme.colors.outlineVariant,
       backgroundColor: theme.colors.surface,
@@ -1416,66 +1445,63 @@ const defaultStyles = (theme: AppTheme) =>
     rowItem: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 12,
-      paddingHorizontal: 16,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
     },
     iconBox: {
       width: 44,
       height: 44,
-      borderRadius: 14,
+      borderRadius: radius.lg,
       borderWidth: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      marginRight: 14,
+      marginRight: spacing.md,
     },
     rowText: {
       flex: 1,
       justifyContent: 'center',
     },
     rowTitle: {
+      ...theme.fonts.titleMedium,
       fontSize: fontScale(14),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
     },
     rowSub: {
+      ...theme.fonts.bodySmall,
       fontSize: fontScale(11),
-      fontFamily: 'Inter-Regular',
-      fontWeight: '400',
-      marginTop: 2,
+      marginTop: spacing.xs,
     },
     rowRight: {
       flexDirection: 'row',
       alignItems: 'center',
     },
     badge: {
-      borderRadius: 100,
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      marginRight: 8,
+      borderRadius: radius.full,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      marginRight: spacing.sm,
     },
     badgeText: {
+      ...theme.fonts.labelMedium,
       fontSize: fontScale(11),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
     },
     divider: {
       backgroundColor: theme.colors.outlineVariant,
-      marginLeft: 74,
+      marginLeft: 44 + spacing.md + spacing.md,
     },
     themeSelectorContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      gap: 8,
+      gap: spacing.sm,
     },
     themeButton: {
       flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: 14,
-      borderRadius: 14,
+      paddingVertical: spacing.md,
+      borderRadius: radius.lg,
       borderWidth: 1,
-      gap: 6,
+      gap: spacing.xs,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: theme.dark ? 0.2 : 0.02,
@@ -1483,18 +1509,19 @@ const defaultStyles = (theme: AppTheme) =>
       elevation: 1,
     },
     themeButtonText: {
-      fontSize: 13,
+      ...theme.fonts.bodyMedium,
+      fontSize: fontScale(13),
       textTransform: 'capitalize',
     },
     modalListItem: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingVertical: 16,
-      paddingHorizontal: 16,
-      borderRadius: 16,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.md,
+      borderRadius: radius.xl,
       borderWidth: 1,
-      marginBottom: 10,
+      marginBottom: spacing.sm,
     },
     radioOuter: {
       width: 20,

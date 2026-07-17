@@ -21,7 +21,7 @@ const PLAY_STORE_URL = `market://details?id=${ANDROID_PACKAGE}`;
 const PLAY_STORE_WEB_URL = `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}`;
 const APP_STORE_URL = IOS_APP_ID
   ? `itms-apps://itunes.apple.com/app/id${IOS_APP_ID}?action=write-review`
-  : '';
+  : 'https://apps.apple.com/us/search?term=habit+money';
 
 function readSetting(key: string): string | null {
   try {
@@ -68,12 +68,26 @@ async function openStoreFallback(): Promise<void> {
     const canOpen = await Linking.canOpenURL(url);
     if (canOpen) {
       await Linking.openURL(url);
-    } else if (Platform.OS === 'android') {
-      await Linking.openURL(PLAY_STORE_WEB_URL);
+    } else {
+      if (Platform.OS === 'android') {
+        await Linking.openURL(PLAY_STORE_WEB_URL);
+      } else if (Platform.OS === 'ios') {
+        await Linking.openURL(
+          'https://apps.apple.com/us/search?term=habit+money',
+        );
+      }
     }
   } catch {
-    if (Platform.OS === 'android') {
-      Linking.openURL(PLAY_STORE_WEB_URL).catch(() => {});
+    try {
+      if (Platform.OS === 'android') {
+        await Linking.openURL(PLAY_STORE_WEB_URL);
+      } else if (Platform.OS === 'ios') {
+        await Linking.openURL(
+          'https://apps.apple.com/us/search?term=habit+money',
+        );
+      }
+    } catch (err) {
+      console.warn('ReviewManager: failed to open store fallback', err);
     }
   }
 }
@@ -146,6 +160,6 @@ export class ReviewManager {
   static async requestReviewManually(): Promise<void> {
     writeSetting(REVIEW_KEYS.lastPromptDate, new Date().toISOString());
     writeSetting(REVIEW_KEYS.hasReviewed, 'true');
-    await triggerReview();
+    await openStoreFallback();
   }
 }
