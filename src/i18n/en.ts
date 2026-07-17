@@ -362,6 +362,8 @@ export const en = {
   feedbackDesc: 'Help us improve Habit Money with your suggestions',
   feedbackPlaceholder: 'Tell us what you think or report a bug...',
   sendFeedback: 'Send Feedback',
+  rateApp: 'Rate the App',
+  rateAppDesc: 'Enjoying Habit Money? Leave us a review!',
   donate: 'Donate',
   donateDesc: 'Support the development of Habit Money',
   buyMeACoffee: 'Invite me a coffee',

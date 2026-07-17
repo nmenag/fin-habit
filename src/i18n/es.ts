@@ -369,6 +369,8 @@ export const es = {
   feedbackDesc: 'Ayúdanos a mejorar Habit Money con tus sugerencias',
   feedbackPlaceholder: 'Cuéntanos qué piensas o reporta un error...',
   sendFeedback: 'Enviar Feedback',
+  rateApp: 'Calificar la App',
+  rateAppDesc: '¿Disfrutas Habit Money? ¡Déjanos una reseña!',
   donate: 'Donar',
   donateDesc: 'Apoya el desarrollo de Habit Money',
   buyMeACoffee: 'Invitame a un café',

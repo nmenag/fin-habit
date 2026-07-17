@@ -58,6 +58,7 @@ module.exports = {
       },
       predictiveBackGestureEnabled: false,
       package: getPackageName(),
+      playStoreUrl: `https://play.google.com/store/apps/details?id=${getPackageName()}`,
       googleServicesFile:
         process.env.GOOGLE_SERVICES_JSON || './google-services.json',
       jsEngine: 'hermes',

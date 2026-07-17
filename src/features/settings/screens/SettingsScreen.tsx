@@ -24,6 +24,7 @@ import Animated, {
 
 import { BannerAdComponent } from '../../../shared/components/BannerAdComponent';
 import { NotificationService } from '../../../services/NotificationService';
+import { ReviewManager } from '../../../services/ReviewManager';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { backupToJSON, restoreFromJSON } from '../../../utils/dataBackup';
 import { CURRENCIES } from '../../../constants';
@@ -860,6 +861,49 @@ export const SettingsScreen = () => {
                   ]}
                 >
                   {t('feedbackDesc')}
+                </Text>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </TouchableOpacity>
+
+            <Divider style={styles.divider} />
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.rowItem}
+              onPress={() => {
+                ReviewManager.requestReviewManually().catch(() => {});
+              }}
+              accessibilityRole="button"
+            >
+              <View
+                style={[
+                  styles.iconBox,
+                  {
+                    backgroundColor: '#F59E0B12',
+                    borderColor: '#F59E0B2B',
+                  },
+                ]}
+              >
+                <Ionicons name="star-outline" size={20} color="#F59E0B" />
+              </View>
+              <View style={styles.rowText}>
+                <Text
+                  style={[styles.rowTitle, { color: theme.colors.onSurface }]}
+                >
+                  {t('rateApp' as any)}
+                </Text>
+                <Text
+                  style={[
+                    styles.rowSub,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {t('rateAppDesc' as any)}
                 </Text>
               </View>
               <Ionicons
