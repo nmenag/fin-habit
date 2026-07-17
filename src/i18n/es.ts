@@ -53,6 +53,12 @@ export const es = {
   restoreData: 'Restaurar Datos (JSON)',
   restoreDataDesc: 'Importa datos desde un archivo JSON de respaldo.',
   dataManagement: 'Gestión de Datos',
+  resetData: 'Restablecer Datos',
+  resetDataDesc: 'Eliminar permanentemente todos los datos financieros',
+  resetDataConfirmTitle: 'Restablecer Todos los Datos',
+  resetDataConfirmMessage:
+    'Esto eliminará permanentemente todas tus cuentas, transacciones, presupuestos, metas y categorías. Tus preferencias (idioma, moneda, tema) se conservarán. Esta acción no se puede deshacer.',
+  resetDataSuccess: 'Los datos de la app se restablecieron correctamente.',
   restoreConfirm:
     '¿Estás seguro de que deseas restaurar los datos? Esto sobrescribirá tus datos actuales y no se puede deshacer.',
   restoreBackupPrompt:

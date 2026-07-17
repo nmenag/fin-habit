@@ -52,6 +52,12 @@ export const en = {
   restoreData: 'Restore Data (JSON)',
   restoreDataDesc: 'Import data from a backup JSON file.',
   dataManagement: 'Data Management',
+  resetData: 'Reset App Data',
+  resetDataDesc: 'Permanently delete all financial data',
+  resetDataConfirmTitle: 'Reset All Data',
+  resetDataConfirmMessage:
+    'This will permanently delete all your accounts, transactions, budgets, goals, and categories. Your app preferences (language, currency, theme) will be kept. This action cannot be undone.',
+  resetDataSuccess: 'App data has been reset successfully.',
   restoreConfirm:
     'Are you sure you want to restore data? This will overwrite your current data and cannot be undone.',
   restoreBackupPrompt:

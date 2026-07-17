@@ -737,7 +737,7 @@ export const DashboardScreen = React.memo(() => {
     </Card>
   );
 
-  const topCategoryCard = (
+  const topCategoryCard = data.topCategory ? (
     <Card style={styles.card} mode="contained">
       <Card.Content>
         <Text
@@ -823,7 +823,7 @@ export const DashboardScreen = React.memo(() => {
         )}
       </Card.Content>
     </Card>
-  );
+  ) : null;
 
   const insightCard = (
     <Card

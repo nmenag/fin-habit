@@ -54,6 +54,7 @@ export const SettingsScreen = () => {
     setNotificationTime,
     currency,
     setCurrency,
+    resetData,
   } = useStore();
 
   const { t, language } = useTranslation();
@@ -738,6 +739,83 @@ export const SettingsScreen = () => {
                 name="chevron-forward"
                 size={16}
                 color={theme.colors.onSurfaceVariant}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.error }]}>
+            {'Danger Zone'}
+          </Text>
+          <View style={styles.card}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.rowItem}
+              onPress={() => {
+                Alert.alert(
+                  t('resetDataConfirmTitle' as any),
+                  t('resetDataConfirmMessage' as any),
+                  [
+                    { text: t('cancel'), style: 'cancel' },
+                    {
+                      text: t('resetData' as any),
+                      style: 'destructive',
+                      onPress: () => {
+                        try {
+                          resetData();
+                          Haptics.notificationAsync(
+                            Haptics.NotificationFeedbackType.Success,
+                          ).catch(() => {});
+                          Alert.alert(
+                            t('success'),
+                            t('resetDataSuccess' as any),
+                          );
+                        } catch {
+                          Haptics.notificationAsync(
+                            Haptics.NotificationFeedbackType.Error,
+                          ).catch(() => {});
+                        }
+                      },
+                    },
+                  ],
+                );
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={t('resetData' as any)}
+            >
+              <View
+                style={[
+                  styles.iconBox,
+                  {
+                    backgroundColor: '#EF444412',
+                    borderColor: '#EF44442B',
+                  },
+                ]}
+              >
+                <Ionicons
+                  name="trash-outline"
+                  size={20}
+                  color={theme.colors.error}
+                />
+              </View>
+              <View style={styles.rowText}>
+                <Text style={[styles.rowTitle, { color: theme.colors.error }]}>
+                  {t('resetData' as any)}
+                </Text>
+                <Text
+                  style={[
+                    styles.rowSub,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {t('resetDataDesc' as any)}
+                </Text>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color={theme.colors.error}
               />
             </TouchableOpacity>
           </View>

@@ -1,7 +1,7 @@
 import * as Localization from 'expo-localization';
 import { StateCreator } from 'zustand';
 import { interstitialManager } from '../../ads/InterstitialManager';
-import { getDb } from '../../db/schema';
+import { getDb, initDb } from '../../db/schema';
 import { Language } from '../../i18n/translations';
 import { AnalyticsManager } from '../../features/insights/services/AnalyticsManager';
 import { AnalyticsReport } from '../../features/insights/services/types';
@@ -76,6 +76,7 @@ export interface SettingsSlice {
   formatCurrency: (amount: number, currencyCode?: string) => string;
   checkAndShowAd: () => Promise<void>;
   refreshAnalytics: () => Promise<void>;
+  resetData: () => void;
 }
 
 export const createSettingsSlice: StateCreator<
@@ -307,6 +308,33 @@ export const createSettingsSlice: StateCreator<
       currencyCode || defaultCurrency,
       language,
     );
+  },
+
+  resetData: () => {
+    try {
+      const db = getDb();
+      db.execSync('DELETE FROM transactions;');
+      db.execSync('DELETE FROM budgets;');
+      db.execSync('DELETE FROM goals;');
+      db.execSync('DELETE FROM accounts;');
+      db.execSync('DELETE FROM categories;');
+      initDb();
+      set({
+        transactions: [],
+        budgets: [],
+        goals: [],
+        accounts: [],
+        categories: [],
+        analyticsReport: null,
+        dashboardReport: null,
+      });
+      setTimeout(() => {
+        get().loadData();
+      }, 0);
+    } catch (error) {
+      console.error('resetData DB Error:', error);
+      throw error;
+    }
   },
 
   checkAndShowAd: async () => {
