@@ -2,26 +2,36 @@ import * as StoreReview from 'expo-store-review';
 import { Linking, Platform } from 'react-native';
 import { getDb } from '../db/schema';
 
+export interface ReviewStats {
+  firstLaunchDate: string | null;
+  appOpenCount: number;
+  lastPromptDate: string | null;
+  promptCount: number;
+  hasCompletedReview: boolean;
+}
+
 const REVIEW_KEYS = {
-  transactionCount: 'review_transactionCount',
-  lastPromptDate: 'review_lastPromptDate',
-  hasReviewed: 'review_hasReviewed',
+  firstLaunchDate: 'review_firstLaunchDate',
   appOpenCount: 'review_appOpenCount',
-  lastOpenDate: 'review_lastOpenDate',
+  lastPromptDate: 'review_lastPromptDate',
+  promptCount: 'review_promptCount',
+  hasCompletedReview: 'review_hasCompletedReview',
 } as const;
 
 const ANDROID_PACKAGE = 'com.finhabit';
 const IOS_APP_ID = '';
 
-const PROMPT_THRESHOLD_TRANSACTIONS = 5;
-const REPROMPT_COOLDOWN_DAYS = 90;
 const MIN_APP_OPENS = 3;
+const COOLDOWN_DAYS = 60;
+const MAX_PROMPTS_LIFETIME = 3;
 
 const PLAY_STORE_URL = `market://details?id=${ANDROID_PACKAGE}`;
 const PLAY_STORE_WEB_URL = `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}`;
 const APP_STORE_URL = IOS_APP_ID
   ? `itms-apps://itunes.apple.com/app/id${IOS_APP_ID}?action=write-review`
   : 'https://apps.apple.com/us/search?term=habit+money';
+
+type PrePromptListener = (visible: boolean) => void;
 
 function readSetting(key: string): string | null {
   try {
@@ -55,111 +65,193 @@ function daysBetween(dateStr: string): number {
 }
 
 async function openStoreFallback(): Promise<void> {
-  const url =
+  const primaryUrl = Platform.OS === 'android' ? PLAY_STORE_URL : APP_STORE_URL;
+  const webUrl =
     Platform.OS === 'android'
-      ? PLAY_STORE_URL
-      : Platform.OS === 'ios'
-        ? APP_STORE_URL
-        : '';
-
-  if (!url) return;
+      ? PLAY_STORE_WEB_URL
+      : 'https://apps.apple.com/us/search?term=habit+money';
 
   try {
-    const canOpen = await Linking.canOpenURL(url);
-    if (canOpen) {
-      await Linking.openURL(url);
-    } else {
-      if (Platform.OS === 'android') {
-        await Linking.openURL(PLAY_STORE_WEB_URL);
-      } else if (Platform.OS === 'ios') {
-        await Linking.openURL(
-          'https://apps.apple.com/us/search?term=habit+money',
-        );
-      }
-    }
+    await Linking.openURL(primaryUrl);
   } catch {
     try {
-      if (Platform.OS === 'android') {
-        await Linking.openURL(PLAY_STORE_WEB_URL);
-      } else if (Platform.OS === 'ios') {
-        await Linking.openURL(
-          'https://apps.apple.com/us/search?term=habit+money',
-        );
-      }
+      await Linking.openURL(webUrl);
     } catch (err) {
-      console.warn('ReviewManager: failed to open store fallback', err);
+      console.warn('ReviewManager: failed to open store fallback URL', err);
     }
   }
 }
 
-async function triggerReview(): Promise<void> {
+async function triggerNativeReview(): Promise<void> {
   try {
     const hasAction = await StoreReview.hasAction();
-    if (hasAction) {
+    if (hasAction && !__DEV__) {
       await StoreReview.requestReview();
-    } else {
-      await openStoreFallback();
+      return;
     }
-  } catch {
-    await openStoreFallback();
+  } catch (e) {
+    console.warn('ReviewManager: StoreReview.requestReview error', e);
   }
+  await openStoreFallback();
 }
 
 export class ReviewManager {
-  static incrementTransactionCount(): void {
-    const current = parseInt(
-      readSetting(REVIEW_KEYS.transactionCount) ?? '0',
-      10,
-    );
-    writeSetting(REVIEW_KEYS.transactionCount, String(current + 1));
+  private static prePromptListener: PrePromptListener | null = null;
+
+  static setOnPrePromptListener(listener: PrePromptListener | null): void {
+    ReviewManager.prePromptListener = listener;
   }
 
-  static recordAppOpen(): void {
-    const appOpens = parseInt(readSetting(REVIEW_KEYS.appOpenCount) ?? '0', 10);
-    const today = new Date().toISOString().split('T')[0];
-    writeSetting(REVIEW_KEYS.appOpenCount, String(appOpens + 1));
-    writeSetting(REVIEW_KEYS.lastOpenDate, today);
+  static async recordAppOpen(): Promise<void> {
+    try {
+      const firstLaunch = readSetting(REVIEW_KEYS.firstLaunchDate);
+      if (!firstLaunch) {
+        writeSetting(REVIEW_KEYS.firstLaunchDate, new Date().toISOString());
+      }
+
+      const countStr = readSetting(REVIEW_KEYS.appOpenCount);
+      const currentOpens = parseInt(countStr ?? '0', 10);
+      writeSetting(REVIEW_KEYS.appOpenCount, String(currentOpens + 1));
+    } catch (error) {
+      console.warn('ReviewManager: failed to record app open', error);
+    }
   }
 
-  static shouldAutoPrompt(): boolean {
-    const hasReviewed = readSetting(REVIEW_KEYS.hasReviewed);
-    if (hasReviewed === 'true') return false;
+  static async getReviewStats(): Promise<ReviewStats> {
+    try {
+      const firstLaunchDate = readSetting(REVIEW_KEYS.firstLaunchDate);
+      const appOpenCountStr = readSetting(REVIEW_KEYS.appOpenCount);
+      const lastPromptDate = readSetting(REVIEW_KEYS.lastPromptDate);
+      const promptCountStr = readSetting(REVIEW_KEYS.promptCount);
+      const hasCompletedReviewStr = readSetting(REVIEW_KEYS.hasCompletedReview);
 
-    const appOpens = parseInt(readSetting(REVIEW_KEYS.appOpenCount) ?? '0', 10);
-    if (appOpens < MIN_APP_OPENS) return false;
+      return {
+        firstLaunchDate,
+        appOpenCount: parseInt(appOpenCountStr ?? '0', 10),
+        lastPromptDate,
+        promptCount: parseInt(promptCountStr ?? '0', 10),
+        hasCompletedReview: hasCompletedReviewStr === 'true',
+      };
+    } catch (error) {
+      console.warn('ReviewManager: failed to get stats', error);
+      return {
+        firstLaunchDate: null,
+        appOpenCount: 0,
+        lastPromptDate: null,
+        promptCount: 0,
+        hasCompletedReview: false,
+      };
+    }
+  }
 
-    const txCount = parseInt(
-      readSetting(REVIEW_KEYS.transactionCount) ?? '0',
-      10,
-    );
-    if (txCount < PROMPT_THRESHOLD_TRANSACTIONS) return false;
+  static async canShowAutoPrompt(): Promise<boolean> {
+    try {
+      const stats = await ReviewManager.getReviewStats();
 
-    const lastPrompt = readSetting(REVIEW_KEYS.lastPromptDate);
-    if (lastPrompt && daysBetween(lastPrompt) < REPROMPT_COOLDOWN_DAYS) {
+      if (stats.hasCompletedReview) {
+        return false;
+      }
+
+      if (stats.appOpenCount < MIN_APP_OPENS) {
+        return false;
+      }
+
+      if (stats.promptCount >= MAX_PROMPTS_LIFETIME) {
+        return false;
+      }
+
+      if (stats.lastPromptDate) {
+        const elapsedDays = daysBetween(stats.lastPromptDate);
+        if (elapsedDays < COOLDOWN_DAYS) {
+          return false;
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.warn('ReviewManager: canShowAutoPrompt check failed', error);
+      return false;
+    }
+  }
+
+  private static async triggerPrePromptGate(): Promise<boolean> {
+    const canPrompt = await ReviewManager.canShowAutoPrompt();
+    if (!canPrompt) {
       return false;
     }
 
-    return true;
+    if (ReviewManager.prePromptListener) {
+      ReviewManager.prePromptListener(true);
+      return true;
+    }
+
+    return false;
   }
 
-  static async maybeRequestReview(): Promise<void> {
-    if (!ReviewManager.shouldAutoPrompt()) return;
+  static async onGoalCompleted(): Promise<boolean> {
+    return ReviewManager.triggerPrePromptGate();
+  }
 
-    writeSetting(REVIEW_KEYS.lastPromptDate, new Date().toISOString());
-    writeSetting(REVIEW_KEYS.hasReviewed, 'true');
+  static async onBudgetMonthSuccess(): Promise<boolean> {
+    return ReviewManager.triggerPrePromptGate();
+  }
 
-    setTimeout(async () => {
-      try {
-        await triggerReview();
-      } catch {
-        /* non-blocking */
+  static async onStreakReached(streakCount: number = 7): Promise<boolean> {
+    if (streakCount < 7) {
+      return false;
+    }
+    return ReviewManager.triggerPrePromptGate();
+  }
+
+  static async handleUserFeedback(enjoying: boolean): Promise<void> {
+    try {
+      if (ReviewManager.prePromptListener) {
+        ReviewManager.prePromptListener(false);
       }
-    }, 1500);
+
+      const stats = await ReviewManager.getReviewStats();
+      const newPromptCount = stats.promptCount + 1;
+      const nowIso = new Date().toISOString();
+
+      writeSetting(REVIEW_KEYS.lastPromptDate, nowIso);
+      writeSetting(REVIEW_KEYS.promptCount, String(newPromptCount));
+
+      if (enjoying) {
+        writeSetting(REVIEW_KEYS.hasCompletedReview, 'true');
+        await triggerNativeReview();
+      } else {
+        const subject = encodeURIComponent('Habit Money Feedback');
+        const emailUrl = `mailto:nmena.garzon@gmail.com?subject=${subject}`;
+        try {
+          await Linking.openURL(emailUrl);
+        } catch (err) {
+          console.warn('ReviewManager: failed to open feedback email', err);
+        }
+      }
+    } catch (error) {
+      console.warn('ReviewManager: error handling user feedback', error);
+    }
+  }
+
+  static async handleUserDismiss(): Promise<void> {
+    try {
+      if (ReviewManager.prePromptListener) {
+        ReviewManager.prePromptListener(false);
+      }
+    } catch (error) {
+      console.warn('ReviewManager: error handling user dismiss', error);
+    }
   }
 
   static async requestReviewManually(): Promise<void> {
-    writeSetting(REVIEW_KEYS.lastPromptDate, new Date().toISOString());
-    writeSetting(REVIEW_KEYS.hasReviewed, 'true');
-    await openStoreFallback();
+    try {
+      const nowIso = new Date().toISOString();
+      writeSetting(REVIEW_KEYS.lastPromptDate, nowIso);
+      writeSetting(REVIEW_KEYS.hasCompletedReview, 'true');
+      await triggerNativeReview();
+    } catch (error) {
+      console.warn('ReviewManager: requestReviewManually failed', error);
+      await openStoreFallback();
+    }
   }
 }

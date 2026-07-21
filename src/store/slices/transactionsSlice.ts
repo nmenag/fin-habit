@@ -3,7 +3,6 @@ import { getDb } from '../../db/schema';
 import { Budget, Goal, Transaction, TransactionType } from '../types';
 import type { AppStore } from '../useStore';
 import { ProductAnalyticsService } from '../../services/ProductAnalyticsService';
-import { ReviewManager } from '../../services/ReviewManager';
 
 export interface TransactionsSlice {
   transactions: Transaction[];
@@ -126,8 +125,6 @@ export const createTransactionsSlice: StateCreator<
     });
 
     get().refreshAnalytics();
-    ReviewManager.incrementTransactionCount();
-    ReviewManager.maybeRequestReview().catch(() => {});
   },
 
   editTransaction: (transaction) => {
