@@ -71,6 +71,28 @@ export const chartColors = [
   '#6366F1',
 ];
 
+export const radius = {
+  sm: 8,
+  md: 12,
+  lg: 14,
+  xl: 16,
+  full: 100,
+};
+
+export const featureColors = {
+  accounts: chartColors[8], // #10B981
+  categories: chartColors[4], // #8B5CF6
+  budgets: chartColors[1], // #3B82F6
+  goals: chartColors[2], // #F59E0B
+  calendar: chartColors[5], // #EC4899
+  export: chartColors[9], // #6366F1
+  backup: '#4F46E5',
+  restore: '#A855F7',
+  feedback: '#64748B',
+  rateApp: chartColors[2], // #F59E0B
+  donate: chartColors[2], // #F59E0B
+};
+
 const fontConfig = {
   displayLarge: {
     fontFamily: 'Inter-SemiBold',

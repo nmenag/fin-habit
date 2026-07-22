@@ -15,6 +15,8 @@ import { en, es, registerTranslation } from 'react-native-paper-dates';
 import { interstitialManager } from '../src/ads/InterstitialManager';
 import { initDb } from '../src/db/schema';
 import { NotificationService } from '../src/services/NotificationService';
+import { ReviewManager } from '../src/services/ReviewManager';
+import { ReviewPrePromptDialog } from '../src/shared/components/ReviewPrePromptDialog';
 import { useStore, useTranslation } from '../src/store/useStore';
 import { darkTheme, lightTheme } from '../src/theme/theme';
 import { checkBackupReminder } from '../src/utils/dataBackup';
@@ -67,6 +69,7 @@ export default function RootLayout() {
         interstitialManager.init();
         initDb();
         await NotificationService.setupChannel();
+        await ReviewManager.recordAppOpen();
         setDbInitialized(true);
       } catch (e) {
         console.error('Failed to initialize local DB or Ads', e);
@@ -216,6 +219,7 @@ export default function RootLayout() {
               }}
             />
           </Stack>
+          <ReviewPrePromptDialog />
         </ThemeProvider>
       </PaperProvider>
     </GestureHandlerRootView>

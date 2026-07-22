@@ -53,6 +53,12 @@ export const es = {
   restoreData: 'Restaurar Datos (JSON)',
   restoreDataDesc: 'Importa datos desde un archivo JSON de respaldo.',
   dataManagement: 'Gestión de Datos',
+  resetData: 'Restablecer Datos',
+  resetDataDesc: 'Eliminar permanentemente todos los datos financieros',
+  resetDataConfirmTitle: 'Restablecer Todos los Datos',
+  resetDataConfirmMessage:
+    'Esto eliminará permanentemente todas tus cuentas, transacciones, presupuestos, metas y categorías. Tus preferencias (idioma, moneda, tema) se conservarán. Esta acción no se puede deshacer.',
+  resetDataSuccess: 'Los datos de la app se restablecieron correctamente.',
   restoreConfirm:
     '¿Estás seguro de que deseas restaurar los datos? Esto sobrescribirá tus datos actuales y no se puede deshacer.',
   restoreBackupPrompt:
@@ -363,6 +369,14 @@ export const es = {
   feedbackDesc: 'Ayúdanos a mejorar Habit Money con tus sugerencias',
   feedbackPlaceholder: 'Cuéntanos qué piensas o reporta un error...',
   sendFeedback: 'Enviar Feedback',
+  rateApp: 'Calificar la App',
+  rateAppDesc: '¿Disfrutas Habit Money? ¡Déjanos una reseña!',
+  enjoyingAppTitle: '¿Disfrutas Habit Money?',
+  enjoyingAppMessage:
+    'Tus comentarios nos ayudan a mejorar Habit Money para gestionar mejor tus finanzas.',
+  rateYes: '¡Sí! 👍',
+  rateNotReally: 'No mucho 👎',
+  notNow: 'Ahora no',
   donate: 'Donar',
   donateDesc: 'Apoya el desarrollo de Habit Money',
   buyMeACoffee: 'Invitame a un café',
