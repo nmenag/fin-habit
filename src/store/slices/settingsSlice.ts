@@ -59,6 +59,7 @@ export interface SettingsSlice {
   currencySymbol: string;
   themePreference: 'light' | 'dark' | 'system';
   isLoaded: boolean;
+  isFirstLaunch: boolean;
   isPremiumUser: boolean;
   analyticsReport: AnalyticsReport | null;
   dashboardReport: AnalyticsReport | null;
@@ -90,6 +91,7 @@ export const createSettingsSlice: StateCreator<
   currencySymbol: '$',
   themePreference: 'system',
   isLoaded: false,
+  isFirstLaunch: true,
   isPremiumUser: false,
   analyticsReport: null,
   dashboardReport: null,
@@ -124,6 +126,8 @@ export const createSettingsSlice: StateCreator<
     let themeSetting;
     let notifEnabledSetting;
     let notifTimeSetting;
+    let firstLaunchSetting;
+    let txCountSetting;
     try {
       currencySetting = db.getFirstSync<{ val: string }>(
         "SELECT val FROM settings WHERE id = 'currency'",
@@ -142,6 +146,12 @@ export const createSettingsSlice: StateCreator<
       );
       notifTimeSetting = db.getFirstSync<{ val: string }>(
         "SELECT val FROM settings WHERE id = 'notificationTime'",
+      );
+      firstLaunchSetting = db.getFirstSync<{ val: string }>(
+        "SELECT val FROM settings WHERE id = 'isFirstLaunch'",
+      );
+      txCountSetting = db.getFirstSync<{ count: number }>(
+        'SELECT COUNT(*) as count FROM transactions',
       );
     } catch (e) {
       console.warn('Could not load settings from DB:', e);
@@ -165,6 +175,11 @@ export const createSettingsSlice: StateCreator<
       }
     }
 
+    const isFirstLaunch = !(
+      firstLaunchSetting?.val === 'false' ||
+      (txCountSetting && txCountSetting.count > 0)
+    );
+
     set({
       accounts,
       transactions,
@@ -177,6 +192,7 @@ export const createSettingsSlice: StateCreator<
       isPremiumUser: premiumSetting?.val === 'true',
       notificationsEnabled: notifEnabledSetting?.val === 'true',
       notificationTime: notifTimeSetting?.val || '20:00',
+      isFirstLaunch,
       isLoaded: true,
     });
 
@@ -291,7 +307,7 @@ export const createSettingsSlice: StateCreator<
       ]);
 
       const currencySymbol = CURRENCY_SYMBOLS[currency] || '$';
-      set({ language: lang, currency, currencySymbol });
+      set({ language: lang, currency, currencySymbol, isFirstLaunch: false });
 
       db.runSync('UPDATE accounts SET currency = ?', [currency]);
       get().loadData();
@@ -353,9 +369,9 @@ export const createSettingsSlice: StateCreator<
         const { language } = get();
 
         const now = new Date();
-        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-          .toISOString()
-          .split('T')[0];
+        const currentMonthStart = getLocalDateString(
+          new Date(now.getFullYear(), now.getMonth(), 1),
+        );
         const hasCurrentMonthData = get().transactions.some(
           (t) => t.date >= currentMonthStart && t.type !== 'transfer',
         );

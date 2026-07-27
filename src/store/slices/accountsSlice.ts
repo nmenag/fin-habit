@@ -3,6 +3,7 @@ import { getDb } from '../../db/schema';
 import { Account } from '../types';
 import type { AppStore } from '../useStore';
 import { ProductAnalyticsService } from '../../services/ProductAnalyticsService';
+import { getLocalDateString } from '../../utils/dateUtils';
 
 export interface AccountsSlice {
   accounts: Account[];
@@ -56,18 +57,55 @@ export const createAccountsSlice: StateCreator<
 
   editAccount: (account) => {
     const db = getDb();
-    db.runSync(
-      'UPDATE accounts SET name = ?, type = ?, initialBalance = ?, currentBalance = ?, color = ?, currency = ? WHERE id = ?',
-      [
-        account.name ?? null,
-        account.type ?? null,
-        account.initialBalance ?? 0,
-        account.currentBalance ?? 0,
-        account.color ?? null,
-        account.currency ?? 'COP',
-        account.id ?? null,
-      ],
-    );
+    const oldAccount = get().accounts.find((a) => a.id === account.id);
+    const balanceDiff = oldAccount
+      ? (account.currentBalance ?? 0) - (oldAccount.currentBalance ?? 0)
+      : 0;
+
+    db.withTransactionSync(() => {
+      db.runSync(
+        'UPDATE accounts SET name = ?, type = ?, initialBalance = ?, currentBalance = ?, color = ?, currency = ? WHERE id = ?',
+        [
+          account.name ?? null,
+          account.type ?? null,
+          account.initialBalance ?? 0,
+          account.currentBalance ?? 0,
+          account.color ?? null,
+          account.currency ?? 'COP',
+          account.id ?? null,
+        ],
+      );
+
+      if (balanceDiff !== 0 && oldAccount) {
+        const isPositive = balanceDiff > 0;
+        const adjustmentTx = {
+          id:
+            Math.random().toString(36).substring(2, 9) +
+            Date.now().toString(36),
+          type: (isPositive ? 'income' : 'expense') as 'income' | 'expense',
+          amount: Math.abs(balanceDiff),
+          categoryId: null,
+          accountId: account.id,
+          date: getLocalDateString(new Date()),
+          note: 'Balance Adjustment',
+        };
+
+        db.runSync(
+          'INSERT INTO transactions (id, type, amount, categoryId, accountId, budgetId, date, note, toAccountId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [
+            adjustmentTx.id,
+            adjustmentTx.type,
+            adjustmentTx.amount,
+            null,
+            adjustmentTx.accountId,
+            null,
+            adjustmentTx.date,
+            adjustmentTx.note,
+            null,
+          ],
+        );
+      }
+    });
 
     ProductAnalyticsService.logAccountUpdated(account.type || 'unknown').catch(
       () => {},

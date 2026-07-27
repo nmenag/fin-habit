@@ -1,40 +1,12 @@
 import { Redirect } from 'expo-router';
-import { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
-import { getDb } from '../src/db/schema';
+import { useStore } from '../src/store/useStore';
 
 export default function Index() {
-  const [loading, setLoading] = useState(true);
-  const [firstLaunch, setFirstLaunch] = useState<boolean | null>(null);
+  const isLoaded = useStore((state) => state.isLoaded);
+  const isFirstLaunch = useStore((state) => state.isFirstLaunch);
 
-  useEffect(() => {
-    const checkFirstLaunch = async () => {
-      try {
-        const db = getDb();
-        const row = db.getFirstSync<{ val: string }>(
-          "SELECT val FROM settings WHERE id = 'isFirstLaunch'",
-        );
-
-        const txCount = db.getFirstSync<{ count: number }>(
-          'SELECT COUNT(*) as count FROM transactions',
-        );
-
-        if ((row && row.val === 'false') || (txCount && txCount.count > 0)) {
-          setFirstLaunch(false);
-        } else {
-          setFirstLaunch(true);
-        }
-      } catch (e) {
-        console.warn('DB error checking first launch:', e);
-        setFirstLaunch(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkFirstLaunch();
-  }, []);
-
-  if (loading) {
+  if (!isLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" />
@@ -42,7 +14,7 @@ export default function Index() {
     );
   }
 
-  if (firstLaunch) {
+  if (isFirstLaunch) {
     return <Redirect href="/onboarding" />;
   }
 

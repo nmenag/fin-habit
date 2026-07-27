@@ -6,7 +6,8 @@ import {
 import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, useColorScheme, View } from 'react-native';
+import * as ExpoSplashScreen from 'expo-splash-screen';
+import { AppState, AppStateStatus, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import mobileAds from 'react-native-google-mobile-ads';
 import { adaptNavigationTheme, PaperProvider } from 'react-native-paper';
@@ -15,11 +16,15 @@ import { en, es, registerTranslation } from 'react-native-paper-dates';
 import { interstitialManager } from '../src/ads/InterstitialManager';
 import { initDb } from '../src/db/schema';
 import { NotificationService } from '../src/services/NotificationService';
+import { ProductAnalyticsService } from '../src/services/ProductAnalyticsService';
 import { ReviewManager } from '../src/services/ReviewManager';
 import { ReviewPrePromptDialog } from '../src/shared/components/ReviewPrePromptDialog';
+import { SplashScreen } from '../src/shared/components/SplashScreen';
 import { useStore, useTranslation } from '../src/store/useStore';
 import { darkTheme, lightTheme } from '../src/theme/theme';
 import { checkBackupReminder } from '../src/utils/dataBackup';
+
+ExpoSplashScreen.preventAutoHideAsync().catch(() => {});
 
 registerTranslation('en', en);
 registerTranslation('es', es);
@@ -63,48 +68,78 @@ export default function RootLayout() {
   const theme = isDarkTheme ? CombinedDarkTheme : CombinedDefaultTheme;
 
   useEffect(() => {
+    if (!__DEV__) {
+      const noop = () => {};
+      ['log', 'info', 'warn', 'error'].forEach((key) => {
+        (console as any)[key] = noop;
+      });
+    }
+
+    const globalAny = global as any;
+    if (globalAny.ErrorUtils) {
+      const originalHandler = globalAny.ErrorUtils.getGlobalHandler();
+      globalAny.ErrorUtils.setGlobalHandler((error: any, isFatal: boolean) => {
+        ProductAnalyticsService.recordError(
+          error instanceof Error ? error : new Error(String(error)),
+          `Fatal_${isFatal}`,
+        );
+        if (originalHandler) {
+          originalHandler(error, isFatal);
+        }
+      });
+    }
+
     const setup = async () => {
       try {
+        initDb();
+        await ProductAnalyticsService.init();
         await mobileAds().initialize();
         interstitialManager.init();
-        initDb();
         await NotificationService.setupChannel();
         await ReviewManager.recordAppOpen();
         setDbInitialized(true);
       } catch (e) {
         console.error('Failed to initialize local DB or Ads', e);
+        if (e instanceof Error) {
+          ProductAnalyticsService.recordError(e, 'InitializationError');
+        }
       }
     };
     setup();
   }, []);
 
   useEffect(() => {
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'background') {
+        ProductAnalyticsService.logAppBackground().catch(() => {});
+      } else if (nextAppState === 'active') {
+        ProductAnalyticsService.logAppForeground().catch(() => {});
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
     if (dbInitialized && !isLoaded) {
       loadData();
     }
-    if (
-      dbInitialized &&
-      isLoaded &&
-      pathname !== '/onboarding' &&
-      pathname !== '/'
-    ) {
-      checkBackupReminder(t);
+    if (dbInitialized && isLoaded) {
+      ExpoSplashScreen.hideAsync().catch(() => {});
+      if (pathname !== '/onboarding' && pathname !== '/') {
+        checkBackupReminder(t);
+      }
     }
   }, [dbInitialized, isLoaded, loadData, pathname, t]);
 
   if (!dbInitialized || !isLoaded) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: theme.colors.background,
-        }}
-      >
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
-    );
+    return <SplashScreen />;
   }
 
   return (

@@ -2,15 +2,20 @@ import { format, isSameDay } from 'date-fns';
 import { enUS, es as esLocale } from 'date-fns/locale';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { FAB, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FlashList } from '@shopify/flash-list';
 import { CalendarView } from '../components/CalendarView';
 import { TransactionItem } from '../components/TransactionItem';
 import { useStore, useTranslation } from '../../../store/useStore';
+import { Transaction } from '../../../store/types';
 import { getLocalISOString } from '../../../utils/dateUtils';
 
-const formatAmount = (amount: number, formatCurrency: any) => {
+const formatAmount = (
+  amount: number,
+  formatCurrency: (val: number) => string,
+): string => {
   if (amount >= 1000000) return (amount / 1000000).toFixed(1) + 'M';
   if (amount >= 1000) return (amount / 1000).toFixed(1) + 'k';
   return formatCurrency(amount);
@@ -49,7 +54,7 @@ export const CalendarScreen = () => {
 
   const dailyNet = dayTotals.income - dayTotals.expense + dayTotals.adjustments;
 
-  const handleTransactionPress = (transaction: any) => {
+  const handleTransactionPress = (transaction: Transaction) => {
     router.push({
       pathname: '/add-transaction',
       params: {
@@ -63,7 +68,7 @@ export const CalendarScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <FlatList
+      <FlashList
         data={dayTransactions}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={

@@ -24,8 +24,6 @@ import { getValidCategoryIcon } from '../../../constants';
 
 import { FlashList } from '@shopify/flash-list';
 
-const TypedFlashList = FlashList as any;
-
 const addAlpha = (color: string | undefined, opacity: number) => {
   const resolvedColor = color || '#10B981';
   if (resolvedColor.startsWith('#')) {
@@ -286,12 +284,11 @@ export const TransactionsScreen = () => {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        <TypedFlashList
+        <FlashList
           data={flattenedData.data as any[]}
           keyExtractor={(item: any) => item.id || item.title}
           renderItem={renderItem}
           getItemType={getItemType}
-          estimatedItemSize={72}
           stickyHeaderIndices={flattenedData.stickyHeaderIndices}
           contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 16 }}
           ListEmptyComponent={
