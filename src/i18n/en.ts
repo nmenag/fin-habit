@@ -491,4 +491,14 @@ export const en = {
   smartSavingsTip:
     '💡 Smart tip: Scaling down spending in this category by just {{dailySaving}} per day will unlock {{monthlySaving}} per month to accelerate your active Savings Goals.',
   overLimit: 'Over limit',
+
+  appLock: 'App Lock',
+  appLockDesc: 'Require biometric or PIN to open the app.',
+  appLockNoHardware: 'Your device does not support biometric or device lock.',
+  appLockNotEnrolled:
+    'No device lock is set up. Enable a PIN, pattern, or biometric in your device Settings first.',
+  appLockTitle: 'App Locked',
+  appLockSubtitle: 'Verify your identity to continue.',
+  appLockButton: 'Unlock',
+  appLockOpenSettings: 'Open Settings',
 };

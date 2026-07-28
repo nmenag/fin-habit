@@ -5,7 +5,7 @@ import {
 } from '@react-navigation/native';
 import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as ExpoSplashScreen from 'expo-splash-screen';
 import { AppState, AppStateStatus, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -18,7 +18,9 @@ import { initDb } from '../src/db/schema';
 import { NotificationService } from '../src/services/NotificationService';
 import { ProductAnalyticsService } from '../src/services/ProductAnalyticsService';
 import { ReviewManager } from '../src/services/ReviewManager';
+import { AppLockService } from '../src/services/AppLockService';
 import { ReviewPrePromptDialog } from '../src/shared/components/ReviewPrePromptDialog';
+import { AppLockScreen } from '../src/shared/components/AppLockScreen';
 import { SplashScreen } from '../src/shared/components/SplashScreen';
 import { useStore, useTranslation } from '../src/store/useStore';
 import { darkTheme, lightTheme } from '../src/theme/theme';
@@ -56,11 +58,16 @@ const CombinedDarkTheme = {
 
 export default function RootLayout() {
   const [dbInitialized, setDbInitialized] = useState(false);
-  const { loadData, isLoaded } = useStore();
+  const { loadData, isLoaded, setAppLockEnabled } = useStore();
+  const appLockEnabled = useStore((state) => state.appLockEnabled);
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const themePreference = useStore((state) => state.themePreference);
   const pathname = usePathname();
+
+  const [isLocked, setIsLocked] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(true);
+  const prevAppState = useRef<AppStateStatus>('active');
 
   const isDarkTheme =
     themePreference === 'dark' ||
@@ -97,6 +104,20 @@ export default function RootLayout() {
         interstitialManager.init();
         await NotificationService.setupChannel();
         await ReviewManager.recordAppOpen();
+
+        const [lockEnabled, support] = await Promise.all([
+          AppLockService.getAppLockEnabled(),
+          AppLockService.checkHardwareSupport(),
+        ]);
+
+        setAppLockEnabled(lockEnabled);
+        setIsEnrolled(support.isEnrolled);
+
+        if (lockEnabled) {
+          const result = await AppLockService.authenticate();
+          setIsLocked(!result.success);
+        }
+
         setDbInitialized(true);
       } catch (e) {
         console.error('Failed to initialize local DB or Ads', e);
@@ -106,15 +127,29 @@ export default function RootLayout() {
       }
     };
     setup();
-  }, []);
+  }, [setAppLockEnabled]);
 
   useEffect(() => {
-    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+    const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+      if (
+        prevAppState.current === 'background' &&
+        nextAppState === 'active' &&
+        appLockEnabled
+      ) {
+        const support = await AppLockService.checkHardwareSupport();
+        setIsEnrolled(support.isEnrolled);
+        setIsLocked(true);
+        const result = await AppLockService.authenticate();
+        setIsLocked(!result.success);
+      }
+
       if (nextAppState === 'background') {
         ProductAnalyticsService.logAppBackground().catch(() => {});
       } else if (nextAppState === 'active') {
         ProductAnalyticsService.logAppForeground().catch(() => {});
       }
+
+      prevAppState.current = nextAppState;
     };
 
     const subscription = AppState.addEventListener(
@@ -124,7 +159,7 @@ export default function RootLayout() {
     return () => {
       subscription.remove();
     };
-  }, []);
+  }, [appLockEnabled]);
 
   useEffect(() => {
     if (dbInitialized && !isLoaded) {
@@ -137,6 +172,13 @@ export default function RootLayout() {
       }
     }
   }, [dbInitialized, isLoaded, loadData, pathname, t]);
+
+  const handleUnlock = useCallback(async () => {
+    const result = await AppLockService.authenticate();
+    if (result.success) {
+      setIsLocked(false);
+    }
+  }, []);
 
   if (!dbInitialized || !isLoaded) {
     return <SplashScreen />;
@@ -255,6 +297,9 @@ export default function RootLayout() {
             />
           </Stack>
           <ReviewPrePromptDialog />
+          {isLocked && appLockEnabled && (
+            <AppLockScreen isEnrolled={isEnrolled} onUnlock={handleUnlock} />
+          )}
         </ThemeProvider>
       </PaperProvider>
     </GestureHandlerRootView>

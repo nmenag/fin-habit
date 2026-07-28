@@ -12,6 +12,7 @@ import { Account, Category, Transaction } from '../types';
 import { useFilterStore } from '../useFilterStore';
 import type { AppStore } from '../useStore';
 import { triggerWidgetUpdate } from '../../utils/widgetUpdater';
+import { AppLockService } from '../../services/AppLockService';
 
 let analyticsDebounceTimer: any = null;
 
@@ -65,6 +66,7 @@ export interface SettingsSlice {
   dashboardReport: AnalyticsReport | null;
   notificationsEnabled: boolean;
   notificationTime: string;
+  appLockEnabled: boolean;
 
   loadData: () => void;
   setLanguage: (lang: Language) => void;
@@ -73,6 +75,7 @@ export interface SettingsSlice {
   setNotificationTime: (time: string) => void;
   setCurrency: (currency: string) => void;
   setPremium: (isPremium: boolean) => void;
+  setAppLockEnabled: (enabled: boolean) => Promise<void>;
   completeOnboarding: (lang: Language, currency: string) => void;
   formatCurrency: (amount: number, currencyCode?: string) => string;
   checkAndShowAd: () => Promise<void>;
@@ -97,6 +100,7 @@ export const createSettingsSlice: StateCreator<
   dashboardReport: null,
   notificationsEnabled: false,
   notificationTime: '20:00',
+  appLockEnabled: false,
 
   loadData: () => {
     const db = getDb();
@@ -288,6 +292,11 @@ export const createSettingsSlice: StateCreator<
     } catch (error) {
       console.error('setPremium DB Error:', error);
     }
+  },
+
+  setAppLockEnabled: async (enabled) => {
+    await AppLockService.setAppLockEnabled(enabled);
+    set({ appLockEnabled: enabled });
   },
 
   completeOnboarding: (lang, currency) => {
