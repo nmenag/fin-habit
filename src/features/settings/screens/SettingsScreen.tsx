@@ -56,6 +56,8 @@ export const SettingsScreen = () => {
     currency,
     setCurrency,
     resetData,
+    appLockEnabled,
+    setAppLockEnabled,
   } = useStore();
 
   const { t, language } = useTranslation();
@@ -126,6 +128,25 @@ export const SettingsScreen = () => {
     const subject = `Habit Money Feedback (${language})`;
     Linking.openURL(`mailto:nmena.garzon@gmail.com?subject=${subject}`);
   };
+
+  const handleAppLockToggle = React.useCallback(
+    async (newValue: boolean) => {
+      if (newValue) {
+        const { AppLockService } =
+          await import('../../../services/AppLockService');
+        const result = await AppLockService.authenticate();
+        if (!result.success) {
+          const blockedErrors = ['not_enrolled', 'not_available', 'unknown'];
+          if (blockedErrors.includes((result as any).error)) {
+            Alert.alert(t('appLock'), t('appLockNotEnrolled'));
+          }
+          return;
+        }
+      }
+      await setAppLockEnabled(newValue);
+    },
+    [setAppLockEnabled, t],
+  );
 
   const handleDonate = async () => {
     Linking.openURL('https://ko-fi.com/nmenag');
@@ -521,6 +542,46 @@ export const SettingsScreen = () => {
                 onValueChange={(val) => {
                   setThemePreference(val ? 'dark' : 'light');
                 }}
+                color={theme.colors.primary}
+              />
+            </View>
+
+            <Divider style={styles.divider} />
+
+            <View style={styles.rowItem}>
+              <View
+                style={[
+                  styles.iconBox,
+                  {
+                    backgroundColor: addAlpha(theme.colors.primary, 0.07),
+                    borderColor: addAlpha(theme.colors.primary, 0.17),
+                  },
+                ]}
+              >
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color={theme.colors.primary}
+                />
+              </View>
+              <View style={styles.rowText}>
+                <Text
+                  style={[styles.rowTitle, { color: theme.colors.onSurface }]}
+                >
+                  {t('appLock')}
+                </Text>
+                <Text
+                  style={[
+                    styles.rowSub,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {t('appLockDesc')}
+                </Text>
+              </View>
+              <Switch
+                value={appLockEnabled}
+                onValueChange={handleAppLockToggle}
                 color={theme.colors.primary}
               />
             </View>

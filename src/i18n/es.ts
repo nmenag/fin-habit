@@ -499,4 +499,15 @@ export const es = {
   smartSavingsTip:
     '💡 Consejo inteligente: Reducir los gastos en esta categoría por solo {{dailySaving}} al día liberará {{monthlySaving}} al mes para acelerar tus metas de ahorro activas.',
   overLimit: 'Límite excedido',
+
+  appLock: 'Bloqueo de App',
+  appLockDesc: 'Requiere biometría o PIN para abrir la aplicación.',
+  appLockNoHardware:
+    'Tu dispositivo no admite biometría ni bloqueo de pantalla.',
+  appLockNotEnrolled:
+    'No hay bloqueo de dispositivo configurado. Habilita un PIN, patrón o biometría en los Ajustes de tu dispositivo primero.',
+  appLockTitle: 'App Bloqueada',
+  appLockSubtitle: 'Verifica tu identidad para continuar.',
+  appLockButton: 'Desbloquear',
+  appLockOpenSettings: 'Abrir Ajustes',
 };

@@ -5,8 +5,9 @@ import {
 } from '@react-navigation/native';
 import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, useColorScheme, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import * as ExpoSplashScreen from 'expo-splash-screen';
+import { AppState, AppStateStatus, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import mobileAds from 'react-native-google-mobile-ads';
 import { adaptNavigationTheme, PaperProvider } from 'react-native-paper';
@@ -15,11 +16,17 @@ import { en, es, registerTranslation } from 'react-native-paper-dates';
 import { interstitialManager } from '../src/ads/InterstitialManager';
 import { initDb } from '../src/db/schema';
 import { NotificationService } from '../src/services/NotificationService';
+import { ProductAnalyticsService } from '../src/services/ProductAnalyticsService';
 import { ReviewManager } from '../src/services/ReviewManager';
+import { AppLockService } from '../src/services/AppLockService';
 import { ReviewPrePromptDialog } from '../src/shared/components/ReviewPrePromptDialog';
+import { AppLockScreen } from '../src/shared/components/AppLockScreen';
+import { SplashScreen } from '../src/shared/components/SplashScreen';
 import { useStore, useTranslation } from '../src/store/useStore';
 import { darkTheme, lightTheme } from '../src/theme/theme';
 import { checkBackupReminder } from '../src/utils/dataBackup';
+
+ExpoSplashScreen.preventAutoHideAsync().catch(() => {});
 
 registerTranslation('en', en);
 registerTranslation('es', es);
@@ -51,11 +58,16 @@ const CombinedDarkTheme = {
 
 export default function RootLayout() {
   const [dbInitialized, setDbInitialized] = useState(false);
-  const { loadData, isLoaded } = useStore();
+  const { loadData, isLoaded, setAppLockEnabled } = useStore();
+  const appLockEnabled = useStore((state) => state.appLockEnabled);
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const themePreference = useStore((state) => state.themePreference);
   const pathname = usePathname();
+
+  const [isLocked, setIsLocked] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(true);
+  const prevAppState = useRef<AppStateStatus>('active');
 
   const isDarkTheme =
     themePreference === 'dark' ||
@@ -63,48 +75,113 @@ export default function RootLayout() {
   const theme = isDarkTheme ? CombinedDarkTheme : CombinedDefaultTheme;
 
   useEffect(() => {
+    if (!__DEV__) {
+      const noop = () => {};
+      ['log', 'info', 'warn', 'error'].forEach((key) => {
+        (console as any)[key] = noop;
+      });
+    }
+
+    const globalAny = global as any;
+    if (globalAny.ErrorUtils) {
+      const originalHandler = globalAny.ErrorUtils.getGlobalHandler();
+      globalAny.ErrorUtils.setGlobalHandler((error: any, isFatal: boolean) => {
+        ProductAnalyticsService.recordError(
+          error instanceof Error ? error : new Error(String(error)),
+          `Fatal_${isFatal}`,
+        );
+        if (originalHandler) {
+          originalHandler(error, isFatal);
+        }
+      });
+    }
+
     const setup = async () => {
       try {
+        initDb();
+        await ProductAnalyticsService.init();
         await mobileAds().initialize();
         interstitialManager.init();
-        initDb();
         await NotificationService.setupChannel();
         await ReviewManager.recordAppOpen();
+
+        const [lockEnabled, support] = await Promise.all([
+          AppLockService.getAppLockEnabled(),
+          AppLockService.checkHardwareSupport(),
+        ]);
+
+        setAppLockEnabled(lockEnabled);
+        setIsEnrolled(support.isEnrolled);
+
+        if (lockEnabled) {
+          const result = await AppLockService.authenticate();
+          setIsLocked(!result.success);
+        }
+
         setDbInitialized(true);
       } catch (e) {
         console.error('Failed to initialize local DB or Ads', e);
+        if (e instanceof Error) {
+          ProductAnalyticsService.recordError(e, 'InitializationError');
+        }
       }
     };
     setup();
-  }, []);
+  }, [setAppLockEnabled]);
+
+  useEffect(() => {
+    const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+      if (
+        prevAppState.current === 'background' &&
+        nextAppState === 'active' &&
+        appLockEnabled
+      ) {
+        const support = await AppLockService.checkHardwareSupport();
+        setIsEnrolled(support.isEnrolled);
+        setIsLocked(true);
+        const result = await AppLockService.authenticate();
+        setIsLocked(!result.success);
+      }
+
+      if (nextAppState === 'background') {
+        ProductAnalyticsService.logAppBackground().catch(() => {});
+      } else if (nextAppState === 'active') {
+        ProductAnalyticsService.logAppForeground().catch(() => {});
+      }
+
+      prevAppState.current = nextAppState;
+    };
+
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+    return () => {
+      subscription.remove();
+    };
+  }, [appLockEnabled]);
 
   useEffect(() => {
     if (dbInitialized && !isLoaded) {
       loadData();
     }
-    if (
-      dbInitialized &&
-      isLoaded &&
-      pathname !== '/onboarding' &&
-      pathname !== '/'
-    ) {
-      checkBackupReminder(t);
+    if (dbInitialized && isLoaded) {
+      ExpoSplashScreen.hideAsync().catch(() => {});
+      if (pathname !== '/onboarding' && pathname !== '/') {
+        checkBackupReminder(t);
+      }
     }
   }, [dbInitialized, isLoaded, loadData, pathname, t]);
 
+  const handleUnlock = useCallback(async () => {
+    const result = await AppLockService.authenticate();
+    if (result.success) {
+      setIsLocked(false);
+    }
+  }, []);
+
   if (!dbInitialized || !isLoaded) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: theme.colors.background,
-        }}
-      >
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
-    );
+    return <SplashScreen />;
   }
 
   return (
@@ -220,6 +297,9 @@ export default function RootLayout() {
             />
           </Stack>
           <ReviewPrePromptDialog />
+          {isLocked && appLockEnabled && (
+            <AppLockScreen isEnrolled={isEnrolled} onUnlock={handleUnlock} />
+          )}
         </ThemeProvider>
       </PaperProvider>
     </GestureHandlerRootView>

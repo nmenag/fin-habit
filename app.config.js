@@ -109,6 +109,8 @@ module.exports = {
         },
       ],
       'expo-localization',
+      'expo-local-authentication',
+      'expo-secure-store',
       [
         'expo-notifications',
         {
