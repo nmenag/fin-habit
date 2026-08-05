@@ -19,6 +19,7 @@ import { isInRange } from '../../../utils/dateFilters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { fontScale, moderateScale } from '../../../utils/responsive';
+import { calculateCategoryGrowth } from '../../../utils/categoryGrowth';
 
 const addAlpha = (
   color: string | undefined,
@@ -55,11 +56,12 @@ export const InsightsScreen = () => {
   const analyticsReport = useStore((s) => s.analyticsReport);
   const formatCurrency = useStore((s) => s.formatCurrency);
   const currencySymbol = useStore((s) => s.currencySymbol);
+  const currency = useStore((s) => s.currency);
   const loadFullData = useStore((s) => s.loadFullData);
   const checkAndShowAd = useStore((s) => s.checkAndShowAd);
   const refreshAnalytics = useStore((s) => s.refreshAnalytics);
 
-  const { t, translateName } = useTranslation();
+  const { t, translateName, language } = useTranslation();
   const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
   const selectedRange = useFilterStore((s) => s.selectedRange);
@@ -261,67 +263,119 @@ export const InsightsScreen = () => {
   const memoizedLegend = useMemo(
     () => (
       <View style={styles.legendList}>
-        {filtered.categoryBreakdown.map((item, i) => (
-          <View key={i} style={styles.legendRow}>
-            <View
-              style={[
-                styles.legendIconContainer,
-                {
-                  backgroundColor: addAlpha(item.color, 0.08, '#64748B'),
-                  borderColor: addAlpha(item.color, 0.17, '#64748B'),
-                  borderWidth: 1,
-                },
-              ]}
-            >
-              <MaterialCommunityIcons
-                name={getValidCategoryIcon(item.icon) as any}
-                size={14}
-                color={item.color}
-              />
-            </View>
-            <Text style={styles.legendName} numberOfLines={1}>
-              {item.name}
-            </Text>
-            <Text
-              style={{
-                fontFamily: 'Inter-Medium',
-                color: theme.colors.onSurfaceVariant,
-                fontWeight: '500',
-                fontSize: 12,
-              }}
-            >
-              {item.percentage}%
-            </Text>
-            <Text
-              style={[
-                styles.legendAmount,
-                {
+        {filtered.categoryBreakdown.map((item, i) => {
+          const prevCat = analyticsReport?.previousCategoryExpenses?.find(
+            (p) => p.categoryId === item.id,
+          );
+          const growth = calculateCategoryGrowth({
+            currentSpending: item.amount,
+            previousMonthTotal: prevCat ? prevCat.amount : 0,
+            currencyCode: currency,
+            language,
+          });
+
+          const badgeText = growth.growthPercentageBadge || growth.statusLabel;
+
+          let badgeBg = addAlpha(
+            theme.colors.onSurfaceVariant,
+            0.08,
+            '#64748B',
+          );
+          let badgeColor = theme.colors.onSurfaceVariant;
+
+          if (growth.status === 'new') {
+            badgeBg = addAlpha(theme.colors.primary, 0.12, '#22C55E');
+            badgeColor = theme.colors.primary;
+          } else if (growth.status === 'no_spend') {
+            badgeBg = addAlpha(theme.colors.income, 0.12, '#16A34A');
+            badgeColor = theme.colors.income;
+          } else if (growth.status === 'normal') {
+            if (
+              growth.displayGrowthPercentage !== null &&
+              growth.displayGrowthPercentage > 0
+            ) {
+              badgeBg = addAlpha(theme.colors.error, 0.12, '#EF4444');
+              badgeColor = theme.colors.error;
+            } else if (
+              growth.displayGrowthPercentage !== null &&
+              growth.displayGrowthPercentage < 0
+            ) {
+              badgeBg = addAlpha(theme.colors.income, 0.12, '#16A34A');
+              badgeColor = theme.colors.income;
+            }
+          }
+
+          return (
+            <View key={i} style={styles.legendRow}>
+              <View
+                style={[
+                  styles.legendIconContainer,
+                  {
+                    backgroundColor: addAlpha(item.color, 0.08, '#64748B'),
+                    borderColor: addAlpha(item.color, 0.17, '#64748B'),
+                    borderWidth: 1,
+                  },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name={getValidCategoryIcon(item.icon) as any}
+                  size={14}
+                  color={item.color}
+                />
+              </View>
+              <Text style={styles.legendName} numberOfLines={1}>
+                {item.name}
+              </Text>
+              {badgeText && (
+                <View
+                  style={[styles.growthBadge, { backgroundColor: badgeBg }]}
+                >
+                  <Text style={[styles.growthBadgeText, { color: badgeColor }]}>
+                    {badgeText}
+                  </Text>
+                </View>
+              )}
+              <Text
+                style={{
                   fontFamily: 'Inter-Medium',
+                  color: theme.colors.onSurfaceVariant,
                   fontWeight: '500',
-                  color: theme.colors.onSurface,
-                  flexShrink: 1,
-                  textAlign: 'right',
-                  fontSize: 13,
-                },
-              ]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-            >
-              {formatCurrency(item.amount)}
-            </Text>
-          </View>
-        ))}
+                  fontSize: 12,
+                  marginLeft: 4,
+                }}
+              >
+                {item.percentage}%
+              </Text>
+              <Text
+                style={[
+                  styles.legendAmount,
+                  {
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    color: theme.colors.onSurface,
+                    flexShrink: 1,
+                    textAlign: 'right',
+                    fontSize: 13,
+                  },
+                ]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {formatCurrency(item.amount)}
+              </Text>
+            </View>
+          );
+        })}
       </View>
     ),
     [
       filtered.categoryBreakdown,
+      analyticsReport,
+      currency,
+      language,
       theme.colors,
       formatCurrency,
-      styles.legendAmount,
-      styles.legendIconContainer,
-      styles.legendList,
-      styles.legendName,
-      styles.legendRow,
+      styles,
     ],
   );
 
@@ -1191,6 +1245,17 @@ const defaultStyles = (theme: any) =>
     },
     legendAmount: {
       marginLeft: 8,
+    },
+    growthBadge: {
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 6,
+      marginRight: 6,
+    },
+    growthBadgeText: {
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      fontSize: 10,
     },
     growthContainer: {
       alignItems: 'center',

@@ -6,6 +6,7 @@ import {
 import { AnalyticsReport, Insight } from './types';
 import { formatCurrency } from '../../../utils/formatters';
 import { getLocalISOString } from '../../../utils/dateUtils';
+import { calculateCategoryGrowth } from '../../../utils/categoryGrowth';
 
 export class InsightEngine {
   static generateInsights(
@@ -100,12 +101,18 @@ export class InsightEngine {
         const prev = previousCategoryExpenses.find(
           (p) => p.categoryId === cat.categoryId,
         );
-        if (prev && prev.amount > 0) {
-          const inc = ((cat.amount - prev.amount) / prev.amount) * 100;
-          if (inc > maxIncrease) {
-            maxIncrease = inc;
-            targetCat = cat;
-          }
+        const growth = calculateCategoryGrowth({
+          currentSpending: cat.amount,
+          previousMonthTotal: prev ? prev.amount : 0,
+          language,
+        });
+        if (
+          growth.status === 'normal' &&
+          growth.rawGrowthPercentage !== null &&
+          growth.rawGrowthPercentage > maxIncrease
+        ) {
+          maxIncrease = growth.rawGrowthPercentage;
+          targetCat = cat;
         }
       });
 
@@ -156,9 +163,32 @@ export class InsightEngine {
       now.getMonth() + 1,
       0,
     ).getDate();
+    const daysInPrevMonth = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      0,
+    ).getDate();
 
-    if (currentMonth.expenses > 0 && currentDay > 3) {
-      const projection = (currentMonth.expenses / currentDay) * daysInMonth;
+    const prevCalendarExpenses = report.previousCalendarMonth.expenses;
+    const prevDailyRate =
+      prevCalendarExpenses > 0 ? prevCalendarExpenses / daysInPrevMonth : 0;
+    const currentDailyRate =
+      currentDay > 0 ? currentMonth.expenses / currentDay : 0;
+
+    const hasEnoughCurrentData = currentDay >= 7;
+    const hasPrevData = prevDailyRate > 0;
+    const hasCurrentData = currentMonth.expenses > 0;
+
+    if (hasCurrentData && (hasEnoughCurrentData || hasPrevData)) {
+      const currentWeight = Math.min(currentDay / daysInMonth, 1);
+      const prevWeight = 1 - currentWeight;
+
+      const blendedDailyRate = hasPrevData
+        ? currentDailyRate * currentWeight + prevDailyRate * prevWeight
+        : currentDailyRate;
+
+      const projection = blendedDailyRate * daysInMonth;
+
       insights.push({
         id: 'spending-projection',
         title: t.insightProjectionTitle,

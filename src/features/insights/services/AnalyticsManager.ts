@@ -27,9 +27,6 @@ export class AnalyticsManager {
 
     const prevRange = getPreviousPeriodRange(range);
     if (prevRange) {
-      previousCategoryExpenses =
-        await AnalyticsService.getCategoryExpenses(prevRange);
-
       if (range.type === 'month') {
         const start = new Date(range.startDate);
         const fullPrevRange: DateRange = {
@@ -54,8 +51,12 @@ export class AnalyticsManager {
           ),
         };
         previousMonth = await AnalyticsService.getMonthlyMetrics(fullPrevRange);
+        previousCategoryExpenses =
+          await AnalyticsService.getCategoryExpenses(fullPrevRange);
       } else {
         previousMonth = await AnalyticsService.getMonthlyMetrics(prevRange);
+        previousCategoryExpenses =
+          await AnalyticsService.getCategoryExpenses(prevRange);
       }
     }
 
