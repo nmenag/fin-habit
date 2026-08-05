@@ -6,6 +6,7 @@ import {
 import { AnalyticsReport, Insight } from './types';
 import { formatCurrency } from '../../../utils/formatters';
 import { getLocalISOString } from '../../../utils/dateUtils';
+import { calculateCategoryGrowth } from '../../../utils/categoryGrowth';
 
 export class InsightEngine {
   static generateInsights(
@@ -100,12 +101,18 @@ export class InsightEngine {
         const prev = previousCategoryExpenses.find(
           (p) => p.categoryId === cat.categoryId,
         );
-        if (prev && prev.amount > 0) {
-          const inc = ((cat.amount - prev.amount) / prev.amount) * 100;
-          if (inc > maxIncrease) {
-            maxIncrease = inc;
-            targetCat = cat;
-          }
+        const growth = calculateCategoryGrowth({
+          currentSpending: cat.amount,
+          previousMonthTotal: prev ? prev.amount : 0,
+          language,
+        });
+        if (
+          growth.status === 'normal' &&
+          growth.rawGrowthPercentage !== null &&
+          growth.rawGrowthPercentage > maxIncrease
+        ) {
+          maxIncrease = growth.rawGrowthPercentage;
+          targetCat = cat;
         }
       });
 

@@ -501,4 +501,8 @@ export const en = {
   appLockSubtitle: 'Verify your identity to continue.',
   appLockButton: 'Unlock',
   appLockOpenSettings: 'Open Settings',
+
+  growthLabelNew: 'New',
+  growthLabelNoSpend: 'No spend this month',
+  growthLabelOccasional: 'Occasional spend',
 };

@@ -510,4 +510,8 @@ export const es = {
   appLockSubtitle: 'Verifica tu identidad para continuar.',
   appLockButton: 'Desbloquear',
   appLockOpenSettings: 'Abrir Ajustes',
+
+  growthLabelNew: 'Nuevo',
+  growthLabelNoSpend: 'Sin gastos este mes',
+  growthLabelOccasional: 'Gasto ocasional',
 };
