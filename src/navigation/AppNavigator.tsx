@@ -84,6 +84,11 @@ const GoalDetailScreen = lazy(() =>
     default: m.GoalDetailScreen,
   })),
 );
+const EmergencyFundScreen = lazy(() =>
+  import('../features/goals').then((m) => ({
+    default: m.EmergencyFundScreen,
+  })),
+);
 const AboutScreen = lazy(() =>
   import('../features/settings').then((m) => ({ default: m.AboutScreen })),
 );
@@ -234,6 +239,11 @@ export const AppNavigator = () => {
         name="GoalDetail"
         component={withSuspense(GoalDetailScreen)}
         options={{ title: t('goalDetail') || 'Goal Details' }}
+      />
+      <Stack.Screen
+        name="EmergencyFund"
+        component={withSuspense(EmergencyFundScreen)}
+        options={{ title: t('emergencyFund') }}
       />
       <Stack.Screen
         name="About"

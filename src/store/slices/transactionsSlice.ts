@@ -39,9 +39,20 @@ export const createTransactionsSlice: StateCreator<
     const transactions = db.getAllSync<Transaction>(
       'SELECT id, type, amount, categoryId, accountId, budgetId, date, note, toAccountId FROM transactions ORDER BY date DESC',
     );
-    const goals = db.getAllSync<Goal>(
-      'SELECT id, name, targetAmount, currentAmount, color, icon, deadline, status, displayOrder FROM goals ORDER BY displayOrder ASC, name ASC',
+    const goalRows = db.getAllSync<any>(
+      'SELECT id, name, targetAmount, currentAmount, color, icon, deadline, status, displayOrder, type, selectedMonths, monthsToCover FROM goals ORDER BY displayOrder ASC, name ASC',
     );
+    const goals: Goal[] = goalRows.map((r) => ({
+      ...r,
+      type: r.type || 'standard',
+      selectedMonths:
+        typeof r.selectedMonths === 'string' && r.selectedMonths.trim() !== ''
+          ? JSON.parse(r.selectedMonths)
+          : Array.isArray(r.selectedMonths)
+            ? r.selectedMonths
+            : undefined,
+      monthsToCover: r.monthsToCover ?? undefined,
+    }));
     const budgets = db.getAllSync<Budget>(
       'SELECT id, name, amount, color, categoryId, displayOrder FROM budgets ORDER BY displayOrder ASC, id ASC',
     );

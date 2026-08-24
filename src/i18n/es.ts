@@ -514,4 +514,27 @@ export const es = {
   growthLabelNew: 'Nuevo',
   growthLabelNoSpend: 'Sin gastos este mes',
   growthLabelOccasional: 'Gasto ocasional',
+
+  emergencyFund: 'Fondo de Emergencia',
+  emergencyFundDesc:
+    'Un colchón financiero para imprevistos basado en tus gastos reales.',
+  setupEmergencyFund: 'Configurar Fondo de Emergencia',
+  editEmergencyFund: 'Editar cálculo',
+  selectMonthsToCover: 'Selecciona los meses base',
+  monthsToCoverLabel: 'Meses a cubrir',
+  monthlyExpenseAverage: 'Gasto promedio mensual',
+  recommendedFund: 'Fondo recomendado',
+  emergencyFundTip:
+    'Basado en los {{count}} meses que elegiste, tu gasto mensual promedio es {{avg}}. Para cubrir {{months}} meses, tu fondo de emergencia recomendado es {{target}}.',
+  noExpenseDataForMonths: 'No hay gastos registrados en meses anteriores.',
+  saveEmergencyFund: 'Guardar Fondo de Emergencia',
+  updateEmergencyFund: 'Actualizar Fondo de Emergencia',
+  monthsCount: '{{count}} meses',
+  selectBasisMonthsHeader: 'Selecciona los meses base para tu cálculo:',
+  monthsToCoverSliderHeader: '¿Cuántos meses deseas cubrir?',
+  monthsUnit: 'meses',
+  invalidAmount: 'Monto inválido',
+  saved: 'Guardado',
+  addContribution: 'Abonar al Fondo',
+  details: 'Detalles del Cálculo',
 };

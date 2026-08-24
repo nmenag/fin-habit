@@ -505,4 +505,27 @@ export const en = {
   growthLabelNew: 'New',
   growthLabelNoSpend: 'No spend this month',
   growthLabelOccasional: 'Occasional spend',
+
+  emergencyFund: 'Emergency Fund',
+  emergencyFundDesc:
+    'A financial safety net for unexpected events based on your real expenses.',
+  setupEmergencyFund: 'Set up Emergency Fund',
+  editEmergencyFund: 'Edit calculation',
+  selectMonthsToCover: 'Select basis months',
+  monthsToCoverLabel: 'Months to cover',
+  monthlyExpenseAverage: 'Average monthly expense',
+  recommendedFund: 'Recommended fund',
+  emergencyFundTip:
+    'Based on the {{count}} months you chose, your average monthly expense is {{avg}}. To cover {{months}} months, your recommended emergency fund is {{target}}.',
+  noExpenseDataForMonths: 'No expenses registered in past months.',
+  saveEmergencyFund: 'Save Emergency Fund',
+  updateEmergencyFund: 'Update Emergency Fund',
+  monthsCount: '{{count}} months',
+  selectBasisMonthsHeader: 'Select basis months for your calculation:',
+  monthsToCoverSliderHeader: 'How many months do you want to cover?',
+  monthsUnit: 'months',
+  invalidAmount: 'Invalid amount',
+  saved: 'Saved',
+  addContribution: 'Add Contribution',
+  details: 'Calculation Details',
 };
