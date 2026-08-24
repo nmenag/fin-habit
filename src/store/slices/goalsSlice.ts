@@ -22,9 +22,20 @@ export const createGoalsSlice: StateCreator<AppStore, [], [], GoalsSlice> = (
 
   loadGoals: () => {
     const db = getDb();
-    const goals = db.getAllSync<Goal>(
-      'SELECT id, name, targetAmount, currentAmount, color, icon, deadline, status, displayOrder FROM goals ORDER BY displayOrder ASC',
+    const rows = db.getAllSync<any>(
+      'SELECT id, name, targetAmount, currentAmount, color, icon, deadline, status, displayOrder, type, selectedMonths, monthsToCover FROM goals ORDER BY displayOrder ASC',
     );
+    const goals: Goal[] = rows.map((r) => ({
+      ...r,
+      type: r.type || 'standard',
+      selectedMonths:
+        typeof r.selectedMonths === 'string' && r.selectedMonths.trim() !== ''
+          ? JSON.parse(r.selectedMonths)
+          : Array.isArray(r.selectedMonths)
+            ? r.selectedMonths
+            : undefined,
+      monthsToCover: r.monthsToCover ?? undefined,
+    }));
     set({ goals });
   },
 
@@ -39,8 +50,12 @@ export const createGoalsSlice: StateCreator<AppStore, [], [], GoalsSlice> = (
     const displayOrder = (maxOrder?.maxOrder || 0) + 1;
     const goal: Goal = { ...goalData, id, displayOrder };
 
+    const selectedMonthsStr = goal.selectedMonths
+      ? JSON.stringify(goal.selectedMonths)
+      : null;
+
     db.runSync(
-      'INSERT INTO goals (id, name, targetAmount, currentAmount, color, icon, deadline, status, displayOrder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO goals (id, name, targetAmount, currentAmount, color, icon, deadline, status, displayOrder, type, selectedMonths, monthsToCover) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         goal.id,
         goal.name,
@@ -51,6 +66,9 @@ export const createGoalsSlice: StateCreator<AppStore, [], [], GoalsSlice> = (
         goal.deadline ?? null,
         goal.status,
         displayOrder,
+        goal.type ?? 'standard',
+        selectedMonthsStr,
+        goal.monthsToCover ?? null,
       ],
     );
     set((state) => ({ goals: [...state.goals, goal] }));
@@ -60,8 +78,12 @@ export const createGoalsSlice: StateCreator<AppStore, [], [], GoalsSlice> = (
     const db = getDb();
 
     ProductAnalyticsService.logGoalUpdated().catch(() => {});
+    const selectedMonthsStr = goal.selectedMonths
+      ? JSON.stringify(goal.selectedMonths)
+      : null;
+
     db.runSync(
-      'UPDATE goals SET name = ?, targetAmount = ?, currentAmount = ?, color = ?, icon = ?, deadline = ?, status = ? WHERE id = ?',
+      'UPDATE goals SET name = ?, targetAmount = ?, currentAmount = ?, color = ?, icon = ?, deadline = ?, status = ?, type = ?, selectedMonths = ?, monthsToCover = ? WHERE id = ?',
       [
         goal.name,
         goal.targetAmount,
@@ -70,6 +92,9 @@ export const createGoalsSlice: StateCreator<AppStore, [], [], GoalsSlice> = (
         goal.icon ?? null,
         goal.deadline ?? null,
         goal.status,
+        goal.type ?? 'standard',
+        selectedMonthsStr,
+        goal.monthsToCover ?? null,
         goal.id,
       ],
     );

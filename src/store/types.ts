@@ -45,6 +45,8 @@ export interface Transaction {
   toAccountId?: string | null;
 }
 
+export type GoalType = 'standard' | 'emergency_fund';
+
 export interface Goal {
   id: string;
   name: string;
@@ -55,4 +57,7 @@ export interface Goal {
   deadline?: string | null;
   status: 'active' | 'completed';
   displayOrder: number;
+  type?: GoalType;
+  selectedMonths?: string[];
+  monthsToCover?: number;
 }

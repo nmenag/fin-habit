@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useCallback, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
@@ -13,13 +13,18 @@ import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { BannerAdComponent } from '../../../shared/components/BannerAdComponent';
 import { Goal, useStore, useTranslation } from '../../../store/useStore';
 import { getValidGoalIcon } from '../../../constants';
-import { AppTheme, spacing } from '../../../theme/theme';
+import { AppTheme, featureColors, spacing } from '../../../theme/theme';
 import { fontScale } from '../../../utils/responsive';
 
 export const GoalsScreen = () => {
   const goals = useStore((s) => s.goals);
   const formatCurrency = useStore((s) => s.formatCurrency);
   const updateGoalsOrder = useStore((s) => s.updateGoalsOrder);
+
+  const emergencyFundGoal = useMemo(
+    () => goals.find((g) => g.type === 'emergency_fund'),
+    [goals],
+  );
 
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -252,11 +257,54 @@ export const GoalsScreen = () => {
           { paddingBottom: insets.bottom + 140 },
         ]}
         ListHeaderComponent={
-          goals.length > 0 ? (
-            <Animated.View
-              entering={FadeIn.duration(400)}
-              style={styles.dashboardHeader}
+          <Animated.View
+            entering={FadeIn.duration(400)}
+            style={styles.dashboardHeader}
+          >
+            <TouchableOpacity
+              style={styles.emergencyBanner}
+              onPress={() => router.push('/emergency-fund')}
+              activeOpacity={0.8}
             >
+              <View style={styles.emergencyIconCircle}>
+                <Ionicons
+                  name="shield-checkmark"
+                  size={22}
+                  color={featureColors.emergencyFund}
+                />
+              </View>
+              <View style={{ flex: 1, paddingRight: 8 }}>
+                <View style={styles.emergencyTitleRow}>
+                  <Text style={styles.emergencyTitle}>
+                    {t('emergencyFund')}
+                  </Text>
+                  {emergencyFundGoal && (
+                    <View style={styles.emergencyPercentBadge}>
+                      <Text style={styles.emergencyPercentText}>
+                        {Math.round(
+                          (emergencyFundGoal.currentAmount /
+                            (emergencyFundGoal.targetAmount || 1)) *
+                            100,
+                        )}
+                        %
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.emergencySubtitle} numberOfLines={1}>
+                  {emergencyFundGoal
+                    ? `${formatCurrency(emergencyFundGoal.currentAmount)} / ${formatCurrency(emergencyFundGoal.targetAmount)}`
+                    : t('emergencyFundDesc')}
+                </Text>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={18}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </TouchableOpacity>
+
+            {goals.length > 0 && (
               <View style={styles.statCard}>
                 <View style={styles.overviewTextRow}>
                   <View style={{ flex: 1, marginRight: 8 }}>
@@ -299,37 +347,39 @@ export const GoalsScreen = () => {
                   </Text>
                 </View>
               </View>
+            )}
 
-              {smartAdvice && (
-                <View
+            {goals.length > 0 && smartAdvice && (
+              <View
+                style={[
+                  styles.recommendationBox,
+                  {
+                    backgroundColor: smartAdvice.bgColor,
+                    borderColor: `${smartAdvice.color}2B`,
+                  },
+                ]}
+              >
+                <Ionicons
+                  name="sparkles-outline"
+                  size={16}
+                  color={smartAdvice.color}
+                  style={{ marginRight: 10 }}
+                />
+                <Text
                   style={[
-                    styles.recommendationBox,
-                    {
-                      backgroundColor: smartAdvice.bgColor,
-                      borderColor: `${smartAdvice.color}2B`,
-                    },
+                    styles.recommendationText,
+                    { color: theme.colors.onSurface },
                   ]}
                 >
-                  <Ionicons
-                    name="sparkles-outline"
-                    size={16}
-                    color={smartAdvice.color}
-                    style={{ marginRight: 10 }}
-                  />
-                  <Text
-                    style={[
-                      styles.recommendationText,
-                      { color: theme.colors.onSurface },
-                    ]}
-                  >
-                    {smartAdvice.text}
-                  </Text>
-                </View>
-              )}
+                  {smartAdvice.text}
+                </Text>
+              </View>
+            )}
 
+            {goals.length > 0 && (
               <Text style={styles.sectionTitle}>{t('savingsMilestones')}</Text>
-            </Animated.View>
-          ) : null
+            )}
+          </Animated.View>
         }
         ListEmptyComponent={
           <Animated.View entering={FadeIn.duration(400)} style={styles.empty}>
@@ -391,6 +441,53 @@ const defaultStyles = (theme: AppTheme) =>
       paddingHorizontal: 16,
       marginTop: 16,
       marginBottom: 8,
+    },
+    emergencyBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 14,
+      borderRadius: theme.roundness || 12,
+      backgroundColor: theme.dark ? '#052E16' : '#ECFDF5',
+      borderWidth: 1,
+      borderColor: featureColors.emergencyFund,
+      marginBottom: 12,
+    },
+    emergencyIconCircle: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: theme.dark ? '#064E3B' : '#DCFCE7',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 12,
+    },
+    emergencyTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    emergencyTitle: {
+      fontSize: fontScale(15),
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      color: theme.colors.onSurface,
+    },
+    emergencySubtitle: {
+      fontSize: fontScale(12),
+      fontFamily: 'Inter-Regular',
+      color: theme.colors.onSurfaceVariant,
+      marginTop: 2,
+    },
+    emergencyPercentBadge: {
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 10,
+      backgroundColor: theme.dark ? '#064E3B' : '#DCFCE7',
+    },
+    emergencyPercentText: {
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-SemiBold',
+      color: featureColors.emergencyFund,
     },
     statCard: {
       borderWidth: 1,

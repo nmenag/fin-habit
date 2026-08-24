@@ -177,7 +177,7 @@ export const restoreFromJSON = async (
     }
 
     const insertGoal = db.prepareSync(
-      'INSERT INTO goals (id, name, targetAmount, currentAmount, color, icon, deadline, status, displayOrder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO goals (id, name, targetAmount, currentAmount, color, icon, deadline, status, displayOrder, type, selectedMonths, monthsToCover) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     );
     try {
       goals.forEach((g: any) =>
@@ -191,6 +191,13 @@ export const restoreFromJSON = async (
           g.deadline,
           g.status,
           g.displayOrder || 0,
+          g.type || 'standard',
+          g.selectedMonths
+            ? typeof g.selectedMonths === 'string'
+              ? g.selectedMonths
+              : JSON.stringify(g.selectedMonths)
+            : null,
+          g.monthsToCover || 6,
         ]),
       );
     } finally {

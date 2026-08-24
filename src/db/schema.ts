@@ -118,9 +118,24 @@ export const initDb = () => {
         icon TEXT DEFAULT 'trophy',
         deadline TEXT,
         status TEXT DEFAULT 'active',
-        displayOrder INTEGER DEFAULT 0
+        displayOrder INTEGER DEFAULT 0,
+        type TEXT DEFAULT 'standard',
+        selectedMonths TEXT,
+        monthsToCover INTEGER DEFAULT 6
       );
     `);
+
+    try {
+      db.execSync("ALTER TABLE goals ADD COLUMN type TEXT DEFAULT 'standard';");
+    } catch {}
+    try {
+      db.execSync('ALTER TABLE goals ADD COLUMN selectedMonths TEXT;');
+    } catch {}
+    try {
+      db.execSync(
+        'ALTER TABLE goals ADD COLUMN monthsToCover INTEGER DEFAULT 6;',
+      );
+    } catch {}
 
     try {
       db.execSync(
