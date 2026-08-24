@@ -291,7 +291,7 @@ export const GoalsScreen = () => {
                     </View>
                   )}
                 </View>
-                <Text style={styles.emergencySubtitle} numberOfLines={1}>
+                <Text style={styles.emergencySubtitle} numberOfLines={2}>
                   {emergencyFundGoal
                     ? `${formatCurrency(emergencyFundGoal.currentAmount)} / ${formatCurrency(emergencyFundGoal.targetAmount)}`
                     : t('emergencyFundDesc')}
