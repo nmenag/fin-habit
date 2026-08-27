@@ -1,28 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { enUS, es as esLocale } from 'date-fns/locale';
-import { Stack } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  useWindowDimensions,
-  View,
-} from 'react-native';
-import {
-  Button,
-  Card,
-  Checkbox,
-  IconButton,
-  Modal,
-  Portal,
-  ProgressBar,
-  Text,
-  TextInput,
-  useTheme,
-} from 'react-native-paper';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Card, Text, useTheme } from 'react-native-paper';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -36,505 +17,246 @@ interface MonthData {
   totalExpense: number;
 }
 
-export const EmergencyFundScreen = () => {
-  const { goals, addGoal, editGoal, contributeToGoal, formatCurrency } =
-    useStore();
-  const { t, language } = useTranslation();
-  const insets = useSafeAreaInsets();
-  const { width: windowWidth } = useWindowDimensions();
-  const isSmallDevice = windowWidth < 375;
+const DEFAULT_MONTHS_TO_COVER = 6;
 
+const loadMonthlyExpenses = (): MonthData[] => {
+  try {
+    const db = getDb();
+    return db.getAllSync<MonthData>(`
+      SELECT
+        substr(date, 1, 7) as month,
+        SUM(amount) as totalExpense
+      FROM transactions
+      WHERE type = 'expense'
+        AND (note IS NULL OR note NOT IN ('Balance Adjustment', 'Ajuste de Saldo'))
+      GROUP BY month
+      ORDER BY month DESC
+      LIMIT 12
+    `);
+  } catch {
+    return [];
+  }
+};
+
+export const EmergencyFundScreen = () => {
+  const { t, language } = useTranslation();
+  const formatCurrency = useStore((s) => s.formatCurrency);
+  const insets = useSafeAreaInsets();
   const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
 
-  const existingFundGoal = useMemo(
-    () => goals.find((g) => g.type === 'emergency_fund'),
-    [goals],
-  );
-
-  const [availableMonths, setAvailableMonths] = useState<MonthData[]>([]);
-  const [isEditing, setIsEditing] = useState(!existingFundGoal);
-
-  const [selectedMonths, setSelectedMonths] = useState<string[]>(
-    existingFundGoal?.selectedMonths || [],
-  );
-  const [monthsToCover, setMonthsToCover] = useState<number>(
-    existingFundGoal?.monthsToCover || 6,
-  );
-
-  const [contribModalVisible, setContribModalVisible] = useState(false);
-  const [contribInput, setContribInput] = useState('');
-
-  const loadExpenseHistory = useCallback(() => {
-    try {
-      const db = getDb();
-      const rows = db.getAllSync<MonthData>(`
-        SELECT 
-          substr(date, 1, 7) as month,
-          SUM(amount) as totalExpense
-        FROM transactions
-        WHERE type = 'expense'
-          AND (note IS NULL OR note NOT IN ('Balance Adjustment', 'Ajuste de Saldo'))
-        GROUP BY month
-        ORDER BY month DESC
-      `);
-      setAvailableMonths(rows);
-
-      if (rows.length > 0 && selectedMonths.length === 0 && !existingFundGoal) {
-        setSelectedMonths(rows.map((r) => r.month));
-      }
-    } catch (e) {
-      console.error('Error fetching monthly expense history:', e);
-    }
-  }, [existingFundGoal, selectedMonths.length]);
+  const [months, setMonths] = useState<MonthData[]>([]);
 
   useEffect(() => {
-    loadExpenseHistory();
-  }, [loadExpenseHistory]);
-
-  useEffect(() => {
-    if (existingFundGoal) {
-      if (existingFundGoal.selectedMonths) {
-        setSelectedMonths(existingFundGoal.selectedMonths);
-      }
-      if (existingFundGoal.monthsToCover) {
-        setMonthsToCover(existingFundGoal.monthsToCover);
-      }
-    }
-  }, [existingFundGoal]);
-
-  const monthMap = useMemo(() => {
-    const map = new Map<string, number>();
-    availableMonths.forEach((m) => map.set(m.month, m.totalExpense));
-    return map;
-  }, [availableMonths]);
-
-  const monthlyExpenseBase = useMemo(() => {
-    if (selectedMonths.length === 0) return 0;
-    let sum = 0;
-    selectedMonths.forEach((m) => {
-      sum += monthMap.get(m) || 0;
-    });
-    return sum / selectedMonths.length;
-  }, [selectedMonths, monthMap]);
-
-  const calculatedTarget = useMemo(() => {
-    return Math.round(monthlyExpenseBase * monthsToCover);
-  }, [monthlyExpenseBase, monthsToCover]);
-
-  const toggleMonth = useCallback((month: string) => {
-    setSelectedMonths((prev) =>
-      prev.includes(month) ? prev.filter((m) => m !== month) : [...prev, month],
-    );
+    setMonths(loadMonthlyExpenses());
   }, []);
 
-  const handleSave = useCallback(() => {
-    if (selectedMonths.length === 0) {
-      Alert.alert(t('error') || 'Error', t('selectMonthsToCover'));
-      return;
-    }
+  const avgMonthlyExpense = useMemo(() => {
+    if (months.length === 0) return 0;
+    const total = months.reduce((sum, m) => sum + m.totalExpense, 0);
+    return total / months.length;
+  }, [months]);
 
-    const accentColor = featureColors.emergencyFund || theme.colors.primary;
-    const goalTitle = t('emergencyFund');
+  const recommendedTarget = useMemo(
+    () => Math.round(avgMonthlyExpense * DEFAULT_MONTHS_TO_COVER),
+    [avgMonthlyExpense],
+  );
 
-    if (existingFundGoal) {
-      editGoal({
-        ...existingFundGoal,
-        name: goalTitle,
-        targetAmount: calculatedTarget,
-        selectedMonths,
-        monthsToCover,
-        color: accentColor,
-        icon: 'shield-checkmark',
-      });
-    } else {
-      addGoal({
-        name: goalTitle,
-        targetAmount: calculatedTarget,
-        currentAmount: 0,
-        color: accentColor,
-        icon: 'shield-checkmark',
-        status: 'active',
-        displayOrder: 0,
-        type: 'emergency_fund',
-        selectedMonths,
-        monthsToCover,
-      });
-    }
+  const formatMonthLabel = useCallback(
+    (monthStr: string) => {
+      try {
+        const [year, month] = monthStr.split('-');
+        const date = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
+        const str = format(date, 'MMMM yyyy', {
+          locale: language === 'es' ? esLocale : enUS,
+        });
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      } catch {
+        return monthStr;
+      }
+    },
+    [language],
+  );
 
-    setIsEditing(false);
-  }, [
-    selectedMonths,
-    existingFundGoal,
-    calculatedTarget,
-    monthsToCover,
-    theme.colors.primary,
-    t,
-    editGoal,
-    addGoal,
-  ]);
-
-  const handleContributeSubmit = useCallback(() => {
-    if (!existingFundGoal) return;
-    const amount = parseFloat(contribInput.replace(/[^0-9.]/g, ''));
-    if (!amount || amount <= 0) {
-      Alert.alert(
-        t('error') || 'Error',
-        t('invalidAmount') || 'Monto inválido',
-      );
-      return;
-    }
-    contributeToGoal(existingFundGoal.id, amount);
-    setContribInput('');
-    setContribModalVisible(false);
-  }, [existingFundGoal, contribInput, contributeToGoal, t]);
-
-  const formatMonthLabel = (monthStr: string) => {
-    try {
-      const [year, month] = monthStr.split('-');
-      const date = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
-      const str = format(date, 'MMMM yyyy', {
-        locale: language === 'es' ? esLocale : enUS,
-      });
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    } catch {
-      return monthStr;
-    }
-  };
-
-  const currentAmount = existingFundGoal?.currentAmount || 0;
-  const progressFraction =
-    calculatedTarget > 0 ? Math.min(currentAmount / calculatedTarget, 1) : 0;
-  const progressPercent = Math.round(progressFraction * 100);
+  const hasData = months.length > 0;
 
   return (
     <View style={styles.container}>
-      <Stack.Screen
-        options={{
-          title: t('emergencyFund'),
-          headerBackTitle: t('goals'),
-        }}
-      />
-
       <ScrollView
         contentContainerStyle={[
           styles.content,
           { paddingBottom: insets.bottom + spacing.lg },
         ]}
+        showsVerticalScrollIndicator={false}
       >
-        {isEditing ? (
-          <Animated.View entering={FadeIn}>
-            <Card style={styles.setupCard}>
-              <Card.Content style={styles.cardContent}>
-                <View style={styles.iconHeaderContainer}>
-                  <View style={styles.headerIconCircle}>
-                    <Ionicons
-                      name="shield-checkmark"
-                      size={28}
-                      color={featureColors.emergencyFund}
-                    />
+        <Animated.View entering={FadeIn} style={styles.headerBlock}>
+          <View style={styles.headerIconCircle}>
+            <Ionicons
+              name="shield-checkmark"
+              size={32}
+              color={featureColors.emergencyFund}
+            />
+          </View>
+          <Text style={styles.headerTitle}>{t('emergencyFund')}</Text>
+          <Text style={styles.headerSubtitle}>{t('emergencyFundDesc')}</Text>
+        </Animated.View>
+
+        <Animated.View entering={FadeInUp.delay(80)}>
+          <Card style={styles.infoCard}>
+            <Card.Content style={styles.cardContent}>
+              <Text style={styles.sectionTitle}>
+                {language === 'es' ? '¿Qué es?' : 'What is it?'}
+              </Text>
+              <Text style={styles.bodyText}>
+                {language === 'es'
+                  ? 'Un fondo de emergencia es un colchón financiero que te protege ante gastos inesperados: desempleo, gastos médicos, reparaciones urgentes. Tenerlo te da tranquilidad y evita endeudarte.'
+                  : 'An emergency fund is a financial buffer that protects you from unexpected expenses: job loss, medical bills, urgent repairs. Having one gives you peace of mind and keeps you out of debt.'}
+              </Text>
+            </Card.Content>
+          </Card>
+        </Animated.View>
+
+        <Animated.View entering={FadeInUp.delay(140)}>
+          <Card style={styles.infoCard}>
+            <Card.Content style={styles.cardContent}>
+              <Text style={styles.sectionTitle}>
+                {language === 'es'
+                  ? '¿Cuánto necesito?'
+                  : 'How much do I need?'}
+              </Text>
+              <Text style={styles.bodyText}>
+                {language === 'es'
+                  ? 'Los expertos recomiendan ahorrar entre 3 y 6 meses de gastos mensuales. Si tienes ingresos variables o dependientes, apunta a 9–12 meses.'
+                  : 'Experts recommend saving 3–6 months of monthly expenses. If you have variable income or dependents, aim for 9–12 months.'}
+              </Text>
+
+              <View style={styles.pillRow}>
+                {[3, 6, 9, 12].map((m) => (
+                  <View key={m} style={styles.pill}>
+                    <Text style={styles.pillNumber}>{m}</Text>
+                    <Text style={styles.pillLabel}>
+                      {language === 'es' ? 'meses' : 'months'}
+                    </Text>
                   </View>
-                  <Text style={styles.setupTitle}>
-                    {existingFundGoal
-                      ? t('updateEmergencyFund')
-                      : t('setupEmergencyFund')}
+                ))}
+              </View>
+            </Card.Content>
+          </Card>
+        </Animated.View>
+
+        {hasData ? (
+          <Animated.View entering={FadeInUp.delay(200)}>
+            <Card style={styles.calcCard}>
+              <Card.Content style={styles.cardContent}>
+                <View style={styles.calcTitleRow}>
+                  <Ionicons
+                    name="calculator-outline"
+                    size={18}
+                    color={featureColors.emergencyFund}
+                  />
+                  <Text style={styles.sectionTitle}>
+                    {language === 'es'
+                      ? 'Tu estimación personal'
+                      : 'Your personal estimate'}
+                  </Text>
+                </View>
+                <Text style={styles.calcSubtitle}>
+                  {language === 'es'
+                    ? `Basado en tus últimos ${months.length} meses de gastos registrados:`
+                    : `Based on your last ${months.length} months of recorded expenses:`}
+                </Text>
+
+                <View style={styles.statRow}>
+                  <Text style={styles.statLabel}>
+                    {t('monthlyExpenseAverage')}
+                  </Text>
+                  <Text style={styles.statValue}>
+                    {formatCurrency(avgMonthlyExpense)}
                   </Text>
                 </View>
 
-                <Text style={styles.sectionSubtitle}>
-                  {t('selectBasisMonthsHeader')}
-                </Text>
-
-                {availableMonths.length === 0 ? (
-                  <View style={styles.emptyMonthsBox}>
-                    <Ionicons
-                      name="information-circle-outline"
-                      size={20}
-                      color={theme.colors.onSurfaceVariant}
-                    />
-                    <Text style={styles.emptyMonthsText}>
-                      {t('noExpenseDataForMonths')}
-                    </Text>
-                  </View>
-                ) : (
-                  <View style={styles.monthsList}>
-                    {availableMonths.map((m) => {
-                      const isChecked = selectedMonths.includes(m.month);
-                      return (
-                        <TouchableOpacity
-                          key={m.month}
-                          style={[
-                            styles.monthRow,
-                            isChecked && styles.monthRowSelected,
-                          ]}
-                          onPress={() => toggleMonth(m.month)}
-                          activeOpacity={0.7}
-                        >
-                          <Checkbox.Android
-                            status={isChecked ? 'checked' : 'unchecked'}
-                            onPress={() => toggleMonth(m.month)}
-                            color={featureColors.emergencyFund}
-                          />
-                          <Text style={styles.monthLabel}>
-                            {formatMonthLabel(m.month)}
-                          </Text>
-                          <Text style={styles.monthExpense}>
-                            {formatCurrency(m.totalExpense)}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                )}
-
                 <View style={styles.divider} />
 
-                <Text style={styles.sectionSubtitle}>
-                  {t('monthsToCoverSliderHeader')}
-                </Text>
-                <View style={styles.stepperContainer}>
-                  <IconButton
-                    icon="minus-circle-outline"
-                    size={28}
-                    disabled={monthsToCover <= 3}
-                    onPress={() =>
-                      setMonthsToCover((prev) => Math.max(3, prev - 1))
-                    }
-                  />
-                  <View style={styles.monthsDisplayBadge}>
-                    <Text style={styles.monthsNumberText}>{monthsToCover}</Text>
-                    <Text style={styles.monthsUnitText}>{t('monthsUnit')}</Text>
-                  </View>
-                  <IconButton
-                    icon="plus-circle-outline"
-                    size={28}
-                    disabled={monthsToCover >= 12}
-                    onPress={() =>
-                      setMonthsToCover((prev) => Math.min(12, prev + 1))
-                    }
-                  />
+                <View style={styles.targetBlock}>
+                  <Text style={styles.targetLabel}>
+                    {language === 'es'
+                      ? `Fondo recomendado (${DEFAULT_MONTHS_TO_COVER} meses)`
+                      : `Recommended fund (${DEFAULT_MONTHS_TO_COVER} months)`}
+                  </Text>
+                  <Text style={styles.targetAmount}>
+                    {formatCurrency(recommendedTarget)}
+                  </Text>
                 </View>
 
-                <View style={styles.calculationPreviewCard}>
-                  <View style={styles.calcRow}>
-                    <Text style={styles.calcLabel}>
-                      {t('monthlyExpenseAverage')}:
-                    </Text>
-                    <Text style={styles.calcValue}>
-                      {formatCurrency(monthlyExpenseBase)}
-                    </Text>
-                  </View>
-                  <View style={styles.calcRow}>
-                    <Text style={styles.calcLabel}>
-                      {t('monthsToCoverLabel')}:
-                    </Text>
-                    <Text style={styles.calcValue}>{monthsToCover}</Text>
-                  </View>
-                  <View style={[styles.calcRow, styles.calcRowTotal]}>
-                    <Text style={styles.calcTotalLabel}>
-                      {t('recommendedFund')}:
-                    </Text>
-                    <Text style={styles.calcTotalValue}>
-                      {formatCurrency(calculatedTarget)}
-                    </Text>
-                  </View>
-                </View>
-
-                <View
-                  style={[
-                    styles.actionButtonsRow,
-                    isSmallDevice && styles.actionButtonsRowStacked,
-                  ]}
-                >
-                  {existingFundGoal && (
-                    <Button
-                      mode="outlined"
-                      onPress={() => setIsEditing(false)}
-                      style={styles.cancelBtn}
-                      labelStyle={styles.actionBtnLabel}
-                    >
-                      {t('cancel') || 'Cancelar'}
-                    </Button>
-                  )}
-                  <Button
-                    mode="contained"
-                    onPress={handleSave}
-                    buttonColor={featureColors.emergencyFund}
-                    textColor="#FFFFFF"
-                    style={styles.saveBtn}
-                    labelStyle={styles.actionBtnLabel}
-                  >
-                    {t('saveEmergencyFund')}
-                  </Button>
+                <View style={styles.monthBreakdown}>
+                  <Text style={styles.breakdownHeader}>
+                    {language === 'es'
+                      ? 'Detalle mensual'
+                      : 'Monthly breakdown'}
+                  </Text>
+                  {months.slice(0, 6).map((m) => (
+                    <View key={m.month} style={styles.monthRow}>
+                      <Text style={styles.monthLabel}>
+                        {formatMonthLabel(m.month)}
+                      </Text>
+                      <Text style={styles.monthAmount}>
+                        {formatCurrency(m.totalExpense)}
+                      </Text>
+                    </View>
+                  ))}
                 </View>
               </Card.Content>
             </Card>
           </Animated.View>
         ) : (
-          <Animated.View entering={FadeInUp}>
-            {/* Prominent Recommendation Tip Block */}
-            <Card style={styles.tipCard}>
-              <Card.Content style={styles.tipCardContent}>
-                <View style={styles.tipHeaderRow}>
-                  <View style={styles.tipIconBox}>
-                    <Ionicons
-                      name="shield"
-                      size={24}
-                      color={featureColors.emergencyFund}
-                    />
-                  </View>
-                  <Text style={styles.tipTitle}>{t('emergencyFund')}</Text>
-                </View>
-                <Text style={styles.tipText}>
-                  {t('emergencyFundTip', {
-                    count: selectedMonths.length,
-                    avg: formatCurrency(monthlyExpenseBase),
-                    months: monthsToCover,
-                    target: formatCurrency(calculatedTarget),
-                  })}
-                </Text>
-              </Card.Content>
-            </Card>
-
-            {/* Target and Progress Block */}
-            <Card style={styles.progressCard}>
+          <Animated.View entering={FadeInUp.delay(200)}>
+            <Card style={styles.infoCard}>
               <Card.Content style={styles.cardContent}>
-                <View style={styles.progressHeaderRow}>
-                  <View style={styles.targetAmountContainer}>
-                    <Text style={styles.progressLabel}>
-                      {t('targetAmount') || 'Meta calculada'}
-                    </Text>
-                    <Text
-                      style={styles.targetAmountText}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                    >
-                      {formatCurrency(calculatedTarget)}
-                    </Text>
-                  </View>
-                  <View style={styles.percentBadge}>
-                    <Text style={styles.percentText}>{progressPercent}%</Text>
-                  </View>
-                </View>
-
-                <ProgressBar
-                  progress={progressFraction}
-                  color={featureColors.emergencyFund}
-                  style={styles.progressBar}
-                />
-
-                <View style={styles.progressFooterRow}>
-                  <Text style={styles.savedText} numberOfLines={1}>
-                    {t('saved') || 'Guardado'}: {formatCurrency(currentAmount)}
-                  </Text>
-                  <Text style={styles.remainingText} numberOfLines={1}>
-                    {t('remaining') || 'Falta'}:{' '}
-                    {formatCurrency(
-                      Math.max(calculatedTarget - currentAmount, 0),
-                    )}
-                  </Text>
-                </View>
-
-                <View
-                  style={[
-                    styles.cardActionsRow,
-                    isSmallDevice && styles.cardActionsRowStacked,
-                  ]}
-                >
-                  <Button
-                    mode="contained"
-                    onPress={() => setContribModalVisible(true)}
-                    buttonColor={featureColors.emergencyFund}
-                    textColor="#FFFFFF"
-                    icon="plus"
-                    style={styles.actionBtn}
-                    labelStyle={styles.actionBtnLabel}
-                  >
-                    {t('addContribution') || 'Abonar'}
-                  </Button>
-                  <Button
-                    mode="outlined"
-                    onPress={() => setIsEditing(true)}
-                    icon="pencil"
-                    style={styles.actionBtn}
-                    labelStyle={styles.actionBtnLabel}
-                  >
-                    {t('editEmergencyFund')}
-                  </Button>
-                </View>
-              </Card.Content>
-            </Card>
-
-            {/* Details Breakdown */}
-            <Card style={styles.detailsCard}>
-              <Card.Content style={styles.cardContent}>
-                <Text style={styles.detailsTitle}>
-                  {t('details') || 'Detalles del Cálculo'}
-                </Text>
-                <View style={styles.detailItem}>
-                  <Text style={styles.detailLabel}>
-                    {t('monthlyExpenseAverage')}
-                  </Text>
-                  <Text style={styles.detailValue}>
-                    {formatCurrency(monthlyExpenseBase)}
-                  </Text>
-                </View>
-                <View style={styles.detailItem}>
-                  <Text style={styles.detailLabel}>
-                    {t('monthsToCoverLabel')}
-                  </Text>
-                  <Text style={styles.detailValue}>
-                    {t('monthsCount', { count: monthsToCover })}
-                  </Text>
-                </View>
-                <View style={styles.detailItem}>
-                  <Text style={styles.detailLabel}>
-                    {t('selectMonthsToCover')}
-                  </Text>
-                  <Text style={styles.detailValue}>
-                    {t('monthsCount', { count: selectedMonths.length })}
+                <View style={styles.emptyRow}>
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={20}
+                    color={theme.colors.onSurfaceVariant}
+                  />
+                  <Text style={styles.emptyText}>
+                    {t('noExpenseDataForMonths')}
                   </Text>
                 </View>
               </Card.Content>
             </Card>
           </Animated.View>
         )}
-      </ScrollView>
 
-      <Portal>
-        <Modal
-          visible={contribModalVisible}
-          onDismiss={() => setContribModalVisible(false)}
-          contentContainerStyle={styles.modalContainer}
-        >
-          <Text style={styles.modalTitle}>
-            {t('addContribution') || 'Abonar al Fondo'}
-          </Text>
-          <TextInput
-            label={t('amount') || 'Monto'}
-            value={contribInput}
-            onChangeText={(text) =>
-              setContribInput(text.replace(/[^0-9.]/g, ''))
-            }
-            keyboardType="numeric"
-            style={styles.modalInput}
-            mode="outlined"
-          />
-          <View style={styles.modalActions}>
-            <Button onPress={() => setContribModalVisible(false)}>
-              {t('cancel') || 'Cancelar'}
-            </Button>
-            <Button
-              mode="contained"
-              onPress={handleContributeSubmit}
-              buttonColor={featureColors.emergencyFund}
-              textColor="#FFFFFF"
-            >
-              {t('save') || 'Guardar'}
-            </Button>
-          </View>
-        </Modal>
-      </Portal>
+        <Animated.View entering={FadeInUp.delay(260)}>
+          <Card style={styles.tipsCard}>
+            <Card.Content style={styles.cardContent}>
+              <Text style={styles.sectionTitle}>
+                {language === 'es'
+                  ? 'Consejos para empezar'
+                  : 'Tips to get started'}
+              </Text>
+              {(language === 'es'
+                ? [
+                    '💰 Empieza pequeño: guarda el 5–10% de cada ingreso.',
+                    '🏦 Usa una cuenta separada para no gastarlo.',
+                    '⚡ Automatiza el ahorro el día que cobras.',
+                    '🎯 Fija una meta inicial de 1 mes y ve escalando.',
+                  ]
+                : [
+                    '💰 Start small: save 5–10% of every paycheck.',
+                    '🏦 Keep it in a separate account so you are not tempted.',
+                    '⚡ Automate savings on payday.',
+                    '🎯 Set an initial goal of 1 month and scale up.',
+                  ]
+              ).map((tip, i) => (
+                <Text key={i} style={styles.tipItem}>
+                  {tip}
+                </Text>
+              ))}
+            </Card.Content>
+          </Card>
+        </Animated.View>
+      </ScrollView>
     </View>
   );
 };
@@ -550,337 +272,184 @@ const defaultStyles = (theme: AppTheme) =>
       maxWidth: 600,
       width: '100%',
       alignSelf: 'center',
+      gap: spacing.md,
     },
-    setupCard: {
+    headerBlock: {
+      alignItems: 'center',
+      paddingVertical: spacing.lg,
+    },
+    headerIconCircle: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: theme.dark ? '#052E16' : '#DCFCE7',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: spacing.md,
+    },
+    headerTitle: {
+      fontSize: fontScale(24),
+      fontFamily: 'Inter-SemiBold',
+      color: theme.colors.onSurface,
+      textAlign: 'center',
+      marginBottom: spacing.xs,
+    },
+    headerSubtitle: {
+      fontSize: fontScale(14),
+      fontFamily: 'Inter-Regular',
+      color: theme.colors.onSurfaceVariant,
+      textAlign: 'center',
+      lineHeight: 22,
+    },
+    infoCard: {
       borderRadius: theme.roundness,
       backgroundColor: theme.colors.surface,
-      elevation: 2,
+    },
+    calcCard: {
+      borderRadius: theme.roundness,
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: featureColors.emergencyFund + '40',
+    },
+    tipsCard: {
+      borderRadius: theme.roundness,
+      backgroundColor: theme.dark ? '#052E16' : '#ECFDF5',
+      borderWidth: 1,
+      borderColor: featureColors.emergencyFund + '50',
     },
     cardContent: {
       padding: spacing.md,
     },
-    iconHeaderContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: spacing.md,
-    },
-    headerIconCircle: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: theme.dark ? '#052E16' : '#DCFCE7',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: spacing.sm,
-    },
-    setupTitle: {
-      flex: 1,
-      fontSize: fontScale(20),
+    sectionTitle: {
+      fontSize: fontScale(16),
       fontFamily: 'Inter-SemiBold',
       color: theme.colors.onSurface,
+      marginBottom: spacing.sm,
     },
-    sectionSubtitle: {
+    bodyText: {
       fontSize: fontScale(14),
-      fontFamily: 'Inter-Medium',
+      fontFamily: 'Inter-Regular',
       color: theme.colors.onSurfaceVariant,
-      marginTop: spacing.sm,
-      marginBottom: spacing.xs,
+      lineHeight: 22,
     },
-    emptyMonthsBox: {
+    pillRow: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      marginTop: spacing.md,
+      justifyContent: 'center',
+    },
+    pill: {
+      flex: 1,
+      alignItems: 'center',
+      paddingVertical: spacing.sm,
+      backgroundColor: theme.dark ? '#064E3B' : '#F0FDF4',
+      borderRadius: theme.roundness,
+      borderWidth: 1,
+      borderColor: featureColors.emergencyFund + '40',
+    },
+    pillNumber: {
+      fontSize: fontScale(20),
+      fontFamily: 'Inter-SemiBold',
+      color: featureColors.emergencyFund,
+    },
+    pillLabel: {
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Regular',
+      color: theme.colors.onSurfaceVariant,
+    },
+    calcTitleRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      padding: spacing.md,
-      backgroundColor: theme.colors.background,
-      borderRadius: theme.roundness,
       gap: spacing.xs,
+      marginBottom: spacing.xs,
     },
-    emptyMonthsText: {
+    calcSubtitle: {
       fontSize: fontScale(13),
       fontFamily: 'Inter-Regular',
       color: theme.colors.onSurfaceVariant,
-      flex: 1,
+      marginBottom: spacing.md,
+      lineHeight: 20,
     },
-    monthsList: {
-      gap: spacing.xs,
-      marginVertical: spacing.xs,
-    },
-    monthRow: {
+    statRow: {
       flexDirection: 'row',
+      justifyContent: 'space-between',
       alignItems: 'center',
-      paddingVertical: spacing.xs,
-      paddingHorizontal: spacing.sm,
-      borderRadius: theme.roundness,
-      backgroundColor: theme.colors.background,
     },
-    monthRowSelected: {
-      backgroundColor: theme.dark ? '#052E16' : '#F0FDF4',
-      borderWidth: 1,
-      borderColor: featureColors.emergencyFund,
-    },
-    monthLabel: {
+    statLabel: {
+      fontSize: fontScale(14),
+      fontFamily: 'Inter-Regular',
+      color: theme.colors.onSurfaceVariant,
       flex: 1,
-      fontSize: fontScale(14),
-      fontFamily: 'Inter-Medium',
-      color: theme.colors.onSurface,
-      marginRight: spacing.xs,
+      marginRight: spacing.sm,
     },
-    monthExpense: {
-      fontSize: fontScale(14),
+    statValue: {
+      fontSize: fontScale(15),
       fontFamily: 'Inter-SemiBold',
       color: theme.colors.onSurface,
-      textAlign: 'right',
     },
     divider: {
       height: 1,
       backgroundColor: theme.colors.outlineVariant,
       marginVertical: spacing.md,
     },
-    stepperContainer: {
-      flexDirection: 'row',
+    targetBlock: {
       alignItems: 'center',
-      justifyContent: 'center',
-      gap: spacing.md,
-      marginVertical: spacing.sm,
-    },
-    monthsDisplayBadge: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: spacing.lg,
-      paddingVertical: spacing.xs,
-      backgroundColor: theme.colors.background,
+      paddingVertical: spacing.md,
+      backgroundColor: theme.dark ? '#052E16' : '#F0FDF4',
       borderRadius: theme.roundness,
-      minWidth: 90,
+      marginBottom: spacing.md,
     },
-    monthsNumberText: {
-      fontSize: fontScale(24),
+    targetLabel: {
+      fontSize: fontScale(13),
+      fontFamily: 'Inter-Regular',
+      color: theme.dark ? '#6EE7B7' : '#047857',
+      marginBottom: spacing.xs,
+    },
+    targetAmount: {
+      fontSize: fontScale(28),
       fontFamily: 'Inter-SemiBold',
       color: featureColors.emergencyFund,
     },
-    monthsUnitText: {
-      fontSize: fontScale(12),
-      fontFamily: 'Inter-Regular',
-      color: theme.colors.onSurfaceVariant,
-    },
-    calculationPreviewCard: {
-      backgroundColor: theme.colors.background,
-      borderRadius: theme.roundness,
-      padding: spacing.md,
-      marginTop: spacing.md,
+    monthBreakdown: {
       gap: spacing.xs,
     },
-    calcRow: {
+    breakdownHeader: {
+      fontSize: fontScale(13),
+      fontFamily: 'Inter-Medium',
+      color: theme.colors.onSurfaceVariant,
+      marginBottom: spacing.xs,
+    },
+    monthRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
+      paddingVertical: 4,
     },
-    calcRowTotal: {
-      marginTop: spacing.xs,
-      paddingTop: spacing.xs,
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.outlineVariant,
-    },
-    calcLabel: {
-      flex: 1,
-      fontSize: fontScale(14),
+    monthLabel: {
+      fontSize: fontScale(13),
       fontFamily: 'Inter-Regular',
       color: theme.colors.onSurfaceVariant,
-      marginRight: spacing.sm,
     },
-    calcValue: {
-      fontSize: fontScale(14),
+    monthAmount: {
+      fontSize: fontScale(13),
       fontFamily: 'Inter-Medium',
       color: theme.colors.onSurface,
-      textAlign: 'right',
     },
-    calcTotalLabel: {
-      flex: 1,
-      fontSize: fontScale(15),
-      fontFamily: 'Inter-SemiBold',
-      color: theme.colors.onSurface,
-      marginRight: spacing.sm,
-    },
-    calcTotalValue: {
-      fontSize: fontScale(18),
-      fontFamily: 'Inter-SemiBold',
-      color: featureColors.emergencyFund,
-      textAlign: 'right',
-    },
-    actionButtonsRow: {
-      flexDirection: 'row',
-      gap: spacing.md,
-      marginTop: spacing.lg,
-    },
-    actionButtonsRowStacked: {
-      flexDirection: 'column',
-    },
-    cancelBtn: {
-      flex: 1,
-    },
-    saveBtn: {
-      flex: 1,
-    },
-    actionBtnLabel: {
-      fontSize: fontScale(13),
-    },
-    tipCard: {
-      borderRadius: theme.roundness,
-      backgroundColor: theme.dark ? '#052E16' : '#ECFDF5',
-      borderColor: featureColors.emergencyFund,
-      borderWidth: 1,
-      marginBottom: spacing.md,
-    },
-    tipCardContent: {
-      padding: spacing.md,
-    },
-    tipHeaderRow: {
+    emptyRow: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.xs,
-      marginBottom: spacing.xs,
     },
-    tipIconBox: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: theme.dark ? '#064E3B' : '#A7F3D0',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    tipTitle: {
+    emptyText: {
+      fontSize: fontScale(13),
+      fontFamily: 'Inter-Regular',
+      color: theme.colors.onSurfaceVariant,
       flex: 1,
-      fontSize: fontScale(18),
-      fontFamily: 'Inter-SemiBold',
-      color: theme.dark ? '#6EE7B7' : '#047857',
     },
-    tipText: {
+    tipItem: {
       fontSize: fontScale(14),
       fontFamily: 'Inter-Regular',
       color: theme.dark ? '#D1FAE5' : '#065F46',
-      lineHeight: 22,
-    },
-    progressCard: {
-      borderRadius: theme.roundness,
-      backgroundColor: theme.colors.surface,
-      marginBottom: spacing.md,
-    },
-    progressHeaderRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: spacing.sm,
-    },
-    targetAmountContainer: {
-      flex: 1,
-      marginRight: spacing.sm,
-    },
-    progressLabel: {
-      fontSize: fontScale(13),
-      fontFamily: 'Inter-Regular',
-      color: theme.colors.onSurfaceVariant,
-    },
-    targetAmountText: {
-      fontSize: fontScale(24),
-      fontFamily: 'Inter-SemiBold',
-      color: theme.colors.onSurface,
-    },
-    percentBadge: {
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 2,
-      backgroundColor: theme.dark ? '#052E16' : '#DCFCE7',
-      borderRadius: 12,
-    },
-    percentText: {
-      fontSize: fontScale(14),
-      fontFamily: 'Inter-SemiBold',
-      color: featureColors.emergencyFund,
-    },
-    progressBar: {
-      height: 10,
-      borderRadius: 5,
-      marginVertical: spacing.xs,
-    },
-    progressFooterRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginTop: spacing.xs,
-    },
-    savedText: {
-      fontSize: fontScale(13),
-      fontFamily: 'Inter-Medium',
-      color: theme.colors.onSurface,
-      flex: 1,
-      marginRight: spacing.xs,
-    },
-    remainingText: {
-      fontSize: fontScale(13),
-      fontFamily: 'Inter-Regular',
-      color: theme.colors.onSurfaceVariant,
-      textAlign: 'right',
-    },
-    cardActionsRow: {
-      flexDirection: 'row',
-      gap: spacing.sm,
-      marginTop: spacing.md,
-    },
-    cardActionsRowStacked: {
-      flexDirection: 'column',
-    },
-    actionBtn: {
-      flex: 1,
-    },
-    detailsCard: {
-      borderRadius: theme.roundness,
-      backgroundColor: theme.colors.surface,
-    },
-    detailsTitle: {
-      fontSize: fontScale(16),
-      fontFamily: 'Inter-SemiBold',
-      color: theme.colors.onSurface,
-      marginBottom: spacing.sm,
-    },
-    detailItem: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: spacing.xs,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.outlineVariant,
-    },
-    detailLabel: {
-      flex: 1,
-      fontSize: fontScale(14),
-      fontFamily: 'Inter-Regular',
-      color: theme.colors.onSurfaceVariant,
-      marginRight: spacing.sm,
-    },
-    detailValue: {
-      fontSize: fontScale(14),
-      fontFamily: 'Inter-Medium',
-      color: theme.colors.onSurface,
-      textAlign: 'right',
-    },
-    modalContainer: {
-      backgroundColor: theme.colors.surface,
-      padding: spacing.lg,
-      margin: spacing.lg,
-      borderRadius: theme.roundness,
-      maxWidth: 500,
-      width: '90%',
-      alignSelf: 'center',
-    },
-    modalTitle: {
-      fontSize: fontScale(18),
-      fontFamily: 'Inter-SemiBold',
-      color: theme.colors.onSurface,
-      marginBottom: spacing.md,
-    },
-    modalInput: {
-      marginBottom: spacing.md,
-    },
-    modalActions: {
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-      gap: spacing.sm,
+      lineHeight: 24,
     },
   });

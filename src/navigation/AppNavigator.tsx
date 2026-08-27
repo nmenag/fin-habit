@@ -71,19 +71,6 @@ const CalendarScreen = lazy(() =>
     default: m.CalendarScreen,
   })),
 );
-const GoalsScreen = lazy(() =>
-  import('../features/goals').then((m) => ({ default: m.GoalsScreen })),
-);
-const AddGoalScreen = lazy(() =>
-  import('../features/goals').then((m) => ({
-    default: m.AddGoalScreen,
-  })),
-);
-const GoalDetailScreen = lazy(() =>
-  import('../features/goals').then((m) => ({
-    default: m.GoalDetailScreen,
-  })),
-);
 const EmergencyFundScreen = lazy(() =>
   import('../features/goals').then((m) => ({
     default: m.EmergencyFundScreen,
@@ -225,21 +212,7 @@ export const AppNavigator = () => {
         component={withSuspense(CalendarScreen)}
         options={{ title: t('calendar') }}
       />
-      <Stack.Screen
-        name="Goals"
-        component={withSuspense(GoalsScreen)}
-        options={{ title: t('goals') }}
-      />
-      <Stack.Screen
-        name="AddGoal"
-        component={withSuspense(AddGoalScreen)}
-        options={{ title: t('addGoal'), presentation: 'modal' }}
-      />
-      <Stack.Screen
-        name="GoalDetail"
-        component={withSuspense(GoalDetailScreen)}
-        options={{ title: t('goalDetail') || 'Goal Details' }}
-      />
+
       <Stack.Screen
         name="EmergencyFund"
         component={withSuspense(EmergencyFundScreen)}

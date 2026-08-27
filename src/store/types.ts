@@ -44,20 +44,3 @@ export interface Transaction {
   note?: string | null;
   toAccountId?: string | null;
 }
-
-export type GoalType = 'standard' | 'emergency_fund';
-
-export interface Goal {
-  id: string;
-  name: string;
-  targetAmount: number;
-  currentAmount: number;
-  color?: string | null;
-  icon?: string | null;
-  deadline?: string | null;
-  status: 'active' | 'completed';
-  displayOrder: number;
-  type?: GoalType;
-  selectedMonths?: string[];
-  monthsToCover?: number;
-}

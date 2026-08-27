@@ -63,7 +63,6 @@ const addAlpha = (
 export const DashboardScreen = React.memo(() => {
   const transactions = useStore((s) => s.transactions);
   const categories = useStore((s) => s.categories);
-  const goals = useStore((s) => s.goals);
   const budgets = useStore((s) => s.budgets);
   const accounts = useStore((s) => s.accounts);
   const isLoaded = useStore((s) => s.isLoaded);
@@ -107,7 +106,6 @@ export const DashboardScreen = React.memo(() => {
     const calendarIncome = monthlyIncome;
 
     const totalBalance = accounts.reduce((sum, a) => sum + a.currentBalance, 0);
-    const activeGoals = goals.filter((g) => g.status === 'active').slice(0, 2);
     const recentTransactions = transactions.slice(0, 5);
 
     const activeRange = hasCurrentMonthData
@@ -162,7 +160,6 @@ export const DashboardScreen = React.memo(() => {
       topCategory,
       topCatAmount,
       topCatPercent,
-      activeGoals,
       recentTransactions,
       totalBudget,
       limit,
@@ -174,7 +171,7 @@ export const DashboardScreen = React.memo(() => {
       budgetedExpensesSum,
       unbudgetedExpensesSum,
     };
-  }, [dashboardReport, accounts, goals, transactions, budgets, categories]);
+  }, [dashboardReport, accounts, transactions, budgets, categories]);
 
   const data = useMemo(() => {
     if (!financialData) return null;
@@ -857,106 +854,6 @@ export const DashboardScreen = React.memo(() => {
     </Card>
   );
 
-  const goalsCard =
-    goals.length > 0 ? (
-      <Card style={styles.card} mode="contained">
-        <Card.Content>
-          <View style={styles.cardHeader}>
-            <Text
-              style={{
-                fontFamily: 'Inter-Medium',
-                fontWeight: '500',
-                fontSize: fontScale(15),
-                color: theme.colors.onSurface,
-                flex: 1,
-              }}
-            >
-              {t('goals')}
-            </Text>
-            <TouchableOpacity
-              onPress={() => router.push('/goals')}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              accessibilityLabel={t('viewAll')}
-              accessibilityRole="button"
-            >
-              <Text
-                style={{
-                  color: theme.colors.primary,
-                  marginLeft: 8,
-                  fontFamily: 'Inter-Medium',
-                  fontWeight: '500',
-                  fontSize: fontScale(14),
-                }}
-              >
-                {t('viewAll')}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          {data.activeGoals.length > 0 ? (
-            data.activeGoals.map((goal) => (
-              <View key={goal.id} style={{ marginBottom: 16 }}>
-                <View style={styles.cardHeader}>
-                  <Text
-                    style={{
-                      fontFamily: 'Inter-Medium',
-                      fontWeight: '500',
-                      fontSize: fontScale(13),
-                      color: theme.colors.onSurface,
-                      flex: 1,
-                    }}
-                    numberOfLines={1}
-                  >
-                    {goal.name}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: 'Inter-Regular',
-                      fontWeight: '400',
-                      fontSize: fontScale(12),
-                      color: theme.colors.onSurfaceVariant,
-                      flexShrink: 1,
-                      textAlign: 'right',
-                      marginLeft: 8,
-                    }}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                  >
-                    {formatCurrency(goal.currentAmount)} /{' '}
-                    {formatCurrency(goal.targetAmount)}
-                  </Text>
-                </View>
-                <ProgressBar
-                  progress={Math.min(goal.currentAmount / goal.targetAmount, 1)}
-                  color={goal.color || theme.colors.primary}
-                  style={styles.progressBar}
-                  accessibilityLabel={`${goal.name} ${t('progress')}`}
-                  accessibilityValue={{
-                    now: Math.round(
-                      (goal.currentAmount / goal.targetAmount) * 100,
-                    ),
-                    min: 0,
-                    max: 100,
-                    text: `${Math.round((goal.currentAmount / goal.targetAmount) * 100)}%`,
-                  }}
-                />
-              </View>
-            ))
-          ) : (
-            <Text
-              style={{
-                fontFamily: 'Inter-Regular',
-                fontStyle: 'italic',
-                color: theme.colors.onSurfaceVariant,
-                fontSize: fontScale(13),
-              }}
-            >
-              {t('noGoals')}
-            </Text>
-          )}
-        </Card.Content>
-      </Card>
-    ) : null;
-
   const recentTransactionsCard = (
     <Card style={styles.card} mode="contained">
       <Card.Content>
@@ -1145,10 +1042,7 @@ export const DashboardScreen = React.memo(() => {
             {topCategoryCard}
             {insightCard}
           </View>
-          <View style={styles.gridColumn}>
-            {goalsCard}
-            {recentTransactionsCard}
-          </View>
+          <View style={styles.gridColumn}>{recentTransactionsCard}</View>
         </View>
       );
     } else if (width >= 600) {
@@ -1163,7 +1057,6 @@ export const DashboardScreen = React.memo(() => {
           <View style={styles.gridColumn}>
             {progressCard}
             {topCategoryCard}
-            {goalsCard}
             {insightCard}
           </View>
         </View>
@@ -1177,7 +1070,6 @@ export const DashboardScreen = React.memo(() => {
           {progressCard}
           {topCategoryCard}
           {insightCard}
-          {goalsCard}
           {recentTransactionsCard}
         </View>
       );
