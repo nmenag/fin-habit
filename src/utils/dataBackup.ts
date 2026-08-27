@@ -23,7 +23,6 @@ export const backupToJSON = async () => {
     const transactions = db.getAllSync('SELECT * FROM transactions');
     const categories = db.getAllSync('SELECT * FROM categories');
     const budgets = db.getAllSync('SELECT * FROM budgets');
-    const goals = db.getAllSync('SELECT * FROM goals');
     const settings = db.getAllSync('SELECT * FROM settings');
 
     const backupData = {
@@ -34,7 +33,6 @@ export const backupToJSON = async () => {
         transactions,
         categories,
         budgets,
-        goals,
         settings,
       },
     };
@@ -86,7 +84,7 @@ export const restoreFromJSON = async (
       return;
     }
 
-    const { accounts, transactions, categories, budgets, goals, settings } =
+    const { accounts, transactions, categories, budgets, settings } =
       backup.data;
 
     const db = getDb();
@@ -96,7 +94,6 @@ export const restoreFromJSON = async (
     db.execSync('DELETE FROM accounts;');
     db.execSync('DELETE FROM categories;');
     db.execSync('DELETE FROM budgets;');
-    db.execSync('DELETE FROM goals;');
     db.execSync('DELETE FROM settings;');
 
     const insertAccount = db.prepareSync(
@@ -174,34 +171,6 @@ export const restoreFromJSON = async (
       );
     } finally {
       insertBudget.finalizeSync();
-    }
-
-    const insertGoal = db.prepareSync(
-      'INSERT INTO goals (id, name, targetAmount, currentAmount, color, icon, deadline, status, displayOrder, type, selectedMonths, monthsToCover) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    );
-    try {
-      goals.forEach((g: any) =>
-        insertGoal.executeSync([
-          g.id,
-          g.name,
-          g.targetAmount,
-          g.currentAmount,
-          g.color,
-          g.icon,
-          g.deadline,
-          g.status,
-          g.displayOrder || 0,
-          g.type || 'standard',
-          g.selectedMonths
-            ? typeof g.selectedMonths === 'string'
-              ? g.selectedMonths
-              : JSON.stringify(g.selectedMonths)
-            : null,
-          g.monthsToCover || 6,
-        ]),
-      );
-    } finally {
-      insertGoal.finalizeSync();
     }
 
     const insertSetting = db.prepareSync(

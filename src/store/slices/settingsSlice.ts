@@ -202,7 +202,6 @@ export const createSettingsSlice: StateCreator<
 
     setTimeout(() => {
       get().loadBudgets();
-      get().loadGoals();
       get().refreshAnalytics();
     }, 100);
   },
@@ -340,14 +339,12 @@ export const createSettingsSlice: StateCreator<
       const db = getDb();
       db.execSync('DELETE FROM transactions;');
       db.execSync('DELETE FROM budgets;');
-      db.execSync('DELETE FROM goals;');
       db.execSync('DELETE FROM accounts;');
       db.execSync('DELETE FROM categories;');
       initDb();
       set({
         transactions: [],
         budgets: [],
-        goals: [],
         accounts: [],
         categories: [],
         analyticsReport: null,

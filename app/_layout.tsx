@@ -224,14 +224,7 @@ export default function RootLayout() {
                 title: t('addBudget'),
               }}
             />
-            <Stack.Screen
-              name="add-goal"
-              options={{
-                presentation: 'modal',
-                headerShown: true,
-                title: t('addGoal'),
-              }}
-            />
+
             <Stack.Screen
               name="accounts"
               options={{
@@ -254,24 +247,10 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="goals"
-              options={{
-                headerShown: true,
-                title: t('goals'),
-              }}
-            />
-            <Stack.Screen
               name="calendar"
               options={{
                 headerShown: true,
                 title: t('calendar'),
-              }}
-            />
-            <Stack.Screen
-              name="goal-detail"
-              options={{
-                headerShown: true,
-                title: t('goalDetail'),
               }}
             />
             <Stack.Screen

@@ -270,10 +270,10 @@ export const SettingsScreen = () => {
       color: featureColors.budgets,
     },
     {
-      name: t('manageGoals'),
-      icon: 'flag-outline',
-      screen: '/goals',
-      color: featureColors.goals,
+      name: t('emergencyFund'),
+      icon: 'shield-checkmark-outline',
+      screen: '/emergency-fund',
+      color: featureColors.emergencyFund,
     },
     {
       name: t('calendar'),
@@ -593,15 +593,15 @@ export const SettingsScreen = () => {
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: addAlpha(featureColors.goals, 0.07),
-                    borderColor: addAlpha(featureColors.goals, 0.17),
+                    backgroundColor: addAlpha(featureColors.budgets, 0.07),
+                    borderColor: addAlpha(featureColors.budgets, 0.17),
                   },
                 ]}
               >
                 <Ionicons
                   name="notifications-outline"
                   size={20}
-                  color={featureColors.goals}
+                  color={featureColors.budgets}
                 />
               </View>
               <View style={styles.rowText}>

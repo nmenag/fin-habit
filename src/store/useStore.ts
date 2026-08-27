@@ -7,7 +7,6 @@ import {
   createCategoriesSlice,
   CategoriesSlice,
 } from './slices/categoriesSlice';
-import { createGoalsSlice, GoalsSlice } from './slices/goalsSlice';
 import { createSettingsSlice, SettingsSlice } from './slices/settingsSlice';
 import {
   createTransactionsSlice,
@@ -19,7 +18,6 @@ export type {
   AccountType,
   Budget,
   Category,
-  Goal,
   Transaction,
   TransactionType,
 } from './types';
@@ -29,7 +27,6 @@ export type AppStore = AccountsSlice &
   TransactionsSlice &
   CategoriesSlice &
   BudgetsSlice &
-  GoalsSlice &
   SettingsSlice;
 
 export const useStore = create<AppStore>()((...args) => ({
@@ -37,7 +34,6 @@ export const useStore = create<AppStore>()((...args) => ({
   ...createTransactionsSlice(...args),
   ...createCategoriesSlice(...args),
   ...createBudgetsSlice(...args),
-  ...createGoalsSlice(...args),
   ...createSettingsSlice(...args),
 }));
 
