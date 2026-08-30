@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { fontScale, moderateScale } from '../../../utils/responsive';
 import { calculateCategoryGrowth } from '../../../utils/categoryGrowth';
+import { TipsCarousel } from '../components/TipsCarousel';
 
 const addAlpha = (
   color: string | undefined,
@@ -930,121 +931,9 @@ export const InsightsScreen = () => {
     </Card>
   );
 
-  const insightsSection = analyticsReport &&
-    analyticsReport.insights.length > 0 && (
-      <View style={{ marginTop: 8 }}>
-        <Text
-          style={[
-            styles.sectionTitle,
-            {
-              color: theme.colors.onSurface,
-              fontFamily: 'Inter-SemiBold',
-              fontWeight: '600',
-            },
-          ]}
-        >
-          {t('insights')}
-        </Text>
-        {analyticsReport.insights.map((insight) => {
-          let iconName: any = 'information-circle-outline';
-          let iconColor = theme.colors.primary;
-          let backgroundColor = addAlpha(theme.colors.primary, 0.08, '#22C55E');
-          let borderColor = addAlpha(theme.colors.primary, 0.17, '#22C55E');
-
-          if (insight.level === 'critical' || insight.level === 'warning') {
-            iconName = 'alert-circle-outline';
-            iconColor =
-              insight.level === 'critical'
-                ? theme.colors.error
-                : theme.colors.warning;
-            backgroundColor = addAlpha(
-              iconColor,
-              0.08,
-              insight.level === 'critical' ? '#EF4444' : '#F59E0B',
-            );
-            borderColor = addAlpha(
-              iconColor,
-              0.17,
-              insight.level === 'critical' ? '#EF4444' : '#F59E0B',
-            );
-          } else if (insight.level === 'positive') {
-            iconName = 'checkmark-circle-outline';
-            iconColor = theme.colors.income;
-            backgroundColor = addAlpha(theme.colors.income, 0.08, '#16A34A');
-            borderColor = addAlpha(theme.colors.income, 0.17, '#16A34A');
-          }
-
-          return (
-            <Card
-              key={insight.id}
-              style={[
-                styles.insightCard,
-                {
-                  borderColor: theme.colors.outlineVariant,
-                  borderWidth: 1,
-                },
-              ]}
-              mode="contained"
-            >
-              <Card.Content style={styles.insightContent}>
-                <View
-                  style={[
-                    styles.insightIconContainer,
-                    {
-                      backgroundColor: backgroundColor,
-                      borderColor: borderColor,
-                      borderWidth: 1,
-                    },
-                  ]}
-                >
-                  <Ionicons name={iconName} size={24} color={iconColor} />
-                </View>
-                <View style={styles.insightTextContainer}>
-                  <Text
-                    style={[
-                      styles.insightTitle,
-                      {
-                        color: theme.colors.onSurface,
-                        fontFamily: 'Inter-Medium',
-                        fontWeight: '500',
-                      },
-                    ]}
-                  >
-                    {insight.title}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.insightText,
-                      {
-                        color: theme.colors.onSurfaceVariant,
-                        fontFamily: 'Inter-Regular',
-                        fontWeight: '400',
-                      },
-                    ]}
-                  >
-                    {insight.message}
-                  </Text>
-                  {insight.recommendation && (
-                    <View style={styles.recommendationContainer}>
-                      <Text
-                        style={{
-                          color: theme.colors.primary,
-                          fontFamily: 'Inter-Medium',
-                          fontWeight: '500',
-                          fontSize: 12,
-                        }}
-                      >
-                        {insight.recommendation}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </Card.Content>
-            </Card>
-          );
-        })}
-      </View>
-    );
+  const insightsSection = (
+    <TipsCarousel insights={analyticsReport?.insights || []} />
+  );
 
   const emptySection = (
     <View style={styles.emptyContainer}>
@@ -1269,42 +1158,6 @@ const defaultStyles = (theme: any) =>
     growthValue: {},
     subtext: {
       color: theme.colors.onSurfaceVariant,
-    },
-    insightCard: {
-      marginBottom: 12,
-      borderRadius: 20,
-      backgroundColor: theme.colors.surface,
-      elevation: 0,
-    },
-    insightContent: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      padding: 12,
-      gap: 12,
-    },
-    insightIconContainer: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    insightTextContainer: {
-      flex: 1,
-      gap: 2,
-    },
-    insightTitle: {
-      fontSize: 14,
-    },
-    insightText: {
-      lineHeight: 18,
-      fontSize: 13,
-    },
-    recommendationContainer: {
-      marginTop: 8,
-      paddingTop: 8,
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.outlineVariant,
     },
     emptyContainer: {
       alignItems: 'center',
