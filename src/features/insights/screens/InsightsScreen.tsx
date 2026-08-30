@@ -274,7 +274,11 @@ export const InsightsScreen = () => {
             language,
           });
 
-          const badgeText = growth.growthPercentageBadge || growth.statusLabel;
+          const isAllTime = selectedRange.type === 'allTime';
+          const badgeText =
+            isAllTime && growth.status === 'new'
+              ? null
+              : growth.growthPercentageBadge || growth.statusLabel;
 
           let badgeBg = addAlpha(
             theme.colors.onSurfaceVariant,
@@ -376,6 +380,7 @@ export const InsightsScreen = () => {
       theme.colors,
       formatCurrency,
       styles,
+      selectedRange,
     ],
   );
 
