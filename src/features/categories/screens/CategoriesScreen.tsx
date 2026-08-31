@@ -28,43 +28,18 @@ import { AppTheme } from '../../../theme/theme';
 import { fontScale } from '../../../utils/responsive';
 
 export const CategoriesScreen = () => {
-  const { categories, transactions, updateCategoriesOrder, formatCurrency } =
-    useStore();
+  const { categories, updateCategoriesOrder } = useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
   const [activeTab, setActiveTab] = useState<TransactionType>('expense');
   const insets = useSafeAreaInsets();
 
-  const analytics = useMemo(() => {
-    const totals: Record<string, number> = {};
-    const counts: Record<string, number> = {};
-    let grandTotal = 0;
-    let maxVal = 0;
-
-    transactions
-      .filter((tx) => tx.type === activeTab)
-      .forEach((tx) => {
-        const catId = tx.categoryId || 'uncategorized';
-        totals[catId] = (totals[catId] || 0) + tx.amount;
-        counts[catId] = (counts[catId] || 0) + 1;
-        grandTotal += tx.amount;
-        if (totals[catId] > maxVal) {
-          maxVal = totals[catId];
-        }
-      });
-
-    return { totals, counts, grandTotal, maxVal };
-  }, [transactions, activeTab]);
-
   const filteredCategories = useMemo(() => {
     return categories.filter((c) => c.type === activeTab);
   }, [categories, activeTab]);
 
   const renderItem = ({ item, drag, isActive }: RenderItemParams<Category>) => {
-    const totalAmount = analytics.totals[item.id] || 0;
-    const txCount = analytics.counts[item.id] || 0;
-    const ratio = analytics.maxVal > 0 ? totalAmount / analytics.maxVal : 0;
     const itemColor = item.color || theme.colors.primary;
 
     const cardBg = isActive ? theme.colors.elevation.level3 : `${itemColor}12`;
@@ -118,48 +93,12 @@ export const CategoriesScreen = () => {
             </View>
 
             <View style={styles.metaCol}>
-              <View style={styles.titleRow}>
-                <Text
-                  style={[
-                    styles.categoryName,
-                    { color: theme.colors.onSurface },
-                  ]}
-                >
-                  {translateName(item.name)}
-                </Text>
-                {totalAmount > 0 && (
-                  <Text
-                    style={[
-                      styles.amountText,
-                      { color: theme.colors.onSurface },
-                    ]}
-                  >
-                    {formatCurrency(totalAmount)}
-                  </Text>
-                )}
-              </View>
-
               <Text
-                style={[styles.categoryDesc, { color: theme.colors.outline }]}
+                style={[styles.categoryName, { color: theme.colors.onSurface }]}
+                numberOfLines={1}
               >
-                {txCount === 1
-                  ? `1 ${t('transaction' as any) || 'transaction'}`
-                  : `${txCount} ${t('transactions')}`}
+                {translateName(item.name)}
               </Text>
-
-              {totalAmount > 0 && (
-                <View style={styles.ratioBarBg}>
-                  <View
-                    style={[
-                      styles.ratioBarFill,
-                      {
-                        width: `${ratio * 100}%`,
-                        backgroundColor: itemColor,
-                      },
-                    ]}
-                  />
-                </View>
-              )}
             </View>
           </View>
         </Card>
@@ -208,68 +147,19 @@ export const CategoriesScreen = () => {
           { paddingBottom: insets.bottom + 200 },
         ]}
         ListHeaderComponent={
-          filteredCategories.length > 0 ? (
-            <View>
-              <Card style={styles.insightsCard} mode="contained">
-                <Card.Content style={styles.insightsCardContent}>
-                  <Ionicons
-                    name="analytics-outline"
-                    size={18}
-                    color={theme.colors.primary}
-                  />
-                  <View style={styles.insightsTextContainer}>
-                    <Text
-                      style={[
-                        styles.insightsTitle,
-                        { color: theme.colors.onSurface },
-                      ]}
-                    >
-                      {activeTab === 'expense'
-                        ? t('topSpendingCategory')
-                        : t('income')}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.insightsBody,
-                        { color: theme.colors.onSurfaceVariant },
-                      ]}
-                    >
-                      {t('totalBalance')}:{' '}
-                      <Text
-                        style={{
-                          fontFamily: 'Inter-SemiBold',
-                          fontWeight: '600',
-                          color: theme.colors.primary,
-                        }}
-                      >
-                        {formatCurrency(analytics.grandTotal)}
-                      </Text>{' '}
-                      {t('acrossCategoriesCount', {
-                        count: filteredCategories.length,
-                      })}
-                    </Text>
-                  </View>
-                </Card.Content>
-              </Card>
-
-              {filteredCategories.length > 1 && (
-                <View style={styles.dragHelpRow}>
-                  <Ionicons
-                    name="information-circle-outline"
-                    size={13}
-                    color={theme.colors.outline}
-                    style={{ marginRight: 4 }}
-                  />
-                  <Text
-                    style={[
-                      styles.dragHelpText,
-                      { color: theme.colors.outline },
-                    ]}
-                  >
-                    {t('holdAndDragToReorder')}
-                  </Text>
-                </View>
-              )}
+          filteredCategories.length > 1 ? (
+            <View style={styles.dragHelpRow}>
+              <Ionicons
+                name="information-circle-outline"
+                size={13}
+                color={theme.colors.outline}
+                style={{ marginRight: 4 }}
+              />
+              <Text
+                style={[styles.dragHelpText, { color: theme.colors.outline }]}
+              >
+                {t('holdAndDragToReorder')}
+              </Text>
             </View>
           ) : null
         }
@@ -335,36 +225,6 @@ const defaultStyles = (theme: AppTheme) =>
     segmentedButtons: {
       borderRadius: 14,
     },
-    insightsCard: {
-      marginHorizontal: 16,
-      marginTop: 16,
-      marginBottom: 8,
-      borderRadius: theme.roundness || 12,
-      backgroundColor: theme.colors.surface,
-      borderColor: theme.colors.outlineVariant,
-      borderWidth: 1,
-      elevation: 0,
-    },
-    insightsCardContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-      padding: 14,
-    },
-    insightsTextContainer: {
-      flex: 1,
-    },
-    insightsTitle: {
-      fontSize: fontScale(13),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
-    },
-    insightsBody: {
-      fontSize: fontScale(11),
-      fontFamily: 'Inter-Regular',
-      fontWeight: '400',
-      marginTop: 2,
-    },
     listContent: {
       paddingTop: 8,
     },
@@ -400,39 +260,11 @@ const defaultStyles = (theme: AppTheme) =>
       flex: 1,
       justifyContent: 'center',
     },
-    titleRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingRight: 6,
-    },
     categoryName: {
       fontFamily: 'Inter-Medium',
       fontWeight: '500',
       fontSize: fontScale(14),
       letterSpacing: -0.1,
-    },
-    amountText: {
-      fontSize: fontScale(13),
-      fontFamily: 'Inter-SemiBold',
-      fontWeight: '600',
-    },
-    categoryDesc: {
-      fontSize: fontScale(11),
-      fontFamily: 'Inter-Regular',
-      fontWeight: '400',
-      marginTop: 2,
-    },
-    ratioBarBg: {
-      height: 4,
-      borderRadius: 100,
-      backgroundColor: theme.dark ? '#27272A' : '#F4F4F5',
-      marginTop: 8,
-      overflow: 'hidden',
-    },
-    ratioBarFill: {
-      height: '100%',
-      borderRadius: 100,
     },
     dragHelpRow: {
       flexDirection: 'row',

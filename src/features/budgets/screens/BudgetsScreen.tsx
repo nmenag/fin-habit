@@ -132,6 +132,7 @@ export const BudgetsScreen = () => {
       .reduce((sum, t) => sum + t.amount, 0);
     const progress = Math.min(spent / item.amount, 1);
     const remaining = Math.max(item.amount - spent, 0);
+    const exceeded = Math.max(spent - item.amount, 0);
     const category = categories.find((c) => c.id === item.categoryId);
     const isOverLimit = spent > item.amount;
     const categoryColor = item.color || theme.colors.primary;
@@ -216,9 +217,14 @@ export const BudgetsScreen = () => {
               </View>
 
               <View style={styles.footerRow}>
-                <Text style={styles.remainingText}>
+                <Text
+                  style={[
+                    styles.remainingText,
+                    isOverLimit && { color: theme.colors.error },
+                  ]}
+                >
                   {isOverLimit
-                    ? t('overLimit')
+                    ? `${t('overLimit')}: ${formatCurrency(exceeded)}`
                     : `${t('remainingAmount')}: ${formatCurrency(remaining)}`}
                 </Text>
                 <Text
@@ -231,7 +237,7 @@ export const BudgetsScreen = () => {
                     },
                   ]}
                 >
-                  {Math.round(progress * 100)}%
+                  {Math.round((spent / item.amount) * 100)}%
                 </Text>
               </View>
             </Card.Content>
