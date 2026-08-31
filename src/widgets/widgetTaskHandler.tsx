@@ -39,7 +39,14 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
       language = languageSetting.val as 'en' | 'es';
     }
 
-    const calRange = getMonthRange();
+    const cycleSetting = db.getFirstSync<{ val: string }>(
+      "SELECT val FROM settings WHERE id = 'cycleStartDay'",
+    );
+    const cycleStartDay = cycleSetting?.val
+      ? parseInt(cycleSetting.val, 10) || 1
+      : 1;
+
+    const calRange = getMonthRange(cycleStartDay);
     const calStartStr = getLocalISOString(calRange.startDate);
     const calEndStr = getLocalISOString(calRange.endDate);
 

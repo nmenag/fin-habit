@@ -257,6 +257,7 @@ export const AddTransactionScreen = () => {
     deleteTransaction,
     formatCurrency,
     currency,
+    cycleStartDay,
   } = useStore();
 
   const { t, language, translateName } = useTranslation();
@@ -636,7 +637,7 @@ export const AddTransactionScreen = () => {
       { spent: number; progress: number; remaining: number }
     > = {};
 
-    const currentMonthRange = getMonthRange();
+    const currentMonthRange = getMonthRange(cycleStartDay);
     const expenses = transactions.filter((t) => t.type === 'expense');
 
     for (const bud of budgets) {
@@ -656,7 +657,7 @@ export const AddTransactionScreen = () => {
     }
 
     return map;
-  }, [transactions, budgets]);
+  }, [transactions, budgets, cycleStartDay]);
 
   const getBudgetUsage = useCallback(
     (bud: Budget) => {

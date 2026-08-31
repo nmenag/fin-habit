@@ -39,6 +39,11 @@ export const es = {
   changeLanguageDesc: 'Cambia el idioma de la aplicación a tu preferencia.',
   changeCurrencyDesc:
     'Cambiar la moneda actualizará cómo se muestran todos los montos en la aplicación.',
+  cycleStartDay: 'Día de inicio de ciclo',
+  cycleStartDayDesc:
+    'Define el día del mes en que inicia tu ciclo financiero (ej. día de pago).',
+  selectCycleStartDay: 'Seleccionar día de inicio de ciclo',
+  cycleStartDayFormat: 'Día {day} de cada mes',
   english: 'Inglés',
   spanish: 'Español',
   theme: 'Tema',

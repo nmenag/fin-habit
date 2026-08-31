@@ -32,7 +32,11 @@ export const BudgetsScreen = () => {
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
 
-  const currentMonthRange = useMemo(() => getMonthRange(), []);
+  const cycleStartDay = useStore((s) => s.cycleStartDay);
+  const currentMonthRange = useMemo(
+    () => getMonthRange(cycleStartDay),
+    [cycleStartDay],
+  );
 
   const formattedDateRange = useMemo(() => {
     const locale = language === 'es' ? es : enUS;
