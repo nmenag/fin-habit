@@ -133,6 +133,7 @@ Always cross-reference this file and the design guidelines in `DESIGN.md` before
 
 - **Prioritize Rules**: AI agents must read and strictly follow this document and `DESIGN.md` in every response and code modification task.
 - **Preserve Patterns**: Always check the repository for existing patterns (e.g., SQLite query formatting, state slicing, localization lookup mechanisms) before introducing new abstractions. Favor consistency over novelty.
+- **Always Translate (i18n)**: Whenever adding or modifying any screen, module, or UI component, AI agents must ALWAYS add complete translation keys to both Spanish (`src/i18n/es.ts`) and English (`src/i18n/en.ts`) files, and consume them using `t(...)`. Hardcoded user-facing strings or inline ternary copy in components are strictly prohibited.
 - **Protect Financial Integrity**: Never perform code modifications that risk desynced account balances, incorrect transaction signs, or unsafe database writes.
 - **Pull Requests**: When asked to generate a PR, keep it extremely concise, format it exactly using the structure of `.github/PULL_REQUEST_TEMPLATE.md`, and always return it wrapped in a markdown code block.
 - **Clarify Ambiguity**: If feature requirements or financial rules (such as calculations, date boundaries, or database schemas) are ambiguous, pause and request clarification from the user.

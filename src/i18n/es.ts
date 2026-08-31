@@ -537,4 +537,23 @@ export const es = {
   saved: 'Guardado',
   addContribution: 'Abonar al Fondo',
   details: 'Detalles del Cálculo',
+  emergencyTargetMonths: 'Objetivo recomendado ({{months}} meses)',
+  targetReserve: 'Fondo Recomendado',
+  viewCalculationAndDetails: 'Ver cálculo y detalles',
+  emergencyTipMessage:
+    'Mantener guardados entre 3 y 6 meses de tus gastos fijos brinda tranquilidad ante imprevistos.',
+  emergencyTipRecommendation:
+    '🛡️ Revisa la calculadora de Fondo de Emergencia aquí en Análisis.',
+  rule503020Title: 'Regla de Presupuesto 50/30/20',
+  rule503020Message:
+    'Destina un 50% a necesidades, 30% a gustos personales y 20% a ahorros o pago de deudas.',
+  rule503020Recommendation:
+    '💡 Ajusta tus categorías para balancear tu regla mensual.',
+  habitsBadge: 'HÁBITOS',
+  savingsBadge: 'AHORRO',
+  noSpendDaysTitle: 'Días Sin Gasto',
+  noSpendDaysMessage:
+    'Intenta pausar compras secundarias durante 2 días a la semana para frenar impulsos.',
+  noSpendDaysRecommendation: '🎯 Planifica tus compras con anticipación.',
+  challengeBadge: 'RETO',
 };

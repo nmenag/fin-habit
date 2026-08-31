@@ -270,12 +270,6 @@ export const SettingsScreen = () => {
       color: featureColors.budgets,
     },
     {
-      name: t('emergencyFund'),
-      icon: 'shield-checkmark-outline',
-      screen: '/emergency-fund',
-      color: featureColors.emergencyFund,
-    },
-    {
       name: t('calendar'),
       icon: 'calendar-outline',
       screen: '/calendar',

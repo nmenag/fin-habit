@@ -528,4 +528,23 @@ export const en = {
   saved: 'Saved',
   addContribution: 'Add Contribution',
   details: 'Calculation Details',
+  emergencyTargetMonths: 'Recommended target ({{months}} months)',
+  targetReserve: 'Target Reserve',
+  viewCalculationAndDetails: 'View calculation & details',
+  emergencyTipMessage:
+    'Keeping 3 to 6 months of fixed expenses in reserve ensures financial stability.',
+  emergencyTipRecommendation:
+    '🛡️ Check out Emergency Reserve setup here in Insights.',
+  rule503020Title: '50/30/20 Budgeting Rule',
+  rule503020Message:
+    'Allocate 50% to needs, 30% to wants, and 20% to savings or debt payoff.',
+  rule503020Recommendation:
+    '💡 Categorize expenses to keep monthly balance in check.',
+  habitsBadge: 'HABITS',
+  savingsBadge: 'SAVINGS',
+  noSpendDaysTitle: 'No-Spend Challenge',
+  noSpendDaysMessage:
+    'Pause non-essential buying 2 days a week to build mindful spending habits.',
+  noSpendDaysRecommendation: '🎯 Plan purchases ahead to prevent impulse buys.',
+  challengeBadge: 'CHALLENGE',
 };

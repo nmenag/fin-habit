@@ -98,5 +98,6 @@ Before modifying any code, verify:
 - [ ] Money calculations avoid floating-point traps
 - [ ] Foreign key constraints and indexes are maintained
 - [ ] Both light and dark themes are considered
+- [ ] All new/modified UI copy has complete translations in both Spanish (`src/i18n/es.ts`) and English (`src/i18n/en.ts`) consumed via `t(...)`
 - [ ] Touch targets meet 44x44dp minimum
 - [ ] Accessibility labels are provided for interactive elements

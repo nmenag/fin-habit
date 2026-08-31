@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fontScale, moderateScale } from '../../../utils/responsive';
 import { calculateCategoryGrowth } from '../../../utils/categoryGrowth';
 import { TipsCarousel } from '../components/TipsCarousel';
+import { EmergencyFundCard } from '../components/EmergencyFundCard';
 
 const addAlpha = (
   color: string | undefined,
@@ -872,13 +873,13 @@ export const InsightsScreen = () => {
                 >
                   {absoluteDifference > 0
                     ? t('spentMoreAbsolute' as any).replace(
-                        '{{amount}}',
-                        formatCurrency(absoluteDifference),
-                      )
+                      '{{amount}}',
+                      formatCurrency(absoluteDifference),
+                    )
                     : t('spentLessAbsolute' as any).replace(
-                        '{{amount}}',
-                        formatCurrency(Math.abs(absoluteDifference)),
-                      )}
+                      '{{amount}}',
+                      formatCurrency(Math.abs(absoluteDifference)),
+                    )}
                 </Text>
               ) : (
                 <Text
@@ -960,7 +961,12 @@ export const InsightsScreen = () => {
 
   const renderInsightsContent = () => {
     if (filtered.txCount === 0) {
-      return emptySection;
+      return (
+        <View style={styles.singleColumn}>
+          {emptySection}
+          <EmergencyFundCard />
+        </View>
+      );
     }
     if (isTablet) {
       return (
@@ -968,6 +974,7 @@ export const InsightsScreen = () => {
           <View style={styles.gridColumn}>
             {summarySection}
             {pieChartCard}
+            <EmergencyFundCard />
           </View>
           <View style={styles.gridColumn}>
             {barChartCard}
@@ -981,6 +988,7 @@ export const InsightsScreen = () => {
         {summarySection}
         {pieChartCard}
         {barChartCard}
+        <EmergencyFundCard />
         {insightsSection}
       </View>
     );
