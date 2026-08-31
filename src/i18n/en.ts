@@ -547,4 +547,25 @@ export const en = {
     'Pause non-essential buying 2 days a week to build mindful spending habits.',
   noSpendDaysRecommendation: '🎯 Plan purchases ahead to prevent impulse buys.',
   challengeBadge: 'CHALLENGE',
+  whatIsEmergencyFundTitle: 'What is it?',
+  whatIsEmergencyFundBody:
+    'An emergency fund is a financial buffer that protects you from unexpected expenses: job loss, medical bills, urgent repairs. Having one gives you peace of mind and keeps you out of debt.',
+  howMuchDoINeedTitle: 'How much do I need?',
+  howMuchDoINeedBody:
+    'Experts recommend saving 3–6 months of monthly expenses. If you have variable income or dependents, aim for 9–12 months.',
+  personalEstimateTitle: 'Your personal estimate',
+  basedOnRecordedExpenses:
+    'Based on your last {{count}} months of recorded expenses:',
+  recommendedFundMonths: 'Recommended fund ({{months}} months)',
+  monthlyBreakdownTitle: 'Monthly breakdown',
+  tipsToGetStartedTitle: 'Tips to get started',
+  tipStartSmall: '💰 Start small: save 5–10% of every paycheck.',
+  tipSeparateAccount:
+    '🏦 Keep it in a separate account so you are not tempted.',
+  tipAutomateSavings: '⚡ Automate savings on payday.',
+  tipInitialGoalOneMonth: '🎯 Set an initial goal of 1 month and scale up.',
+  categoryPieChartDescription: 'Pie chart showing category spending breakdown',
+  monthlyBarChartDescription: 'Bar chart showing monthly expense comparisons',
+  transactionSingle: 'transaction',
+  transactionPlural: 'transactions',
 };
