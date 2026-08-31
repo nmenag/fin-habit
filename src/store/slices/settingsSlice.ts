@@ -6,7 +6,7 @@ import { Language } from '../../i18n/translations';
 import { AnalyticsManager } from '../../features/insights/services/AnalyticsManager';
 import { AnalyticsReport } from '../../features/insights/services/types';
 import { getLocalDateString } from '../../utils/dateUtils';
-import { getLast30DaysRange } from '../../utils/dateFilters';
+import { getLast30DaysRange, getMonthRange } from '../../utils/dateFilters';
 import { formatCurrency as formatCurrencyUtil } from '../../utils/formatters';
 import { Account, Category, Transaction } from '../types';
 import { useFilterStore } from '../useFilterStore';
@@ -59,6 +59,7 @@ export interface SettingsSlice {
   currency: string;
   currencySymbol: string;
   themePreference: 'light' | 'dark' | 'system';
+  cycleStartDay: number;
   isLoaded: boolean;
   isFirstLaunch: boolean;
   isPremiumUser: boolean;
@@ -71,6 +72,7 @@ export interface SettingsSlice {
   loadData: () => void;
   setLanguage: (lang: Language) => void;
   setThemePreference: (theme: 'light' | 'dark' | 'system') => void;
+  setCycleStartDay: (day: number) => void;
   setNotificationsEnabled: (enabled: boolean) => void;
   setNotificationTime: (time: string) => void;
   setCurrency: (currency: string) => void;
@@ -93,6 +95,7 @@ export const createSettingsSlice: StateCreator<
   currency: 'COP',
   currencySymbol: '$',
   themePreference: 'system',
+  cycleStartDay: 1,
   isLoaded: false,
   isFirstLaunch: true,
   isPremiumUser: false,
@@ -128,6 +131,7 @@ export const createSettingsSlice: StateCreator<
     let languageSetting;
     let premiumSetting;
     let themeSetting;
+    let cycleStartDaySetting;
     let notifEnabledSetting;
     let notifTimeSetting;
     let firstLaunchSetting;
@@ -144,6 +148,9 @@ export const createSettingsSlice: StateCreator<
       );
       themeSetting = db.getFirstSync<{ val: string }>(
         "SELECT val FROM settings WHERE id = 'themePreference'",
+      );
+      cycleStartDaySetting = db.getFirstSync<{ val: string }>(
+        "SELECT val FROM settings WHERE id = 'cycleStartDay'",
       );
       notifEnabledSetting = db.getFirstSync<{ val: string }>(
         "SELECT val FROM settings WHERE id = 'notificationsEnabled'",
@@ -184,6 +191,14 @@ export const createSettingsSlice: StateCreator<
       (txCountSetting && txCountSetting.count > 0)
     );
 
+    const parsedCycleDay = cycleStartDaySetting?.val
+      ? parseInt(cycleStartDaySetting.val, 10)
+      : 1;
+    const cycleStartDay = Math.max(
+      1,
+      Math.min(31, isNaN(parsedCycleDay) ? 1 : parsedCycleDay),
+    );
+
     set({
       accounts,
       transactions,
@@ -193,6 +208,7 @@ export const createSettingsSlice: StateCreator<
       currencySymbol: CURRENCY_SYMBOLS[currencySetting?.val || 'COP'] || '$',
       themePreference:
         (themeSetting?.val as 'light' | 'dark' | 'system') || 'system',
+      cycleStartDay,
       isPremiumUser: premiumSetting?.val === 'true',
       notificationsEnabled: notifEnabledSetting?.val === 'true',
       notificationTime: notifTimeSetting?.val || '20:00',
@@ -233,6 +249,24 @@ export const createSettingsSlice: StateCreator<
     } catch (error) {
       console.error('setThemePreference DB Error:', error);
     }
+  },
+
+  setCycleStartDay: (day) => {
+    const clampedDay = Math.max(1, Math.min(31, day));
+    set({ cycleStartDay: clampedDay });
+    setTimeout(() => {
+      try {
+        const db = getDb();
+        db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+          'cycleStartDay',
+          String(clampedDay),
+        ]);
+        useFilterStore.getState().updateCycleStartDay(clampedDay);
+        get().refreshAnalytics();
+      } catch (error) {
+        console.error('setCycleStartDay DB Error:', error);
+      }
+    }, 0);
   },
 
   setNotificationsEnabled: (enabled) => {
@@ -372,11 +406,11 @@ export const createSettingsSlice: StateCreator<
 
     analyticsDebounceTimer = setTimeout(async () => {
       try {
-        const { language } = get();
+        const { language, cycleStartDay } = get();
 
         const now = new Date();
         const currentMonthStart = getLocalDateString(
-          new Date(now.getFullYear(), now.getMonth(), 1),
+          getMonthRange(cycleStartDay, now).startDate,
         );
         const hasCurrentMonthData = get().transactions.some(
           (t) => t.date >= currentMonthStart && t.type !== 'transfer',
@@ -390,7 +424,12 @@ export const createSettingsSlice: StateCreator<
         ) {
           const targetType = hasCurrentMonthData ? 'month' : 'last30Days';
           if (activeRange.type !== targetType) {
-            useFilterStore.getState().setDefaultFilter(targetType);
+            useFilterStore
+              .getState()
+              .setDefaultFilter(targetType, cycleStartDay);
+            activeRange = useFilterStore.getState().selectedRange;
+          } else if (activeRange.type === 'month') {
+            useFilterStore.getState().updateCycleStartDay(cycleStartDay);
             activeRange = useFilterStore.getState().selectedRange;
           }
         }
@@ -398,10 +437,12 @@ export const createSettingsSlice: StateCreator<
         const report = await AnalyticsManager.generateFullReport(
           language,
           activeRange,
+          cycleStartDay,
         );
         const dReport = await AnalyticsManager.generateFullReport(
           language,
           getLast30DaysRange(),
+          cycleStartDay,
         );
         set({ analyticsReport: report, dashboardReport: dReport });
         analyticsDebounceTimer = null;

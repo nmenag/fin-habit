@@ -86,6 +86,7 @@ export const featureColors = {
   goals: chartColors[2], // #F59E0B
   emergencyFund: chartColors[0], // #22C55E
   calendar: chartColors[5], // #EC4899
+  analytics: chartColors[9], // #6366F1
   export: chartColors[9], // #6366F1
   backup: '#4F46E5',
   restore: '#A855F7',

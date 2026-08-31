@@ -1,6 +1,11 @@
 import { getDb } from '../../../db/schema';
 import { Language } from '../../../i18n/translations';
-import { DateRange, getPreviousPeriodRange } from '../../../utils/dateFilters';
+import {
+  DateRange,
+  getLastMonthRange,
+  getMonthRange,
+  getPreviousPeriodRange,
+} from '../../../utils/dateFilters';
 import { AnalyticsService } from './AnalyticsService';
 import { InsightEngine } from './InsightEngine';
 import { AnalyticsReport } from './types';
@@ -9,6 +14,7 @@ export class AnalyticsManager {
   static async generateFullReport(
     language: Language,
     range: DateRange,
+    cycleStartDay: number = 1,
   ): Promise<AnalyticsReport> {
     const currentMonth = await AnalyticsService.getMonthlyMetrics(range);
     const categoryExpenses = await AnalyticsService.getCategoryExpenses(range);
@@ -25,39 +31,11 @@ export class AnalyticsManager {
     };
     let previousCategoryExpenses: any[] = [];
 
-    const prevRange = getPreviousPeriodRange(range);
+    const prevRange = getPreviousPeriodRange(range, cycleStartDay);
     if (prevRange) {
-      if (range.type === 'month') {
-        const start = new Date(range.startDate);
-        const fullPrevRange: DateRange = {
-          type: 'custom',
-          startDate: new Date(
-            start.getFullYear(),
-            start.getMonth() - 1,
-            1,
-            0,
-            0,
-            0,
-            0,
-          ),
-          endDate: new Date(
-            start.getFullYear(),
-            start.getMonth(),
-            0,
-            23,
-            59,
-            59,
-            999,
-          ),
-        };
-        previousMonth = await AnalyticsService.getMonthlyMetrics(fullPrevRange);
-        previousCategoryExpenses =
-          await AnalyticsService.getCategoryExpenses(fullPrevRange);
-      } else {
-        previousMonth = await AnalyticsService.getMonthlyMetrics(prevRange);
-        previousCategoryExpenses =
-          await AnalyticsService.getCategoryExpenses(prevRange);
-      }
+      previousMonth = await AnalyticsService.getMonthlyMetrics(prevRange);
+      previousCategoryExpenses =
+        await AnalyticsService.getCategoryExpenses(prevRange);
     }
 
     const start = new Date(range.startDate);
@@ -69,86 +47,34 @@ export class AnalyticsManager {
     const isCurrentMonthOrRolling =
       range.type === 'month' ||
       range.type === 'last30Days' ||
-      (start.getFullYear() === now.getFullYear() &&
-        start.getMonth() === now.getMonth());
+      (start.getTime() <= now.getTime() &&
+        new Date(range.endDate).getTime() >= now.getTime());
 
     if (isCurrentMonthOrRolling) {
+      const currCycle = getMonthRange(cycleStartDay, now);
+      const prevCycle = getLastMonthRange(cycleStartDay, now);
       currentCalendarRange = {
         type: 'custom',
-        startDate: new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0),
-        endDate: new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate(),
-          23,
-          59,
-          59,
-          999,
-        ),
+        startDate: currCycle.startDate,
+        endDate: now,
       };
       previousCalendarRange = {
         type: 'custom',
-        startDate: new Date(
-          now.getFullYear(),
-          now.getMonth() - 1,
-          1,
-          0,
-          0,
-          0,
-          0,
-        ),
-        endDate: new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          0,
-          23,
-          59,
-          59,
-          999,
-        ),
+        startDate: prevCycle.startDate,
+        endDate: prevCycle.endDate,
       };
     } else {
+      const targetCycle = getMonthRange(cycleStartDay, start);
+      const prevCycle = getLastMonthRange(cycleStartDay, start);
       currentCalendarRange = {
         type: 'custom',
-        startDate: new Date(
-          start.getFullYear(),
-          start.getMonth(),
-          1,
-          0,
-          0,
-          0,
-          0,
-        ),
-        endDate: new Date(
-          start.getFullYear(),
-          start.getMonth() + 1,
-          0,
-          23,
-          59,
-          59,
-          999,
-        ),
+        startDate: targetCycle.startDate,
+        endDate: targetCycle.endDate,
       };
       previousCalendarRange = {
         type: 'custom',
-        startDate: new Date(
-          start.getFullYear(),
-          start.getMonth() - 1,
-          1,
-          0,
-          0,
-          0,
-          0,
-        ),
-        endDate: new Date(
-          start.getFullYear(),
-          start.getMonth(),
-          0,
-          23,
-          59,
-          59,
-          999,
-        ),
+        startDate: prevCycle.startDate,
+        endDate: prevCycle.endDate,
       };
     }
 

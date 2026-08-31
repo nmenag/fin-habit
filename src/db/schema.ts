@@ -318,5 +318,9 @@ export const initDb = () => {
       'currency',
       'COP',
     ]);
+    db.runSync('INSERT INTO settings (id, val) VALUES (?, ?)', [
+      'cycleStartDay',
+      '1',
+    ]);
   }
 };

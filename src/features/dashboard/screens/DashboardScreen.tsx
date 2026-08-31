@@ -70,6 +70,7 @@ export const DashboardScreen = React.memo(() => {
   const dashboardReport = useStore((s) => s.dashboardReport);
   const refreshAnalytics = useStore((s) => s.refreshAnalytics);
   const language = useStore((s) => s.language);
+  const cycleStartDay = useStore((s) => s.cycleStartDay);
 
   const { t, translateName } = useTranslation();
   const theme = useTheme<AppTheme>();
@@ -109,7 +110,7 @@ export const DashboardScreen = React.memo(() => {
     const recentTransactions = transactions.slice(0, 5);
 
     const activeRange = hasCurrentMonthData
-      ? getRangeForType('month')
+      ? getRangeForType('month', undefined, undefined, cycleStartDay)
       : getLast30DaysRange();
 
     const activeExpenses = transactions.filter((t) => {
@@ -171,7 +172,14 @@ export const DashboardScreen = React.memo(() => {
       budgetedExpensesSum,
       unbudgetedExpensesSum,
     };
-  }, [dashboardReport, accounts, transactions, budgets, categories]);
+  }, [
+    dashboardReport,
+    accounts,
+    transactions,
+    budgets,
+    categories,
+    cycleStartDay,
+  ]);
 
   const data = useMemo(() => {
     if (!financialData) return null;
@@ -218,8 +226,20 @@ export const DashboardScreen = React.memo(() => {
         {data.hasCurrentMonthData
           ? (() => {
               const locale = language === 'es' ? esLocale : enUS;
-              const name = format(new Date(), 'MMMM yyyy', { locale });
-              return name.charAt(0).toUpperCase() + name.slice(1);
+              if (cycleStartDay > 1) {
+                const range = getRangeForType(
+                  'month',
+                  undefined,
+                  undefined,
+                  cycleStartDay,
+                );
+                const startStr = format(range.startDate, 'd MMM', { locale });
+                const endStr = format(range.endDate, 'd MMM yyyy', { locale });
+                return `${startStr} - ${endStr}`;
+              } else {
+                const name = format(new Date(), 'MMMM yyyy', { locale });
+                return name.charAt(0).toUpperCase() + name.slice(1);
+              }
             })()
           : t('filterLast30Days' as any)}
       </Text>

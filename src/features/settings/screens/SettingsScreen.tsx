@@ -55,6 +55,8 @@ export const SettingsScreen = () => {
     setNotificationTime,
     currency,
     setCurrency,
+    cycleStartDay,
+    setCycleStartDay,
     resetData,
     appLockEnabled,
     setAppLockEnabled,
@@ -193,6 +195,8 @@ export const SettingsScreen = () => {
   );
   const [languageMenuVisible, setLanguageMenuVisible] = React.useState(false);
   const [currencyMenuVisible, setCurrencyMenuVisible] = React.useState(false);
+  const [cycleStartDayMenuVisible, setCycleStartDayMenuVisible] =
+    React.useState(false);
   const [restoreMenuVisible, setRestoreMenuVisible] = React.useState(false);
 
   const openTimePicker = React.useCallback(() => {
@@ -488,6 +492,72 @@ export const SettingsScreen = () => {
                   >
                     {CURRENCIES.find((c) => c.code === currency)?.symbol || '$'}{' '}
                     {currency}
+                  </Text>
+                </View>
+                <Ionicons
+                  name="chevron-down"
+                  size={16}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </View>
+            </TouchableOpacity>
+
+            <Divider style={styles.divider} />
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => {
+                setCycleStartDayMenuVisible(true);
+              }}
+              style={styles.rowItem}
+            >
+              <View
+                style={[
+                  styles.iconBox,
+                  {
+                    backgroundColor: addAlpha(featureColors.analytics, 0.07),
+                    borderColor: addAlpha(featureColors.analytics, 0.17),
+                  },
+                ]}
+              >
+                <Ionicons
+                  name="calendar-outline"
+                  size={20}
+                  color={featureColors.analytics}
+                />
+              </View>
+              <View style={styles.rowText}>
+                <Text
+                  style={[styles.rowTitle, { color: theme.colors.onSurface }]}
+                >
+                  {t('cycleStartDay')}
+                </Text>
+                <Text
+                  style={[
+                    styles.rowSub,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {t('cycleStartDayDesc')}
+                </Text>
+              </View>
+              <View style={styles.rowRight}>
+                <View
+                  style={[
+                    styles.badge,
+                    { backgroundColor: theme.colors.outlineVariant },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.badgeText,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('cycleStartDayFormat').replace(
+                      '{day}',
+                      String(cycleStartDay),
+                    )}
                   </Text>
                 </View>
                 <Ionicons
@@ -1301,6 +1371,70 @@ export const SettingsScreen = () => {
                   }}
                 >
                   {t(curr.tKey as any)} ({curr.code})
+                </Text>
+                <View
+                  style={[
+                    styles.radioOuter,
+                    {
+                      borderColor: isSelected
+                        ? theme.colors.primary
+                        : theme.colors.outlineVariant,
+                    },
+                  ]}
+                >
+                  {isSelected && (
+                    <View
+                      style={[
+                        styles.radioInner,
+                        { backgroundColor: theme.colors.primary },
+                      ]}
+                    />
+                  )}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </BottomSheet>
+
+      <BottomSheet
+        visible={cycleStartDayMenuVisible}
+        onClose={() => setCycleStartDayMenuVisible(false)}
+        title={t('selectCycleStartDay')}
+      >
+        <ScrollView
+          style={{ maxHeight: 400 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => {
+            const isSelected = cycleStartDay === day;
+            return (
+              <TouchableOpacity
+                key={day}
+                style={[
+                  styles.modalListItem,
+                  { borderColor: theme.colors.outlineVariant },
+                  isSelected && {
+                    backgroundColor: theme.dark
+                      ? addAlpha(theme.colors.primary, 0.16)
+                      : addAlpha(theme.colors.primary, 0.08),
+                  },
+                ]}
+                onPress={() => {
+                  setCycleStartDay(day);
+                  setCycleStartDayMenuVisible(false);
+                }}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+              >
+                <Text
+                  style={{
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    color: theme.colors.onSurface,
+                  }}
+                >
+                  {t('cycleStartDayFormat').replace('{day}', String(day))}
                 </Text>
                 <View
                   style={[
