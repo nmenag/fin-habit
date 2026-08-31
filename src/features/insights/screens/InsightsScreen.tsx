@@ -454,7 +454,9 @@ export const InsightsScreen = () => {
         }}
       >
         {filtered.txCount}{' '}
-        {filtered.txCount === 1 ? 'transaction' : 'transactions'}
+        {filtered.txCount === 1
+          ? t('transactionSingle')
+          : t('transactionPlural')}
       </Text>
     </View>
   );
@@ -673,7 +675,7 @@ export const InsightsScreen = () => {
         ]}
         mode="contained"
         accessible={true}
-        accessibilityLabel={`${leftItemLabel}: ${leftItemValueText}. ${t('spendingFrequencyTitle')}: ${filtered.spendingDays} ${t('daysLabel')}, ${filtered.txCount} ${filtered.txCount === 1 ? 'transaction' : 'transactions'}`}
+        accessibilityLabel={`${leftItemLabel}: ${leftItemValueText}. ${t('spendingFrequencyTitle')}: ${filtered.spendingDays} ${t('daysLabel')}, ${filtered.txCount} ${filtered.txCount === 1 ? t('transactionSingle') : t('transactionPlural')}`}
       >
         <Card.Content style={styles.savingsRow}>
           <View style={styles.savingsItem}>
@@ -773,7 +775,7 @@ export const InsightsScreen = () => {
       ]}
       mode="contained"
       accessible={true}
-      accessibilityLabel={`${t('chartTitle')}. ${t('categoryPieChartDescription' as any) || 'Pie chart showing category spending breakdown'}`}
+      accessibilityLabel={`${t('chartTitle')}. ${t('categoryPieChartDescription')}`}
     >
       <Card.Content>
         <Text
@@ -805,7 +807,7 @@ export const InsightsScreen = () => {
       ]}
       mode="contained"
       accessible={true}
-      accessibilityLabel={`${t('expenseGrowthTitle')}. ${t('monthlyBarChartDescription' as any) || 'Bar chart showing monthly expense comparisons'}`}
+      accessibilityLabel={`${t('expenseGrowthTitle')}. ${t('monthlyBarChartDescription')}`}
     >
       <Card.Content>
         <Text
@@ -873,13 +875,13 @@ export const InsightsScreen = () => {
                 >
                   {absoluteDifference > 0
                     ? t('spentMoreAbsolute' as any).replace(
-                      '{{amount}}',
-                      formatCurrency(absoluteDifference),
-                    )
+                        '{{amount}}',
+                        formatCurrency(absoluteDifference),
+                      )
                     : t('spentLessAbsolute' as any).replace(
-                      '{{amount}}',
-                      formatCurrency(Math.abs(absoluteDifference)),
-                    )}
+                        '{{amount}}',
+                        formatCurrency(Math.abs(absoluteDifference)),
+                      )}
                 </Text>
               ) : (
                 <Text

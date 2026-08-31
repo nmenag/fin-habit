@@ -556,4 +556,26 @@ export const es = {
     'Intenta pausar compras secundarias durante 2 días a la semana para frenar impulsos.',
   noSpendDaysRecommendation: '🎯 Planifica tus compras con anticipación.',
   challengeBadge: 'RETO',
+  whatIsEmergencyFundTitle: '¿Qué es?',
+  whatIsEmergencyFundBody:
+    'Un fondo de emergencia es un colchón financiero que te protege ante gastos inesperados: desempleo, gastos médicos, reparaciones urgentes. Tenerlo te da tranquilidad y evita endeudarte.',
+  howMuchDoINeedTitle: '¿Cuánto necesito?',
+  howMuchDoINeedBody:
+    'Los expertos recomiendan ahorrar entre 3 y 6 meses de gastos mensuales. Si tienes ingresos variables o dependientes, apunta a 9–12 meses.',
+  personalEstimateTitle: 'Tu estimación personal',
+  basedOnRecordedExpenses:
+    'Basado en tus últimos {{count}} meses de gastos registrados:',
+  recommendedFundMonths: 'Fondo recomendado ({{months}} meses)',
+  monthlyBreakdownTitle: 'Detalle mensual',
+  tipsToGetStartedTitle: 'Consejos para empezar',
+  tipStartSmall: '💰 Empieza pequeño: guarda el 5–10% de cada ingreso.',
+  tipSeparateAccount: '🏦 Usa una cuenta separada para no gastarlo.',
+  tipAutomateSavings: '⚡ Automatiza el ahorro el día que cobras.',
+  tipInitialGoalOneMonth: '🎯 Fija una meta inicial de 1 mes y ve escalando.',
+  categoryPieChartDescription:
+    'Gráfico circular que muestra el desglose de gastos por categoría',
+  monthlyBarChartDescription:
+    'Gráfico de barras que muestra la comparación mensual de gastos',
+  transactionSingle: 'transacción',
+  transactionPlural: 'transacciones',
 };

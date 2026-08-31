@@ -75,7 +75,9 @@ export const TipsCarousel: React.FC<TipsCarouselProps> = ({ insights }) => {
     return [
       {
         id: 'rule-50-30-20',
-        title: isEs ? 'Regla de Presupuesto 50/30/20' : '50/30/20 Budgeting Rule',
+        title: isEs
+          ? 'Regla de Presupuesto 50/30/20'
+          : '50/30/20 Budgeting Rule',
         message: isEs
           ? 'Destina un 50% a necesidades, 30% a gustos personales y 20% a ahorros o pago de deudas.'
           : 'Allocate 50% to needs, 30% to wants, and 20% to savings or debt payoff.',
@@ -117,7 +119,8 @@ export const TipsCarousel: React.FC<TipsCarouselProps> = ({ insights }) => {
 
   const tipItems: ProcessedTipItem[] = useMemo(() => {
     const converted: ProcessedTipItem[] = insights.map((item) => {
-      let iconName: keyof typeof Ionicons.glyphMap = 'information-circle-outline';
+      let iconName: keyof typeof Ionicons.glyphMap =
+        'information-circle-outline';
       let badgeLabel = t('insights' as any) || 'INSIGHT';
 
       if (item.level === 'critical' || item.level === 'warning') {
@@ -184,7 +187,9 @@ export const TipsCarousel: React.FC<TipsCarouselProps> = ({ insights }) => {
             color={theme.colors.primary}
             style={{ marginRight: 6 }}
           />
-          <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
+          <Text
+            style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
+          >
             {t('insights')}
           </Text>
         </View>
@@ -255,9 +260,15 @@ export const TipsCarousel: React.FC<TipsCarouselProps> = ({ insights }) => {
                       },
                     ]}
                   >
-                    <Ionicons name={item.iconName} size={20} color={iconColor} />
+                    <Ionicons
+                      name={item.iconName}
+                      size={20}
+                      color={iconColor}
+                    />
                   </View>
-                  <View style={[styles.badgeChip, { backgroundColor: badgeBg }]}>
+                  <View
+                    style={[styles.badgeChip, { backgroundColor: badgeBg }]}
+                  >
                     <Text style={[styles.badgeText, { color: badgeColor }]}>
                       {item.badgeLabel}
                     </Text>

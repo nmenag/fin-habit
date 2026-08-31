@@ -105,12 +105,10 @@ export const EmergencyFundScreen = () => {
           <Card style={styles.infoCard}>
             <Card.Content style={styles.cardContent}>
               <Text style={styles.sectionTitle}>
-                {language === 'es' ? '¿Qué es?' : 'What is it?'}
+                {t('whatIsEmergencyFundTitle')}
               </Text>
               <Text style={styles.bodyText}>
-                {language === 'es'
-                  ? 'Un fondo de emergencia es un colchón financiero que te protege ante gastos inesperados: desempleo, gastos médicos, reparaciones urgentes. Tenerlo te da tranquilidad y evita endeudarte.'
-                  : 'An emergency fund is a financial buffer that protects you from unexpected expenses: job loss, medical bills, urgent repairs. Having one gives you peace of mind and keeps you out of debt.'}
+                {t('whatIsEmergencyFundBody')}
               </Text>
             </Card.Content>
           </Card>
@@ -120,23 +118,15 @@ export const EmergencyFundScreen = () => {
           <Card style={styles.infoCard}>
             <Card.Content style={styles.cardContent}>
               <Text style={styles.sectionTitle}>
-                {language === 'es'
-                  ? '¿Cuánto necesito?'
-                  : 'How much do I need?'}
+                {t('howMuchDoINeedTitle')}
               </Text>
-              <Text style={styles.bodyText}>
-                {language === 'es'
-                  ? 'Los expertos recomiendan ahorrar entre 3 y 6 meses de gastos mensuales. Si tienes ingresos variables o dependientes, apunta a 9–12 meses.'
-                  : 'Experts recommend saving 3–6 months of monthly expenses. If you have variable income or dependents, aim for 9–12 months.'}
-              </Text>
+              <Text style={styles.bodyText}>{t('howMuchDoINeedBody')}</Text>
 
               <View style={styles.pillRow}>
                 {[3, 6, 9, 12].map((m) => (
                   <View key={m} style={styles.pill}>
                     <Text style={styles.pillNumber}>{m}</Text>
-                    <Text style={styles.pillLabel}>
-                      {language === 'es' ? 'meses' : 'months'}
-                    </Text>
+                    <Text style={styles.pillLabel}>{t('monthsUnit')}</Text>
                   </View>
                 ))}
               </View>
@@ -155,15 +145,11 @@ export const EmergencyFundScreen = () => {
                     color={featureColors.emergencyFund}
                   />
                   <Text style={styles.sectionTitle}>
-                    {language === 'es'
-                      ? 'Tu estimación personal'
-                      : 'Your personal estimate'}
+                    {t('personalEstimateTitle')}
                   </Text>
                 </View>
                 <Text style={styles.calcSubtitle}>
-                  {language === 'es'
-                    ? `Basado en tus últimos ${months.length} meses de gastos registrados:`
-                    : `Based on your last ${months.length} months of recorded expenses:`}
+                  {t('basedOnRecordedExpenses', { count: months.length })}
                 </Text>
 
                 <View style={styles.statRow}>
@@ -179,9 +165,9 @@ export const EmergencyFundScreen = () => {
 
                 <View style={styles.targetBlock}>
                   <Text style={styles.targetLabel}>
-                    {language === 'es'
-                      ? `Fondo recomendado (${DEFAULT_MONTHS_TO_COVER} meses)`
-                      : `Recommended fund (${DEFAULT_MONTHS_TO_COVER} months)`}
+                    {t('recommendedFundMonths', {
+                      months: DEFAULT_MONTHS_TO_COVER,
+                    })}
                   </Text>
                   <Text style={styles.targetAmount}>
                     {formatCurrency(recommendedTarget)}
@@ -190,9 +176,7 @@ export const EmergencyFundScreen = () => {
 
                 <View style={styles.monthBreakdown}>
                   <Text style={styles.breakdownHeader}>
-                    {language === 'es'
-                      ? 'Detalle mensual'
-                      : 'Monthly breakdown'}
+                    {t('monthlyBreakdownTitle')}
                   </Text>
                   {months.slice(0, 6).map((m) => (
                     <View key={m.month} style={styles.monthRow}>
@@ -231,24 +215,14 @@ export const EmergencyFundScreen = () => {
           <Card style={styles.tipsCard}>
             <Card.Content style={styles.cardContent}>
               <Text style={styles.sectionTitle}>
-                {language === 'es'
-                  ? 'Consejos para empezar'
-                  : 'Tips to get started'}
+                {t('tipsToGetStartedTitle')}
               </Text>
-              {(language === 'es'
-                ? [
-                    '💰 Empieza pequeño: guarda el 5–10% de cada ingreso.',
-                    '🏦 Usa una cuenta separada para no gastarlo.',
-                    '⚡ Automatiza el ahorro el día que cobras.',
-                    '🎯 Fija una meta inicial de 1 mes y ve escalando.',
-                  ]
-                : [
-                    '💰 Start small: save 5–10% of every paycheck.',
-                    '🏦 Keep it in a separate account so you are not tempted.',
-                    '⚡ Automate savings on payday.',
-                    '🎯 Set an initial goal of 1 month and scale up.',
-                  ]
-              ).map((tip, i) => (
+              {[
+                t('tipStartSmall'),
+                t('tipSeparateAccount'),
+                t('tipAutomateSavings'),
+                t('tipInitialGoalOneMonth'),
+              ].map((tip, i) => (
                 <Text key={i} style={styles.tipItem}>
                   {tip}
                 </Text>
