@@ -418,6 +418,17 @@ export const AddTransactionScreen = () => {
     }
   }, [selectedCategory, type, budgets]);
 
+  useEffect(() => {
+    if (type === 'transfer') {
+      if (!selectedToAccount || selectedToAccount === selectedAccount) {
+        const fallback = accounts.find((a) => a.id !== selectedAccount);
+        if (fallback) {
+          setSelectedToAccount(fallback.id);
+        }
+      }
+    }
+  }, [type, selectedAccount, selectedToAccount, accounts]);
+
   const handleSave = () => {
     if (!amount || isNaN(amount) || amount <= 0) {
       Alert.alert(t('error'), t('enterValidAmount'));
@@ -903,6 +914,11 @@ export const AddTransactionScreen = () => {
             selectedAccountObj={selectedAccountObj}
             selectedToAccountObj={selectedToAccountObj}
             openAccountSheet={openAccountSheet}
+            onSwapAccounts={() => {
+              const prev = selectedAccount;
+              setSelectedAccount(selectedToAccount);
+              setSelectedToAccount(prev);
+            }}
           />
         )}
 
@@ -1084,117 +1100,109 @@ export const AddTransactionScreen = () => {
               : t('depositTo')
         }
       >
-        {accounts
-          .filter((acc) => {
-            if (type === 'transfer') {
-              if (targetAccountType === 'from') {
-                return acc.id !== selectedToAccount;
-              } else {
-                return acc.id !== selectedAccount;
-              }
-            }
-            return true;
-          })
-          .map((acc) => {
-            const isSelected =
-              targetAccountType === 'from'
-                ? selectedAccount === acc.id
-                : selectedToAccount === acc.id;
-            const accColor = acc.color || theme.colors.primary;
-            return (
-              <TouchableOpacity
-                key={acc.id}
-                style={[
-                  styles.modalListItem,
-                  { borderColor: theme.colors.outlineVariant },
-                  isSelected && {
-                    backgroundColor: theme.dark
-                      ? addAlpha(accColor, 0.16)
-                      : addAlpha(accColor, 0.08),
-                  },
-                ]}
-                onPress={() => {
-                  if (targetAccountType === 'from') {
-                    setSelectedAccount(acc.id);
-                  } else {
-                    setSelectedToAccount(acc.id);
+        {accounts.map((acc) => {
+          const isSelected =
+            targetAccountType === 'from'
+              ? selectedAccount === acc.id
+              : selectedToAccount === acc.id;
+          const accColor = acc.color || theme.colors.primary;
+          return (
+            <TouchableOpacity
+              key={acc.id}
+              style={[
+                styles.modalListItem,
+                { borderColor: theme.colors.outlineVariant },
+                isSelected && {
+                  backgroundColor: theme.dark
+                    ? addAlpha(accColor, 0.16)
+                    : addAlpha(accColor, 0.08),
+                },
+              ]}
+              onPress={() => {
+                if (targetAccountType === 'from') {
+                  if (type === 'transfer' && acc.id === selectedToAccount) {
+                    setSelectedToAccount(selectedAccount);
                   }
-                  setAccountSheetOpen(false);
-                }}
-                accessibilityRole="button"
-                accessibilityState={{ selected: isSelected }}
-                accessibilityLabel={`${translateName(acc.name)}, ${acc.type.toUpperCase()}, ${t('balance' as any) || 'balance'}: ${formatCurrency(acc.currentBalance)}`}
-                accessibilityHint={
-                  t('selectAccountHint' as any) || 'Selects this account'
+                  setSelectedAccount(acc.id);
+                } else {
+                  if (type === 'transfer' && acc.id === selectedAccount) {
+                    setSelectedAccount(selectedToAccount);
+                  }
+                  setSelectedToAccount(acc.id);
                 }
-              >
-                <View style={styles.modalListItemLeft}>
-                  <View
-                    style={[
-                      styles.selectorIconBg,
-                      { backgroundColor: accColor },
-                    ]}
-                  >
-                    <MaterialCommunityIcons
-                      name={getAccountIcon(acc.type)}
-                      size={18}
-                      color="#fff"
-                    />
-                  </View>
-                  <View style={{ marginLeft: 12 }}>
-                    <Text
-                      variant="bodyMedium"
-                      style={{
-                        fontFamily: 'Inter-Medium',
-                        fontWeight: '500',
-                        color: theme.colors.onSurface,
-                      }}
-                    >
-                      {translateName(acc.name)}
-                    </Text>
-                    <Text
-                      variant="labelSmall"
-                      style={{ color: theme.colors.onSurfaceVariant }}
-                    >
-                      {acc.type.toUpperCase()}
-                    </Text>
-                  </View>
+                setAccountSheetOpen(false);
+              }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
+              accessibilityLabel={`${translateName(acc.name)}, ${acc.type.toUpperCase()}, ${t('balance' as any) || 'balance'}: ${formatCurrency(acc.currentBalance)}`}
+              accessibilityHint={
+                t('selectAccountHint' as any) || 'Selects this account'
+              }
+            >
+              <View style={styles.modalListItemLeft}>
+                <View
+                  style={[styles.selectorIconBg, { backgroundColor: accColor }]}
+                >
+                  <MaterialCommunityIcons
+                    name={getAccountIcon(acc.type)}
+                    size={18}
+                    color="#fff"
+                  />
                 </View>
-                <View style={styles.modalListItemRight}>
+                <View style={{ marginLeft: 12 }}>
                   <Text
                     variant="bodyMedium"
                     style={{
                       fontFamily: 'Inter-Medium',
                       fontWeight: '500',
                       color: theme.colors.onSurface,
-                      marginRight: 12,
                     }}
                   >
-                    {formatCurrency(acc.currentBalance)}
+                    {translateName(acc.name)}
                   </Text>
-                  <View
-                    style={[
-                      styles.radioOuter,
-                      {
-                        borderColor: isSelected
-                          ? theme.colors.primary
-                          : theme.colors.outlineVariant,
-                      },
-                    ]}
+                  <Text
+                    variant="labelSmall"
+                    style={{ color: theme.colors.onSurfaceVariant }}
                   >
-                    {isSelected && (
-                      <View
-                        style={[
-                          styles.radioInner,
-                          { backgroundColor: theme.colors.primary },
-                        ]}
-                      />
-                    )}
-                  </View>
+                    {acc.type.toUpperCase()}
+                  </Text>
                 </View>
-              </TouchableOpacity>
-            );
-          })}
+              </View>
+              <View style={styles.modalListItemRight}>
+                <Text
+                  variant="bodyMedium"
+                  style={{
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    color: theme.colors.onSurface,
+                    marginRight: 12,
+                  }}
+                >
+                  {formatCurrency(acc.currentBalance)}
+                </Text>
+                <View
+                  style={[
+                    styles.radioOuter,
+                    {
+                      borderColor: isSelected
+                        ? theme.colors.primary
+                        : theme.colors.outlineVariant,
+                    },
+                  ]}
+                >
+                  {isSelected && (
+                    <View
+                      style={[
+                        styles.radioInner,
+                        { backgroundColor: theme.colors.primary },
+                      ]}
+                    />
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </BottomSheet>
 
       <BottomSheet

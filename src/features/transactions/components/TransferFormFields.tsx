@@ -14,6 +14,7 @@ interface TransferFormFieldsProps {
   selectedAccountObj?: Account;
   selectedToAccountObj?: Account;
   openAccountSheet: (type: 'from' | 'to') => void;
+  onSwapAccounts?: () => void;
 }
 
 export const TransferFormFields = React.memo(
@@ -27,6 +28,7 @@ export const TransferFormFields = React.memo(
     selectedAccountObj,
     selectedToAccountObj,
     openAccountSheet,
+    onSwapAccounts,
   }: TransferFormFieldsProps) => {
     return (
       <View style={styles.transferAccountsGroup}>
@@ -37,7 +39,7 @@ export const TransferFormFields = React.memo(
               backgroundColor: theme.colors.surface,
               borderColor: theme.colors.outlineVariant,
               borderWidth: 1,
-              marginBottom: 12,
+              marginBottom: onSwapAccounts ? 4 : 12,
               paddingLeft: 20,
             },
           ]}
@@ -135,6 +137,50 @@ export const TransferFormFields = React.memo(
             </View>
           </View>
         </TouchableOpacity>
+
+        {onSwapAccounts && (
+          <View
+            style={{
+              alignItems: 'center',
+              marginVertical: -14,
+              zIndex: 10,
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.outlineVariant,
+                borderWidth: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                elevation: 3,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.12,
+                shadowRadius: 3,
+              }}
+              onPress={() => {
+                onSwapAccounts();
+              }}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={t('swapAccounts') || 'Swap Accounts'}
+              accessibilityHint={
+                t('swapAccountsHint' as any) ||
+                'Swaps the source and destination accounts'
+              }
+            >
+              <Ionicons
+                name="swap-vertical"
+                size={18}
+                color={theme.colors.primary}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
 
         <TouchableOpacity
           style={[

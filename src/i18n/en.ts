@@ -384,6 +384,7 @@ export const en = {
   budgetTooltip: 'Linking a budget helps you track your limits.',
   withdrawFrom: 'Withdraw From',
   depositTo: 'Deposit To',
+  swapAccounts: 'Swap Accounts',
   selectDate: 'Select Date',
   onboardingWelcome: 'Welcome to Habit Money',
   onboardingDesc:
