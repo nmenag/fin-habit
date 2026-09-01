@@ -129,6 +129,8 @@ All service logic is decoupled from the UI layer to maximize testability and ena
 
 Full internationalization is built-in using `expo-localization`. Every user-facing string is keyed in `src/i18n/en.ts` or `src/i18n/es.ts`. On first launch, the **Onboarding** flow auto-detects the system locale and lets the user confirm or override the language and currency before entering the app.
 
+Whenever a new UI string or action label is introduced, keys must be added to **both** `en.ts` and `es.ts` simultaneously. No hardcoded strings are permitted in components — all copy must be consumed through the `t(...)` helper from `useTranslation`.
+
 ### 6. Android Home Screen Widget (HabitMoneyWidget)
 
 Habit Money includes a native Android home screen widget built with `react-native-android-widget`.
