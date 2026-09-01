@@ -391,6 +391,7 @@ export const es = {
   budgetTooltip: 'Vincular un presupuesto te ayuda a controlar tus límites.',
   withdrawFrom: 'Retirar de',
   depositTo: 'Depositar en',
+  swapAccounts: 'Intercambiar Cuentas',
   selectDate: 'Seleccionar Fecha',
   onboardingWelcome: 'Bienvenido a Habit Money',
   onboardingDesc:

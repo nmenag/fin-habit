@@ -914,6 +914,11 @@ export const AddTransactionScreen = () => {
             selectedAccountObj={selectedAccountObj}
             selectedToAccountObj={selectedToAccountObj}
             openAccountSheet={openAccountSheet}
+            onSwapAccounts={() => {
+              const prev = selectedAccount;
+              setSelectedAccount(selectedToAccount);
+              setSelectedToAccount(prev);
+            }}
           />
         )}
 
