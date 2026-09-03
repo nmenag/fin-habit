@@ -246,6 +246,92 @@ export const DashboardScreen = React.memo(() => {
     </View>
   );
 
+  const remainingCard = (
+    <Card
+      style={[
+        styles.card,
+        {
+          backgroundColor:
+            data.remainingBalance >= 0
+              ? addAlpha(theme.colors.income, 0.08, '#16A34A')
+              : addAlpha(theme.colors.error, 0.08, '#EF4444'),
+          borderColor:
+            data.remainingBalance >= 0
+              ? addAlpha(theme.colors.income, 0.17, '#16A34A')
+              : addAlpha(theme.colors.error, 0.17, '#EF4444'),
+          borderWidth: 1,
+        },
+      ]}
+      mode="contained"
+    >
+      <Card.Content>
+        <View style={styles.remainingHeader}>
+          <Text
+            style={{
+              color: theme.colors.onSurfaceVariant,
+              fontFamily: 'Inter-Medium',
+              fontWeight: '500',
+              fontSize: 10,
+              letterSpacing: 1.5,
+            }}
+          >
+            {t('remaining').toUpperCase()}
+          </Text>
+          <Avatar.Icon
+            size={24}
+            icon={data.remainingBalance >= 0 ? 'trending-up' : 'trending-down'}
+            style={{ backgroundColor: 'transparent' }}
+            color={
+              data.remainingBalance >= 0
+                ? theme.colors.income
+                : theme.colors.error
+            }
+          />
+        </View>
+        <Text
+          style={[
+            styles.amountText,
+            {
+              color:
+                data.remainingBalance >= 0
+                  ? theme.colors.income
+                  : theme.colors.error,
+              fontSize: fontScale(26),
+              fontFamily: 'Inter-SemiBold',
+              fontWeight: '600',
+              lineHeight: fontScale(32),
+              marginTop: spacing.xs,
+            },
+          ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        >
+          {formatCurrency(data.remainingBalance)}
+        </Text>
+
+        {data.monthlyAdjustments !== 0 && (
+          <View style={styles.adjustmentsRow}>
+            <Ionicons
+              name="information-circle-outline"
+              size={16}
+              color={theme.colors.onSurfaceVariant}
+            />
+            <Text
+              variant="bodySmall"
+              style={[
+                styles.adjustmentsText,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              {t('adjustments')}: {data.monthlyAdjustments > 0 ? '+' : ''}
+              {formatCurrency(data.monthlyAdjustments)}
+            </Text>
+          </View>
+        )}
+      </Card.Content>
+    </Card>
+  );
+
   const flowRow = (
     <View style={styles.flowRow}>
       <Card
@@ -967,6 +1053,7 @@ export const DashboardScreen = React.memo(() => {
       return (
         <View style={styles.gridContainer}>
           <View style={styles.gridColumn}>
+            {remainingCard}
             {flowRow}
             {accountsCard}
           </View>
@@ -982,6 +1069,7 @@ export const DashboardScreen = React.memo(() => {
       return (
         <View style={styles.gridContainer}>
           <View style={styles.gridColumn}>
+            {remainingCard}
             {flowRow}
             {accountsCard}
             {recentTransactionsCard}
@@ -996,6 +1084,7 @@ export const DashboardScreen = React.memo(() => {
     } else {
       return (
         <View style={styles.singleColumnContainer}>
+          {remainingCard}
           {flowRow}
           {accountsCard}
           {progressCard}
